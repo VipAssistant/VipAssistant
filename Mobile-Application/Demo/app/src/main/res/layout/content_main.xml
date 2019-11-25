@@ -1,21 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_main"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
         tools:context=".MainActivity">
 
     <TextView
+              android:text="A Simple Calculator"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textSize="32dp"
+              android:gravity="center"
+              android:includeFontPadding="false"/>
+
+    <EditText android:id="@+id/num1"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:inputType="text"
+              android:drawableStart="@drawable/edit"
+              android:hint="Left Hand Side"/>
+
+    <EditText android:id="@+id/operation"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:inputType="text"
+              android:drawableStart="@drawable/edit"
+              android:hint="Operation"/>
+
+    <EditText android:id="@+id/num2"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:inputType="text"
+              android:drawableStart="@drawable/edit"
+              android:hint="Right Hand Side"/>
+
+    <Button   android:text="CALCULATE!"
+              android:onClick="calculateOnClick"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
+    <TextView android:id="@+id/result"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textSize="32dp"
+              android:gravity="center"
+              android:includeFontPadding="false"/>
+
+    <TextView
+            android:text="VIPAssistant - Demo Test Application© Runs on Android 5.1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            android:textSize="20dp"
+            android:gravity="center"
+            android:layout_gravity="bottom|end"
+            android:includeFontPadding="false"/>
+</LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+<!--<RelativeLayout-->
+<!--            xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--            xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--            xmlns:tools="http://schemas.android.com/tools"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:paddingBottom="16dp"-->
+<!--            android:paddingLeft="16dp"-->
+<!--            android:paddingRight="16dp"-->
+<!--            android:paddingTop="16dp"-->
+<!--            tools:context=".MainActivity">-->
+<!--    -->
+<!--    <TextView android:layout_width="" android:layout_height=""-->
+<!--</RelativeLayout>-->

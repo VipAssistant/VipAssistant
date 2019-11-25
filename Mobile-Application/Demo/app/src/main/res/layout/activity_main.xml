@@ -21,7 +21,9 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_main"/>
+<!--    Below includes our main content xml to the main activity xml, beware of the modifications!-->
+    <include layout="@layout/content_main"
+             android:layout_marginTop="40dp" android:layout_height="match_parent" android:layout_width="match_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
