@@ -5,25 +5,26 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        tools:context=".voice.output.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+        <TextView
+                android:text="@string/convert_text_to_speech_on_the_fly"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:gravity="center"
+                android:includeFontPadding="false"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
 <!--    Below includes our main content xml to the main activity xml, beware of the modifications!-->
     <include layout="@layout/content_main"
-             android:layout_marginTop="40dp" android:layout_height="match_parent" android:layout_width="match_parent"/>
+             android:layout_marginTop="75dp" android:layout_height="wrap_content" android:layout_width="match_parent"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

@@ -6,58 +6,55 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingBottom="16dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp"
-        tools:context=".MainActivity">
+        android:padding="16dp"
+        tools:context=".voice.output.MainActivity">
+
+    <EditText
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/enter_text" />
 
     <TextView
-              android:text="A Simple Calculator"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:textSize="32dp"
-              android:gravity="center"
-              android:includeFontPadding="false"/>
-
-    <EditText android:id="@+id/num1"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:inputType="text"
-              android:drawableStart="@drawable/edit"
-              android:hint="Left Hand Side"/>
-
-    <EditText android:id="@+id/operation"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:inputType="text"
-              android:drawableStart="@drawable/edit"
-              android:hint="Operation"/>
-
-    <EditText android:id="@+id/num2"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:inputType="text"
-              android:drawableStart="@drawable/edit"
-              android:hint="Right Hand Side"/>
-
-    <Button   android:text="CALCULATE!"
-              android:onClick="calculateOnClick"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"/>
-
-    <TextView android:id="@+id/result"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:textSize="32dp"
-              android:gravity="center"
-              android:includeFontPadding="false"/>
-
-    <TextView
-            android:text="VIPAssistant - Demo Test Application© Runs on Android 5.1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20dp"
+            android:text="@string/pitch"
+            android:textSize="16sp" />
+
+    <SeekBar
+            android:id="@+id/seek_bar_pitch"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:progress="50"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/speed"
+            android:textSize="16sp" />
+
+    <SeekBar
+            android:id="@+id/seek_bar_speed"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:progress="50" />
+
+    <Button
+            android:id="@+id/button_speak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:enabled="false"
+            android:text="@string/say_it" />
+
+    <TextView
+            android:text="@string/vipassistant_demo_test_application_runs_on_android_5_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="370dp"
+            android:textSize="20sp"
             android:gravity="center"
             android:layout_gravity="bottom|end"
             android:includeFontPadding="false"/>
