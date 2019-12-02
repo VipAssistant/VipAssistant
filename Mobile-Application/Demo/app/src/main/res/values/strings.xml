@@ -2,11 +2,11 @@
     <string name="app_name">VipaMobileDemo</string>
     <string name="action_settings">Settings</string>
 	<string name="pitch">Pitch</string>
-	<string name="enter_text">Enter Text</string>
+	<string name="enter_text">Enter Stuff that you want to hear</string>
 	<string name="speed">Speed</string>
-	<string name="say_it">Say it!</string>
-	<string name="vipassistant_demo_test_application_runs_on_android_5_1">VIPAssistant - Demo Test Application© Runs on
+	<string name="start_conversion">Go!</string>
+	<string name="vipassistant_demo_footer">VIPAssistant - Demo Test Application© Runs on
 		Android 5.1
 	</string>
-	<string name="convert_text_to_speech_on_the_fly">Convert Text to Speech On the FLY!</string>
+	<string name="TTS_headline">Text To Speech Conversion</string>
 </resources>

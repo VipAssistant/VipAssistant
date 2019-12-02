@@ -12,26 +12,10 @@
             android:layout_width="match_parent"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-        <TextView
-                android:text="@string/convert_text_to_speech_on_the_fly"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="30sp"
-                android:gravity="center"
-                android:includeFontPadding="false"/>
-
     </com.google.android.material.appbar.AppBarLayout>
 
-<!--    Below includes our main content xml to the main activity xml, beware of the modifications!-->
+    <!--    Below includes our main content xml to the main activity xml, beware of the modifications!-->
     <include layout="@layout/content_main"
              android:layout_marginTop="75dp" android:layout_height="wrap_content" android:layout_width="match_parent"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@android:drawable/ic_dialog_email"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
