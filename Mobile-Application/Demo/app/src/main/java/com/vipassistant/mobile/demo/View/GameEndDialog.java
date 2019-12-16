@@ -1,14 +1,15 @@
 package com.vipassistant.mobile.demo.View;
 
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import com.vipassistant.mobile.demo.R;
 
 public class GameEndDialog extends DialogFragment {
 

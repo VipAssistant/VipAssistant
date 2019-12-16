@@ -1,11 +1,10 @@
 package com.vipassistant.mobile.demo.Model;
 
 
-import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
+import androidx.lifecycle.MutableLiveData;
 
-import static com.vipassistant.mobile.demo.Utilities.StringUtility.isNullOrEmpty;
-
+import static com.vipassistant.mobile.demo.Util.StringUtility.isNullOrEmpty;
 
 public class Game {
 

@@ -1,6 +1,6 @@
 package com.vipassistant.mobile.demo.Model;
 
-import com.vipassistant.mobile.demo.Utilities.StringUtility;
+import com.vipassistant.mobile.demo.Util.StringUtility;
 
 public class Cell {
 

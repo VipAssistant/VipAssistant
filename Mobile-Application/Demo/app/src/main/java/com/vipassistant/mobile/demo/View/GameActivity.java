@@ -1,13 +1,16 @@
 package com.vipassistant.mobile.demo.View;
 
-import android.arch.lifecycle.ViewModelProviders;
-import android.databinding.DataBindingUtil;
+import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.annotation.VisibleForTesting;
-import android.support.v7.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
+import com.vipassistant.mobile.demo.Model.Player;
+import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ViewModel.GameViewModel;
+import com.vipassistant.mobile.demo.databinding.ActivityGameBinding;
 
-import static com.vipassistant.mobile.demo.Utilities.StringUtility.isNullOrEmpty;
+import static com.vipassistant.mobile.demo.Util.StringUtility.isNullOrEmpty;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -33,6 +36,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initDataBinding(String player1, String player2) {
+        /* https://stackoverflow.com/questions/32170597/databindingutil-setcontentview-type-parameter-t-has-incompatible-upper-bounds */
         ActivityGameBinding activityGameBinding = DataBindingUtil.setContentView(this, R.layout.activity_game);
         gameViewModel = ViewModelProviders.of(this).get(GameViewModel.class);
         gameViewModel.init(player1, player2);

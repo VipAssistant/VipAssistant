@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.Utilities;
+package com.vipassistant.mobile.demo.Util;
 
 
 public class StringUtility {
