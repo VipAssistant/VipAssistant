@@ -1,5 +1,4 @@
-package com.sriyanksiddhartha.speechtotext;
-
+package com.speechtotext;
 
 
 import androidx.annotation.Nullable;
@@ -46,22 +45,14 @@ public class MainActivity extends AppCompatActivity {
 
 		if (intent.resolveActivity(getPackageManager()) != null) {
 			startActivityForResult(intent, 10);
-		} else {
-			Toast.makeText(this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
-		}
+		} 
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
-		switch (requestCode) {
-			case 10:
-				if (resultCode == RESULT_OK && data != null) {
-					ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-					txvResult.setText(result.get(0));
-				}
-				break;
+		if(requestCode == 10 && resultCode == RESULT_OK && data != null ) {
+			ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+			txvResult.setText(result.get(0));
 		}
-	}
 }
