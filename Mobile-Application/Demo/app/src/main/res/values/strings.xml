@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TicTacToe-MVVM</string>
+    <string name="app_name">TicTacToe-VIPAssistant</string>
     <string name="player1_hint">Player 1</string>
     <string name="player2_hint">Player 2</string>
     <string name="game_dialog_title">New game</string>
