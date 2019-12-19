@@ -10,7 +10,7 @@ public class BLEScannerViewModel extends ViewModel {
 
     public BLEScannerViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is tools fragment");
+        mText.setValue("This is BLE Scanner fragment");
     }
 
     public LiveData<String> getText() {

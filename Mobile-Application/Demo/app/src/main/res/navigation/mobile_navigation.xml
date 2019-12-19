@@ -18,16 +18,16 @@
         tools:layout="@layout/fragment_voutput" /> <!-- TODO  NAVIGATION here -->
 
     <fragment
-        android:id="@+id/nav_slideshow"
+        android:id="@+id/nav_vinput"
         android:name="com.vipassistant.mobile.demo.ui.VoiceInput.VoiceInputFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:label="@string/menu_vinput"
+        tools:layout="@layout/fragment_vinput" />
 
     <fragment
-        android:id="@+id/nav_tools"
+        android:id="@+id/nav_blescanner"
         android:name="com.vipassistant.mobile.demo.ui.BLEScanner.BLEScannerFragment"
-        android:label="@string/menu_tools"
-        tools:layout="@layout/fragment_tools" />
+        android:label="@string/menu_blescanner"
+        tools:layout="@layout/fragment_blescanner" />
 
     <fragment
         android:id="@+id/nav_share"

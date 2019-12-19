@@ -20,8 +20,8 @@ public class VoiceInputFragment extends Fragment {
             ViewGroup container, Bundle savedInstanceState) {
         voiceInputViewModel =
                 ViewModelProviders.of(this).get(VoiceInputViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
-        final TextView textView = root.findViewById(R.id.text_slideshow);
+        View root = inflater.inflate(R.layout.fragment_vinput, container, false);
+        final TextView textView = root.findViewById(R.id.text_vinput);
         voiceInputViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {

@@ -10,7 +10,7 @@ public class VoiceInputViewModel extends ViewModel {
 
     public VoiceInputViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is slideshow fragment");
+        mText.setValue("This is Voice Input fragment");
     }
 
     public LiveData<String> getText() {

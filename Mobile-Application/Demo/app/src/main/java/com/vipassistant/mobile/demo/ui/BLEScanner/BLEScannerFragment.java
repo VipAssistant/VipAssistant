@@ -20,8 +20,8 @@ public class BLEScannerFragment extends Fragment {
             ViewGroup container, Bundle savedInstanceState) {
         BLEScannerViewModel =
                 ViewModelProviders.of(this).get(BLEScannerViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_tools, container, false);
-        final TextView textView = root.findViewById(R.id.text_tools);
+        View root = inflater.inflate(R.layout.fragment_blescanner, container, false);
+        final TextView textView = root.findViewById(R.id.text_blescanner);
         BLEScannerViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
