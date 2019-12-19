@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.tools;
+package com.vipassistant.mobile.demo.ui.BLEScanner;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,17 +12,17 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
 
-public class ToolsFragment extends Fragment {
+public class BLEScannerFragment extends Fragment {
 
-    private ToolsViewModel toolsViewModel;
+    private BLEScannerViewModel BLEScannerViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
-        toolsViewModel =
-                ViewModelProviders.of(this).get(ToolsViewModel.class);
+        BLEScannerViewModel =
+                ViewModelProviders.of(this).get(BLEScannerViewModel.class);
         View root = inflater.inflate(R.layout.fragment_tools, container, false);
         final TextView textView = root.findViewById(R.id.text_tools);
-        toolsViewModel.getText().observe(this, new Observer<String>() {
+        BLEScannerViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

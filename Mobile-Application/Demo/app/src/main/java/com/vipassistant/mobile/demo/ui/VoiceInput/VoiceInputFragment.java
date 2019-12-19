@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.slideshow;
+package com.vipassistant.mobile.demo.ui.VoiceInput;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,17 +12,17 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
 
-public class SlideshowFragment extends Fragment {
+public class VoiceInputFragment extends Fragment {
 
-    private SlideshowViewModel slideshowViewModel;
+    private VoiceInputViewModel voiceInputViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
-        slideshowViewModel =
-                ViewModelProviders.of(this).get(SlideshowViewModel.class);
+        voiceInputViewModel =
+                ViewModelProviders.of(this).get(VoiceInputViewModel.class);
         View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
-        slideshowViewModel.getText().observe(this, new Observer<String>() {
+        voiceInputViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

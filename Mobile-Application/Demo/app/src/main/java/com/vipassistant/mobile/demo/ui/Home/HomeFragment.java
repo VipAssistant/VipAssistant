@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.home;
+package com.vipassistant.mobile.demo.ui.Home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
