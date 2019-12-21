@@ -28,21 +28,12 @@ public class VoiceOutputFragment extends Fragment {
     private SeekBar mSeekBarSpeed;
     private Button mButtonSpeak;
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) { // TODO what is container bundle inflater etc.
-//        super.onCreate(savedInstanceState); TODO hmm
-//        setContentView(R.layout.activity_main); TODO fragment_voutput
-
+        super.onCreate(savedInstanceState); // TODO: may not be needed
         voiceOutputViewModel = ViewModelProviders.of(this).get(VoiceOutputViewModel.class);
         View root = inflater.inflate(R.layout.fragment_voutput, container, false);
-
-//        final TextView textView = root.findViewById(R.id.text_voutput);
-//        voiceOutputViewModel.getText().observe(this, new Observer<String>() {
-//            @Override
-//            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
-//            }
-//        });
 
         mButtonSpeak = root.findViewById(R.id.button_speak);
 
@@ -50,7 +41,7 @@ public class VoiceOutputFragment extends Fragment {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
-                    int result = mTTS.setLanguage(Locale.ENGLISH); // TODO: Try to use Locale.TURKISH
+                    int result = mTTS.setLanguage(Locale.ENGLISH); // TODO: Try to use Locale.TURKISH Locale.getDefault()
 
                     if (result == TextToSpeech.LANG_MISSING_DATA
                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
@@ -59,7 +50,7 @@ public class VoiceOutputFragment extends Fragment {
                         mButtonSpeak.setEnabled(true);
                     }
                 } else {
-                    Log.e("VoiceOutput - TTS", "Initialization failed");
+                    Log.e("VoiceOutput - TTS", "TTS Initialization failed");
                 }
             }
         });
