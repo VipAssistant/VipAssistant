@@ -14,14 +14,14 @@ import com.vipassistant.mobile.demo.R;
 
 public class BleDevicesListAdapter extends ArrayAdapter<BleDevice> {
 
-    Activity activity;
+    BLEScannerFragment bleScannerFragment;
     int layoutResourceID;
     ArrayList<BleDevice> devices;
 
-    public BleDevicesListAdapter(Activity activity, int resource, ArrayList<BleDevice> objects) {
-        super(activity.getApplicationContext(), resource, objects); // TODO Check
+    public BleDevicesListAdapter(BLEScannerFragment bleScannerFragment, int resource, ArrayList<BleDevice> objects) {
+        super(bleScannerFragment.getActivity(), resource, objects); // TODO Check
 
-        this.activity = activity;
+        this.bleScannerFragment = bleScannerFragment;
         layoutResourceID = resource;
         devices = objects;
     }
@@ -31,7 +31,7 @@ public class BleDevicesListAdapter extends ArrayAdapter<BleDevice> {
 
         if (convertView == null) {
             LayoutInflater inflater =
-                    (LayoutInflater) activity.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    (LayoutInflater) bleScannerFragment.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(layoutResourceID, parent, false);
         }
 

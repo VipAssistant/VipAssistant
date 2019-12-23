@@ -50,13 +50,12 @@ public class VoiceInputFragment extends Fragment {
 
         // vIntent will show text in dialog
         Intent vIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        vIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        vIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH); // TODO: Locale.getDefault()
+        vIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH); // TODO: we can use Locale.getDefault() for Turkish
         vIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening...");
 
         try {
             startActivityForResult(vIntent, RCS_INPUT);
-        }catch (Exception e){
+        } catch (Exception e){
             Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }

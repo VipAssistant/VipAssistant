@@ -50,39 +50,28 @@ public class BLEScannerFragment extends Fragment implements View.OnClickListener
     private Context context;
     private PackageManager pm ;
 
-    public BLEScannerFragment(){
-        //Empty Constructor
-    }
-
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
         BLEScannerViewModel =
                 ViewModelProviders.of(this).get(BLEScannerViewModel.class);
         View root = inflater.inflate(R.layout.fragment_blescanner, container, false);
-        /*
-        final TextView textView = root.findViewById(R.id.text_blescanner);
-        BLEScannerViewModel.getText().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
-        */
 
         context = getActivity();
         pm = context.getPackageManager();
+
+        // TODO: ALSO REQUEST PERMISSION FOR LOCATION!!
 
         if (!pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Utilities.toast(context, "BLE not supported");
             getActivity().finish();
         }
 
-        bleScanner = new BleScanner(getActivity(), this, 7500, -75);
+        bleScanner = new BleScanner(this, 7500, -75);
 
         bleDeviceHashMap = new HashMap<>();
         bleDeviceArrayList = new ArrayList<>();
 
-        adapter = new BleDevicesListAdapter(getActivity(), R.layout.device_item, bleDeviceArrayList);
+        adapter = new BleDevicesListAdapter(this, R.layout.device_item, bleDeviceArrayList);
 
         ListView listView = new ListView(context);
         listView.setAdapter(adapter);
@@ -139,7 +128,7 @@ public class BLEScannerFragment extends Fragment implements View.OnClickListener
         switch (v.getId()) {
 
             case R.id.btn_scan:
-                Utilities.toast(context, "Scan Button Pressed");
+                Utilities.toast(getActivity(), "Starting Scanning Nearby BLE Devices...");
 
                 if (!bleScanner.getScanningState()) {
                     startScan();
@@ -172,7 +161,7 @@ public class BLEScannerFragment extends Fragment implements View.OnClickListener
     }
 
     public void startScan(){
-        btn_Scan.setText("Scanning");
+        btn_Scan.setText("Scanning...");
 
         bleDeviceArrayList.clear();
         bleDeviceHashMap.clear();
@@ -183,7 +172,7 @@ public class BLEScannerFragment extends Fragment implements View.OnClickListener
     }
 
     public void stopScan() {
-        btn_Scan.setText("Scan");
+        btn_Scan.setText("Scan Again!");
 
         bleScanner.stop();
     }

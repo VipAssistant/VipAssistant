@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 
 public class BleScanner {
 
-    private Activity mainActivity;
     private BLEScannerFragment bleScannerFragment;
     private BluetoothAdapter bluetoothAdapter;
     private boolean isScanning;
@@ -21,15 +20,14 @@ public class BleScanner {
     private long scanPeriod;
     private int minSignalStrength;
 
-    public BleScanner(Activity mainActivity, BLEScannerFragment bleScannerFragment, long scanPeriod, int minSignalStrength){
-        this.mainActivity = mainActivity;
+    public BleScanner(BLEScannerFragment bleScannerFragment, long scanPeriod, int minSignalStrength){
         this.bleScannerFragment = bleScannerFragment;
         this.scanPeriod = scanPeriod;
         this.minSignalStrength = minSignalStrength;
         handler = new Handler();
 
         final BluetoothManager bluetoothManager =
-                (BluetoothManager) mainActivity.getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) bleScannerFragment.getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
 
         bluetoothAdapter =bluetoothManager.getAdapter();
     }
@@ -38,11 +36,11 @@ public class BleScanner {
         return this.isScanning;
     }
 
-    public void start(){
+    public void start () {
         /* if bluetooth is not open, request from user to open bluetooth */
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()){
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mainActivity.startActivityForResult(enableBtIntent, BLEScannerFragment.REQUEST_ENABLE_BT);
+            bleScannerFragment.startActivityForResult(enableBtIntent, BLEScannerFragment.REQUEST_ENABLE_BT);
         }
 
         else{
@@ -56,13 +54,13 @@ public class BleScanner {
 
     private void scanLeDevice(final boolean enable) {
         if (enable && !isScanning) {
-            Utilities.toast(mainActivity.getApplicationContext(), "Scanning");
+            Utilities.toast(bleScannerFragment.getActivity(), "Scanning...");
 
             // Stops scanning after a pre-defined scan period.
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Utilities.toast(mainActivity.getApplicationContext(), "Finished");
+                    Utilities.toast(bleScannerFragment.getActivity(), "Finished BLE Device Scanning");
 
                     isScanning = false;
                     BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
@@ -76,7 +74,7 @@ public class BleScanner {
             isScanning = true;
             BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
             bluetoothLeScanner.startScan(bleScanCallback);
-            /* insteead of the above, bluetoothAdapter.startLeScan(uuids, mLeScanCallback) can be used
+            /* instead of the above, bluetoothAdapter.startLeScan(uuids, mLeScanCallback) can be used
              * if the beacon list and their uuids are known before
              * */
         }
