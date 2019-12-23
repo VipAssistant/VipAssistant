@@ -19,7 +19,7 @@ public class BleDevicesListAdapter extends ArrayAdapter<BleDevice> {
     ArrayList<BleDevice> devices;
 
     public BleDevicesListAdapter(Activity activity, int resource, ArrayList<BleDevice> objects) {
-        super(activity.getApplicationContext(), resource, objects);
+        super(activity.getApplicationContext(), resource, objects); // TODO Check
 
         this.activity = activity;
         layoutResourceID = resource;
