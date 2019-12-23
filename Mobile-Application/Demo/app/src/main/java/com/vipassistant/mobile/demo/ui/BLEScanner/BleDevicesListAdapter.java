@@ -42,7 +42,7 @@ public class BleDevicesListAdapter extends ArrayAdapter<BleDevice> {
 
         TextView tv_name = convertView.findViewById(R.id.tv_name);
         if (name != null && name.length() > 0) {
-            tv_name.setText(device.getBleName());
+            tv_name.setText(name);
         }
         else {
             tv_name.setText("No Name");

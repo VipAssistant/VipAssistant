@@ -22,4 +22,14 @@
 	<string name="start_conversion">Go!</string>
 	<string name="get_started">Click me to Get Started!</string>
 	<string name="welcome">Welcome to the Vip Assistant Demo Application!</string>
+	<string name="vinput_welcome">In order to test Voice Inputting Module press mic button and then speak, your speech
+		will be translated into text automatically!
+	</string>
+	<string name="voutput_welcome">In order to test Voice Outputting Module enter the text that you want to hear to below and
+		set voice pitch &amp; speed. Then you are all set! Just press GO. Your text will be translated into speech automatically!
+	</string>
+	<string name="start_scan">Start Scan</string>
+	<string name="blescanner_welcome">In order to test BLE Scanner Module press \'Start Scan\' button, then recognized
+		nearby BLE devices will be listed automatically!
+	</string>
 </resources>
