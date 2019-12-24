@@ -17,7 +17,7 @@
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:text="@string/voutput_welcome"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -25,6 +25,7 @@
                 android:textColor="#FFF"
                 android:background="@drawable/text_style"
                 android:textAlignment="center"
+                android:padding="5dp"
                 android:layout_centerHorizontal="true"/>
 
         <EditText
@@ -42,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/pitch"
                 android:textSize="16sp"
+                android:textColor="@color/colorPrimaryDark"
                 android:layout_below="@+id/edit_text"/>
 
         <SeekBar
@@ -57,6 +59,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/speed"
                 android:textSize="16sp"
+                android:textColor="@color/colorPrimaryDark"
                 android:layout_below="@+id/seek_bar_pitch"/>
 
         <SeekBar
