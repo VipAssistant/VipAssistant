@@ -42,6 +42,9 @@ public class BleScanner {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             bleScannerFragment.startActivityForResult(enableBtIntent, BLEScannerFragment.REQUEST_ENABLE_BT);
         }
+        else {
+            scanLeDevice(true);
+        }
 
         /* if location permissions are not given request it from user */
 //        https://stackoverflow.com/questions/40142331/how-to-request-location-permission-at-runtime
