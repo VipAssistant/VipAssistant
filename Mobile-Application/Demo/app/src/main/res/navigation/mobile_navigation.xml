@@ -15,7 +15,7 @@
         android:id="@+id/nav_voutput"
         android:name="com.vipassistant.mobile.demo.ui.VoiceOutput.VoiceOutputFragment"
         android:label="@string/menu_voutput"
-        tools:layout="@layout/fragment_voutput" /> <!-- TODO  NAVIGATION here -->
+        tools:layout="@layout/fragment_voutput" />
 
     <fragment
         android:id="@+id/nav_vinput"
@@ -29,15 +29,15 @@
         android:label="@string/menu_blescanner"
         tools:layout="@layout/fragment_blescanner" />
 
-    <fragment
-        android:id="@+id/nav_share"
-        android:name="com.vipassistant.mobile.demo.ui.share.ShareFragment"
-        android:label="@string/menu_share"
-        tools:layout="@layout/fragment_share" />
+<!--    <fragment-->
+<!--        android:id="@+id/nav_share"-->
+<!--        android:name="com.vipassistant.mobile.demo.ui.share.ShareFragment"-->
+<!--        android:label="@string/menu_share"-->
+<!--        tools:layout="@layout/fragment_share" />-->
 
-    <fragment
-        android:id="@+id/nav_send"
-        android:name="com.vipassistant.mobile.demo.ui.send.SendFragment"
-        android:label="@string/menu_send"
-        tools:layout="@layout/fragment_send" />
+<!--    <fragment-->
+<!--        android:id="@+id/nav_send"-->
+<!--        android:name="com.vipassistant.mobile.demo.ui.send.SendFragment"-->
+<!--        android:label="@string/menu_send"-->
+<!--        tools:layout="@layout/fragment_send" />-->
 </navigation>
