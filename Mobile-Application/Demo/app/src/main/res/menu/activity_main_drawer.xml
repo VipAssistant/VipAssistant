@@ -17,7 +17,7 @@
                 <item
                         android:id="@+id/nav_voutput"
                         android:icon="@drawable/ic_hearing_black"
-                        android:title="@string/menu_voutput" /> <!-- TODO  icons and stuff-->
+                        android:title="@string/menu_voutput" />
                 <item
                         android:id="@+id/nav_vinput"
                         android:icon="@drawable/ic_mic_black"
