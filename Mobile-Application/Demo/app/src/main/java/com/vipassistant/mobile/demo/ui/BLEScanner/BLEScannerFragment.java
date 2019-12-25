@@ -66,7 +66,7 @@ public class BLEScannerFragment extends Fragment implements View.OnClickListener
             getActivity().finish();
         }
 
-        bleScanner = new BleScanner(this, 7500, -75);
+        bleScanner = new BleScanner(this, 7500, -90);
 
         bleDeviceHashMap = new HashMap<>();
         bleDeviceArrayList = new ArrayList<>();
