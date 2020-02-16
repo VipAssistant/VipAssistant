@@ -11,6 +11,7 @@
 	<string name="menu_voutput">Voice Output</string>
 	<string name="menu_vinput">Voice Input</string>
 	<string name="menu_blescanner">BLE Scanner</string>
+	<string name="menu_map_nav">Navigate</string>
 <!--	<string name="menu_share">Share</string>-->
 <!--	<string name="menu_send">Send</string>-->
 

@@ -15,6 +15,10 @@
         <menu>
             <group android:checkableBehavior="single">
                 <item
+                        android:id="@+id/nav_map_nav"
+                        android:icon="@drawable/ic_near_me_black_24dp"
+                        android:title="@string/menu_map_nav" />
+                <item
                         android:id="@+id/nav_voutput"
                         android:icon="@drawable/ic_hearing_black"
                         android:title="@string/menu_voutput" />

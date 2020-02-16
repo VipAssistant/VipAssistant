@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+            android:id="@+id/nav_map_nav"
+            android:name="com.vipassistant.mobile.demo.ui.MapNavigation.MapNavigationFragment"
+            android:label="@string/menu_map_nav"
+            tools:layout="@layout/fragment_map_nav" />
+
+    <fragment
         android:id="@+id/nav_voutput"
         android:name="com.vipassistant.mobile.demo.ui.VoiceOutput.VoiceOutputFragment"
         android:label="@string/menu_voutput"
