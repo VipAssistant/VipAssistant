@@ -17,9 +17,13 @@ import com.eegeo.mapapi.EegeoApi;
 import com.eegeo.mapapi.EegeoMap;
 import com.eegeo.mapapi.MapView;
 import com.eegeo.mapapi.map.OnMapReadyCallback;
+import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
+import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
+import com.eegeo.mapapi.services.mapscene.MapsceneService;
+import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.vipassistant.mobile.demo.R;
 
-public class MapNavigationFragment extends Fragment {
+public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener {
 
     private MapNavigationViewModel mapNavigationViewModel;
     private MapView m_mapView;
@@ -36,20 +40,39 @@ public class MapNavigationFragment extends Fragment {
         m_mapView = (MapView) root.findViewById(R.id.mapView);
         m_mapView.onCreate(savedInstanceState);
 
+        final OnMapsceneRequestCompletedListener listener = this;
+
         m_mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final EegeoMap map) {
+//                m_eegeoMap = map;
+//
+//                RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
+//                m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
+//
+//                Toast.makeText(getActivity(), "Map is Ready, Rendering Now!", Toast.LENGTH_LONG).show();
+
                 m_eegeoMap = map;
-
-                RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
-                m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
-
-                Toast.makeText(getActivity(), "Map is Ready, Rendering Now!", Toast.LENGTH_LONG).show();
+                MapsceneService mapsceneService = map.createMapsceneService();
+                mapsceneService.requestMapscene(
+                        new MapsceneRequestOptions("https://wrld.mp/fbdfb87")
+                            .onMapsceneRequestCompletedListener(listener)
+                );
             }
         });
         return root;
     }
 
+    @Override
+    public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
+        if(response.succeeded()) {
+            String message = "Mapscene '" + response.getMapscene().name + "' loaded";
+            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+        }
+        else {
+            Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
+        }
+    }
 
     @Override
     public void onResume() {
