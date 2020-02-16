@@ -1,5 +1,6 @@
 package com.vipassistant.mobile.demo.ui.MapNavigation;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
     private MapView m_mapView;
     private EegeoMap m_eegeoMap = null;
     private IndoorMapView m_interiorView = null;
+    private ProgressDialog nDialog;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
@@ -41,30 +43,33 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
         m_mapView = (MapView) root.findViewById(R.id.mapView);
         m_mapView.onCreate(savedInstanceState);
 
+        nDialog = new ProgressDialog(getActivity());
+        nDialog.setMessage("Loading Map Data...");
+        nDialog.setIndeterminate(false);
+        nDialog.show();
+
         final OnMapsceneRequestCompletedListener listener = this;
 
         m_mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final EegeoMap map) {
                 m_eegeoMap = map;
+
                 MapsceneService mapsceneService = map.createMapsceneService();
                 mapsceneService.requestMapscene(
                         new MapsceneRequestOptions("https://wrld.mp/fbdfb87")
                             .onMapsceneRequestCompletedListener(listener)
                 );
 
-                IndoorEventListener listener = new IndoorEventListener(root);
-                map.addOnIndoorEnteredListener(listener);
-                map.addOnIndoorExitedListener(listener);
+                RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
+                m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 
-                // TODO: use below if going to have loading screen etc.
-//                map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
-//                    @Override
-//                    public void onInitialStreamingComplete() {
-//
-//                    }
-//                });
-
+                map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
+                    @Override
+                    public void onInitialStreamingComplete() {
+                        nDialog.dismiss();
+                    }
+                });
             }
         });
         return root;
@@ -73,7 +78,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
     @Override
     public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
         if(response.succeeded()) {
-            String message = "Mapscene '" + response.getMapscene().name + "' loaded";
+            String message = "Mapscene '" + response.getMapscene().name + "' loaded"; // TODO: may remove later.
             Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
         }
         else {
@@ -97,35 +102,5 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
     public void onDestroy() {
         super.onDestroy();
         m_mapView.onDestroy();
-    }
-
-    public class IndoorEventListener implements OnIndoorEnteredListener, OnIndoorExitedListener {
-        private Button m_button;
-        private RelativeLayout m_layout;
-
-        IndoorEventListener(View root) {
-            this.m_layout = (RelativeLayout) root.findViewById(R.id.fragment_map_nav);
-        }
-
-        @Override
-        public void onIndoorEntered() {
-            this.m_button =  new Button(getActivity());
-            m_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    m_eegeoMap.exitIndoorMap();
-                }
-            });
-            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            m_layout.addView(m_button, lp);
-            m_button.setText("EXIT Indoor Map");
-        }
-
-        @Override
-        public void onIndoorExited() {
-            if(m_layout != null)
-                m_layout.removeView(m_button);
-        }
     }
 }
