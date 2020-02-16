@@ -4,9 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,6 +14,9 @@ import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
 import com.eegeo.mapapi.EegeoMap;
 import com.eegeo.mapapi.MapView;
+import com.eegeo.mapapi.indoors.OnIndoorEnteredListener;
+import com.eegeo.mapapi.indoors.OnIndoorExitedListener;
+import com.eegeo.mapapi.map.OnInitialStreamingCompleteListener;
 import com.eegeo.mapapi.map.OnMapReadyCallback;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
@@ -45,19 +46,25 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
         m_mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final EegeoMap map) {
-//                m_eegeoMap = map;
-//
-//                RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
-//                m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
-//
-//                Toast.makeText(getActivity(), "Map is Ready, Rendering Now!", Toast.LENGTH_LONG).show();
-
                 m_eegeoMap = map;
                 MapsceneService mapsceneService = map.createMapsceneService();
                 mapsceneService.requestMapscene(
                         new MapsceneRequestOptions("https://wrld.mp/fbdfb87")
                             .onMapsceneRequestCompletedListener(listener)
                 );
+
+                IndoorEventListener listener = new IndoorEventListener(root);
+                map.addOnIndoorEnteredListener(listener);
+                map.addOnIndoorExitedListener(listener);
+
+                // TODO: use below if going to have loading screen etc.
+//                map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
+//                    @Override
+//                    public void onInitialStreamingComplete() {
+//
+//                    }
+//                });
+
             }
         });
         return root;
@@ -90,5 +97,35 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
     public void onDestroy() {
         super.onDestroy();
         m_mapView.onDestroy();
+    }
+
+    public class IndoorEventListener implements OnIndoorEnteredListener, OnIndoorExitedListener {
+        private Button m_button;
+        private RelativeLayout m_layout;
+
+        IndoorEventListener(View root) {
+            this.m_layout = (RelativeLayout) root.findViewById(R.id.fragment_map_nav);
+        }
+
+        @Override
+        public void onIndoorEntered() {
+            this.m_button =  new Button(getActivity());
+            m_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    m_eegeoMap.exitIndoorMap();
+                }
+            });
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            m_layout.addView(m_button, lp);
+            m_button.setText("EXIT Indoor Map");
+        }
+
+        @Override
+        public void onIndoorExited() {
+            if(m_layout != null)
+                m_layout.removeView(m_button);
+        }
     }
 }
