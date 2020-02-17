@@ -59,4 +59,14 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    public void toggleFabVisibility() {
+        FloatingActionButton fab = findViewById(R.id.fab);
+        if (fab.getVisibility() == View.VISIBLE) {
+            fab.hide();
+        }
+        else {
+            fab.show();
+        }
+    }
 }

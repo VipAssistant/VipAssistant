@@ -15,6 +15,15 @@
             android:layout_height="fill_parent"
             eegeo:camera_target_latitude="37.7858"
             eegeo:camera_target_longitude="-122.401"
-            eegeo:camera_zoom="16" />
+            eegeo:camera_zoom="16" >
+    </com.eegeo.mapapi.MapView>
+    <Button
+            android:id="@+id/findMeButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/ic_near_me_black_24dp"
+            android:textColor="#fff"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"/>
 
 </RelativeLayout>
