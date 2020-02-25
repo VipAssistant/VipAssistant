@@ -1,0 +1,74 @@
+{
+	"id": "metu_ceng_block_a",
+	"name": "METU CENG Department - A Block",
+	"owner": "ysyesilyurt",
+	"location": {
+		"type": "Point",
+		"coordinates": [32.783211, 39.891986] 
+	},
+	"levels": [		
+		{
+			"id": "metu-ceng-block-a-basement",
+			"name": "0",
+			"readable_name": "Basement",
+			"z_order": 0,
+			"filename": "metu-ceng-block-a-basement.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-0-5",
+			"name": "0.5",
+			"readable_name": "Entrance",
+			"z_order": 1,
+			"filename": "metu-ceng-block-a-floor-0-5.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-1",
+			"name": "1",
+			"readable_name": "Floor 1",
+			"z_order": 2,
+			"filename": "metu-ceng-block-a-floor-1.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-1-5",
+			"name": "1.5",
+			"readable_name": "Floor 1.5",
+			"z_order": 3,
+			"filename": "metu-ceng-block-a-floor-1-5.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-2",
+			"name": "2",
+			"readable_name": "Floor 2",
+			"z_order": 4,
+			"filename": "metu-ceng-block-a-floor-2.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-2-5",
+			"name": "2.5",
+			"readable_name": "Floor 2.5",
+			"z_order": 5,
+			"filename": "metu-ceng-block-a-floor-2-5.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-3",
+			"name": "3",
+			"readable_name": "Floor 3",
+			"z_order": 6,
+			"filename": "metu-ceng-block-a-floor-3.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-3-5",
+			"name": "3.5",
+			"readable_name": "Floor 3.5",
+			"z_order": 7,
+			"filename": "metu-ceng-block-a-floor-3-5.geojson"
+		},
+		{
+			"id": "metu-ceng-block-a-floor-4",
+			"name": "4",
+			"readable_name": "Floor 4",
+			"z_order": 8,
+			"filename": "metu-ceng-block-a-floor-4.geojson"
+		}
+	]
+}
