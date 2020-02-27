@@ -66,7 +66,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
-						new MapsceneRequestOptions("https://wrld.mp/fbdfb87")
+						new MapsceneRequestOptions("https://wrld.mp/57d8552")
 								.onMapsceneRequestCompletedListener(listener)
 				);
 
