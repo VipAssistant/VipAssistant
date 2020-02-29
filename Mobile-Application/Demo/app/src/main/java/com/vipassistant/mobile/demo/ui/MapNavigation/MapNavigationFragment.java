@@ -15,6 +15,7 @@ import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
 import com.eegeo.mapapi.EegeoMap;
 import com.eegeo.mapapi.MapView;
+import com.eegeo.mapapi.bluesphere.BlueSphere;
 import com.eegeo.mapapi.camera.CameraAnimationOptions;
 import com.eegeo.mapapi.camera.CameraPosition;
 import com.eegeo.mapapi.camera.CameraUpdateFactory;
@@ -38,6 +39,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private IndoorMapView m_interiorView = null;
 	private ProgressDialog loadingDialog;
 	private Marker navigationMarker, outNavigationMarker;
+	private BlueSphere m_bluesphere = null;
 	private View root;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
@@ -106,10 +108,18 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
 				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
 				.labelText("You Are Here!"));
-		this.navigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
-				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
-				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
-				.labelText("You Are Here!"));
+
+		m_bluesphere = m_eegeoMap.getBlueSphere();
+		m_bluesphere.setEnabled(true);
+		m_bluesphere.setPosition(new LatLng(39.891756, 32.783188));
+		m_bluesphere.setIndoorMap("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1);
+		m_bluesphere.setBearing(180);
+
+//		this.navigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
+//				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
+//				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
+//				.labelText("You Are Here!"));
+
 	}
 
 	private void updateLocation() {
