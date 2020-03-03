@@ -23,7 +23,7 @@ while RSS_current < RSS_immediate
         d_real ĸ 0.5
 
 
-while d_walked < 3m 
+while d_walked < 3m
 #define what is a step beforehand
     if step 
 #Measure RSS here
