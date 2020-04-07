@@ -1,0 +1,28 @@
+{
+"type": "FeatureCollection",
+"z_order": 6,
+"name": "metu-ceng-block-a-floor-3-paths",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 60020, "type": "entrance", "name": "entrance from b block" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783559540295329, 39.891831313348405 ], [ 32.78356049011812, 39.891818755679942 ] ] } },
+{ "type": "Feature", "properties": { "id": 6001, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783559540295329, 39.891831313348405 ], [ 32.783530046034244, 39.891850650236243 ], [ 32.783489376553398, 39.891848106807593 ], [ 32.78344024842233, 39.89184482334295 ], [ 32.783311291802853, 39.891836585170275 ], [ 32.783272877327377, 39.891833782418331 ], [ 32.783225408822723, 39.891830086072986 ], [ 32.783197383883554, 39.8918279893498 ], [ 32.783168934126707, 39.891826109132509 ], [ 32.783138488025443, 39.891823851319721 ] ] } },
+{ "type": "Feature", "properties": { "id": 6002, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783311291802853, 39.891836585170275 ], [ 32.783309244721281, 39.891857663826592 ] ] } },
+{ "type": "Feature", "properties": { "id": 6003, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783311291802853, 39.891836585170275 ], [ 32.783313700092243, 39.891811377886746 ] ] } },
+{ "type": "Feature", "properties": { "id": 6004, "type": "pathway", "name": "pathway to upstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783168934126707, 39.891826109132509 ], [ 32.783171974884034, 39.891797152095798 ] ] } },
+{ "type": "Feature", "properties": { "id": 6005, "type": "pathway", "name": "pathway to downstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783197383883554, 39.8918279893498 ], [ 32.783200258484221, 39.891798611900299 ] ] } },
+{ "type": "Feature", "properties": { "id": 6006, "type": "pathway", "name": "pathway into elevator" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783272877327377, 39.891833782418331 ], [ 32.783269806387295, 39.891860776479199 ] ] } },
+{ "type": "Feature", "properties": { "id": 6007, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783225408822723, 39.891830086072986 ], [ 32.7832190969254, 39.891884834451751 ], [ 32.783215058087109, 39.891921720217638 ], [ 32.783212842908995, 39.891937761452681 ], [ 32.783209520141824, 39.891961823305245 ], [ 32.78320362222096, 39.892003721340856 ], [ 32.783203177934602, 39.892007639761353 ], [ 32.783202412701222, 39.892014066827315 ], [ 32.783201414620308, 39.89202199555659 ], [ 32.783202978135883, 39.892037758570538 ] ] } },
+{ "type": "Feature", "properties": { "id": 6008, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783202978135883, 39.892037758570538 ], [ 32.783201531490818, 39.89205662501616 ] ] } },
+{ "type": "Feature", "properties": { "id": 6009, "type": "pathway", "name": "pathway to downstairs - 2" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783202978135883, 39.892037758570538 ], [ 32.783220105062263, 39.892039173823427 ] ] } },
+{ "type": "Feature", "properties": { "id": 60010, "type": "pathway", "name": "pathway to upstairs - 2" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783201414620308, 39.89202199555659 ], [ 32.783220078449759, 39.892023240864077 ] ] } },
+{ "type": "Feature", "properties": { "id": 60011, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783202412701222, 39.892014066827315 ], [ 32.783180451099547, 39.892012265215101 ] ] } },
+{ "type": "Feature", "properties": { "id": 60012, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783203177934602, 39.892007639761353 ], [ 32.783225742564611, 39.892009530751665 ] ] } },
+{ "type": "Feature", "properties": { "id": 60013, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.78320362222096, 39.892003721340856 ], [ 32.783179738543225, 39.892001853037762 ] ] } },
+{ "type": "Feature", "properties": { "id": 60014, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783209520141824, 39.891961823305245 ], [ 32.783230053187602, 39.89196373949293 ] ] } },
+{ "type": "Feature", "properties": { "id": 60015, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.7832190969254, 39.891884834451751 ], [ 32.783235817234207, 39.891886246554535 ] ] } },
+{ "type": "Feature", "properties": { "id": 60016, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783215058087109, 39.891921720217638 ], [ 32.783238126191719, 39.891923393183582 ] ] } },
+{ "type": "Feature", "properties": { "id": 60017, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783138488025443, 39.891823851319721 ], [ 32.783141254548504, 39.891800022150477 ], [ 32.783130287673536, 39.891778244750718 ] ] } },
+{ "type": "Feature", "properties": { "id": 60018, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783225408822723, 39.891830086072986 ], [ 32.783235173762066, 39.891744818099937 ] ] } },
+{ "type": "Feature", "properties": { "id": 60019, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783235173762066, 39.891744818099937 ], [ 32.783243813152744, 39.891739614619723 ], [ 32.783245908542632, 39.891725654468502 ] ] } }
+]
+}

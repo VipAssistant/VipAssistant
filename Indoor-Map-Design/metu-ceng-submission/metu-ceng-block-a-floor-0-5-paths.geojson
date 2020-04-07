@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"z_order": 1,
+"name": "metu-ceng-block-a-floor-0-5-paths",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1001, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783145498839097, 39.89175355315232 ], [ 32.783172851363069, 39.891755151610894 ], [ 32.78318913671081, 39.891756099647885 ], [ 32.783204462011078, 39.891757122607046 ], [ 32.783234324070122, 39.891759099536927 ] ] } },
+{ "type": "Feature", "properties": { "id": 1002, "type": "pathway", "name": "pathway into downstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783172851363069, 39.891755151610894 ], [ 32.783171532628288, 39.891770620081189 ] ] } },
+{ "type": "Feature", "properties": { "id": 1003, "type": "pathway", "name": "pathway into upstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783204462011078, 39.891757122607046 ], [ 32.783202825665526, 39.891772818733727 ] ] } },
+{ "type": "Feature", "properties": { "id": 1004, "type": "entrance", "name": "entrance from front" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.78318913671081, 39.891756099647885 ], [ 32.783190911715486, 39.891738535869194 ] ] } },
+{ "type": "Feature", "properties": { "id": 1005, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783266504405283, 39.892040774685569 ], [ 32.783267853611861, 39.892024444977899 ] ] } },
+{ "type": "Feature", "properties": { "id": 1006, "type": "pathway", "name": "pathway to down" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783267853611861, 39.892024444977899 ], [ 32.783253166043629, 39.892023398355342 ] ] } },
+{ "type": "Feature", "properties": { "id": 1007, "type": "pathway", "name": "pathway to up" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783266504405283, 39.892040774685569 ], [ 32.78325143636399, 39.892039535860491 ] ] } }
+]
+}

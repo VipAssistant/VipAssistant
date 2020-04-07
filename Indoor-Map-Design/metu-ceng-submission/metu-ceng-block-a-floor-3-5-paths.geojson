@@ -1,0 +1,14 @@
+{
+"type": "FeatureCollection",
+"z_order": 7,
+"name": "metu-ceng-block-a-floor-3-5-paths",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 7001, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783172203470244, 39.891750069226752 ], [ 32.783206107787414, 39.891752161435235 ] ] } },
+{ "type": "Feature", "properties": { "id": 7002, "type": "pathway", "name": "pathway to downstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783172203470244, 39.891750069226752 ], [ 32.783170063863459, 39.89177634145603 ] ] } },
+{ "type": "Feature", "properties": { "id": 7003, "type": "pathway", "name": "pathway to upstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783206107787414, 39.891752161435235 ], [ 32.78320373161818, 39.89177841296798 ] ] } },
+{ "type": "Feature", "properties": { "id": 7004, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783266504405283, 39.892040774685569 ], [ 32.783267853611861, 39.892024444977899 ] ] } },
+{ "type": "Feature", "properties": { "id": 7005, "type": "pathway", "name": "pathway to down" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783267853611861, 39.892024444977899 ], [ 32.783253166043629, 39.892023398355342 ] ] } },
+{ "type": "Feature", "properties": { "id": 7006, "type": "pathway", "name": "pathway to up" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783266504405283, 39.892040774685569 ], [ 32.78325143636399, 39.892039535860491 ] ] } }
+]
+}

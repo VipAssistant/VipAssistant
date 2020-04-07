@@ -1,0 +1,25 @@
+{
+"type": "FeatureCollection",
+"z_order": 0,
+"name": "metu-ceng-block-a-floor-0-paths",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783133536457683, 39.891821714253261 ], [ 32.783165894254118, 39.891824227362747 ], [ 32.783194828793889, 39.891826361518426 ], [ 32.783223053646374, 39.891828433584394 ], [ 32.78327212852237, 39.891832409248835 ], [ 32.783310479234103, 39.891835446670484 ] ] } },
+{ "type": "Feature", "properties": { "id": 2, "type": "pathway", "name": "pathway into elevator" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.78327212852237, 39.891832409248835 ], [ 32.78326854884434, 39.891858793861395 ] ] } },
+{ "type": "Feature", "properties": { "id": 3, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783223053646374, 39.891828433584394 ], [ 32.783225241616542, 39.891807965999938 ], [ 32.783226813587881, 39.8917918146971 ] ] } },
+{ "type": "Feature", "properties": { "id": 4, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783225241616542, 39.891807965999938 ], [ 32.783255806464084, 39.891810083873565 ] ] } },
+{ "type": "Feature", "properties": { "id": 5, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783194828793889, 39.891826361518426 ], [ 32.783197102999637, 39.891804908257072 ] ] } },
+{ "type": "Feature", "properties": { "id": 6, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783133536457683, 39.891821714253261 ], [ 32.783130485613604, 39.891849774016066 ] ] } },
+{ "type": "Feature", "properties": { "id": 7, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783223053646374, 39.891828433584394 ], [ 32.783216908116643, 39.891886416530731 ], [ 32.783215592367661, 39.891897822786945 ], [ 32.783212878083553, 39.891921581549163 ], [ 32.783208545502198, 39.891961567018953 ], [ 32.783202033815414, 39.892021464644799 ], [ 32.783199283106853, 39.89204927256398 ] ] } },
+{ "type": "Feature", "properties": { "id": 8, "type": "pathway", "name": "pathway into upstairs - 2" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783202033815414, 39.892021464644799 ], [ 32.78322703254662, 39.892023175004041 ] ] } },
+{ "type": "Feature", "properties": { "id": 9, "type": "entrance", "name": "entrance from back" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783199283106853, 39.89204927256398 ], [ 32.783220023714009, 39.892050610385645 ] ] } },
+{ "type": "Feature", "properties": { "id": 10, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783216908116643, 39.891886416530731 ], [ 32.783245158598433, 39.891888649754478 ], [ 32.783287774333068, 39.891891980859548 ] ] } },
+{ "type": "Feature", "properties": { "id": 11, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783245158598433, 39.891888649754478 ], [ 32.783246504909663, 39.89187780237615 ] ] } },
+{ "type": "Feature", "properties": { "id": 12, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783287774333068, 39.891891980859548 ], [ 32.783288815093421, 39.89188190132618 ] ] } },
+{ "type": "Feature", "properties": { "id": 13, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783287774333068, 39.891891980859548 ], [ 32.783290490386676, 39.891894085739864 ], [ 32.783296329043118, 39.891894556827253 ] ] } },
+{ "type": "Feature", "properties": { "id": 14, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783215592367661, 39.891897822786945 ], [ 32.783194816265365, 39.891895528367229 ] ] } },
+{ "type": "Feature", "properties": { "id": 15, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783212878083553, 39.891921581549163 ], [ 32.78323590349499, 39.891923596011644 ] ] } },
+{ "type": "Feature", "properties": { "id": 16, "type": "pathway", "name": null }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783208545502198, 39.891961567018953 ], [ 32.783230965709819, 39.891963687448381 ] ] } },
+{ "type": "Feature", "properties": { "id": 17, "type": "pathway", "name": "pathway into upstairs" }, "geometry": { "type": "LineString", "coordinates": [ [ 32.783165894254118, 39.891824227362747 ], [ 32.783168404983641, 39.891798974434764 ] ] } }
+]
+}
