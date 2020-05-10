@@ -3,6 +3,7 @@ package com.vipassistant.mobile.demo.ui.MapNavigation;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,9 @@ import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 
@@ -49,6 +52,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private View root;
+	private LatLng userLocation;
+	private Handler handler = new Handler();
+	private Queue<LatLng> locationQueue = new LinkedList<>();
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -81,6 +87,14 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 								.onMapsceneRequestCompletedListener(mapsceneRequestCompletedListener)
 				);
 
+				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
+					@Override
+					public void onInitialStreamingComplete() {
+						loadingDialog.dismiss();
+						initializeLocation();
+					}
+				});
+
 				RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 				m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 
@@ -88,7 +102,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				findMeBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						centerLocation();
+						centerCurrentLocation();
 					}
 				});
 
@@ -100,51 +114,71 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 
-				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
-					@Override
-					public void onInitialStreamingComplete() {
-						loadingDialog.dismiss();
-						initializeLocation();
-					}
-				});
-
+				// TODO
 				RoutingService routingService = map.createRoutingService();
 
-				routingService.findRoutes(new RoutingQueryOptions()
-						.addIndoorWaypoint(new LatLng(39.891756, 32.783188), 1)
-						.addIndoorWaypoint(new LatLng(39.892025, 32.783200), 2)
-						.onRoutingQueryCompletedListener(routingQueryCompletedListener));
+//				routingService.findRoutes(new RoutingQueryOptions()
+//						.addIndoorWaypoint(, 1)
+//						.addIndoorWaypoint(new LatLng(39.892025, 32.783200), 2)
+//						.onRoutingQueryCompletedListener(routingQueryCompletedListener));
 			}
 		});
 		return root;
 	}
 
 	private void initializeLocation() {
-		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
-				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
-				.labelText("You Are Here!"));
-
+		/* Initialize Location Queue first */
+		locationQueue.add(new LatLng(39.891756, 32.783188));
+		/* Then initialize related variables */
+		this.userLocation = computeCurrentLocation();
+		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation).labelText("You Are Here!"));
 		this.m_bluesphere = m_eegeoMap.getBlueSphere();
 		this.m_bluesphere.setEnabled(true);
-		this.m_bluesphere.setPosition(new LatLng(39.891756, 32.783188));
+		this.m_bluesphere.setPosition(userLocation);
 		this.m_bluesphere.setIndoorMap("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1);
 		this.m_bluesphere.setBearing(180);
 
-//		this.navigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
-//				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
-//				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
-//				.labelText("You Are Here!"));
-
+		/* Also now set-up Handler for periodic Map refreshing */
+		this.handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				updateMapPeriodically();
+				handler.postDelayed(this, 1000); // TODO: Updating map every 1 second!
+			}
+		}, 1000);
 	}
 
-	private void updateLocation() {
-		// TODO: Update this.navigationMarker periodically using this and Beacon data
+	/**
+	 * Computes the new location of user by BLE Infrastructure in real time
+	 *
+	 * @return LatLng -- user's new location
+	 */
+	private LatLng computeCurrentLocation() {
+		/* BLE Calculation */
+		if (locationQueue.size() != 1) {
+			System.out.println("remove?");
+			return locationQueue.remove();
+		} else {
+			System.out.println("yeah!");
+			return locationQueue.element();
+		}
 	}
 
-	private void centerLocation() {
+	/**
+	 * Method that is called periodically to update user's location with its markers
+	 * inside map. Utilizes computeCurrentLocation() for resolving new location
+	 */
+	private void updateLocation(LatLng newLocation) {
+		this.userLocation = newLocation;
+		this.outNavigationMarker.setPosition(newLocation);
+		this.m_bluesphere.setPosition(userLocation);
+		this.m_bluesphere.setBearing(180); // TODO DIRECTION
+	}
+
+	private void centerCurrentLocation() {
 		CameraPosition position = new CameraPosition.Builder()
-				.target(39.891756, 32.783188) // TODO: get from BEACON
-				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
+				.target(this.userLocation)
+				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1) // TODO maybe also store floor info?
 				.zoom(19)
 				.bearing(270)
 				.build();
@@ -154,7 +188,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		Toast.makeText(getActivity(), "Centered Your Location", Toast.LENGTH_LONG).show();
 	}
 
-	public void navigateToLocation() {
+	private void navigateToLocation() {
 		/*
 			Found Routes Dialog showing:
 				- desc
@@ -171,6 +205,17 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 //		Toast.makeText(getActivity(), "Started Demo Routing", Toast.LENGTH_LONG).show();
 	}
 
+	/**
+	 * Method that is called periodically to update Map Fragment
+	 * updates user location etc.
+	 * updates existing routes ?
+	 * updates geoloc nav helper etc?
+	 */
+	private void updateMapPeriodically() {
+		updateLocation(computeCurrentLocation());
+		// TODO
+	}
+
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
 		if (response.succeeded()) {
@@ -180,16 +225,16 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
 	}
+
 	@Override
 	public void onRoutingQueryCompleted(RoutingQuery query, RoutingQueryResponse response) {
-		if(response.succeeded()) {
+		if (response.succeeded()) {
 			Toast.makeText(getActivity(), "Found routes", Toast.LENGTH_LONG).show();
-		}
-		else{
+		} else {
 			Toast.makeText(getActivity(), "Failed to find routes", Toast.LENGTH_LONG).show();
 		}
 
-		for (Route route: response.getResults()) {
+		for (Route route : response.getResults()) {
 			RouteViewOptions options = new RouteViewOptions()
 					.color(Color.argb(128, 255, 0, 0))
 					.width(8.0f);
@@ -217,7 +262,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		super.onDestroy();
 
 		if (m_eegeoMap != null) {
-			for (RouteView routeView: m_routeViews) {
+			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
 			}
 		}
