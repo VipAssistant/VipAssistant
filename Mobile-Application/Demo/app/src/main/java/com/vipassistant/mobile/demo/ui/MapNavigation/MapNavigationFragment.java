@@ -106,11 +106,27 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 
-				Button demoBtn = (Button) root.findViewById(R.id.demoButton);
-				demoBtn.setOnClickListener(new View.OnClickListener() {
+				Button searchBtn = (Button) root.findViewById(R.id.searchButton);
+				searchBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						navigateToLocation();
+//						displaySearchDialog();
+					}
+				});
+
+				Button shareBtn = (Button) root.findViewById(R.id.shareLocationButton);
+				searchBtn.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+//						displayShareDialog();
+					}
+				});
+
+				Button saveBtn = (Button) root.findViewById(R.id.saveLocationButton);
+				searchBtn.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+//						displaySaveDialog();
 					}
 				});
 
@@ -150,16 +166,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	/**
 	 * Computes the new location of user by BLE Infrastructure in real time
-	 *
 	 * @return LatLng -- user's new location
 	 */
 	private LatLng computeCurrentLocation() {
-		/* BLE Calculation */
+		/* ..BLE Calculation.. */
 		if (locationQueue.size() != 1) {
-			System.out.println("remove?");
+			/* If queue does not contain only 1 element then pop the head */
 			return locationQueue.remove();
 		} else {
-			System.out.println("yeah!");
+			/* Else do not pop since user stays still */
 			return locationQueue.element();
 		}
 	}
