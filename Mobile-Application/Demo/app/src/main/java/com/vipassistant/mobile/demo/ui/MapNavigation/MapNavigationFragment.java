@@ -1,6 +1,7 @@
 package com.vipassistant.mobile.demo.ui.MapNavigation;
 
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,10 +29,16 @@ import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
 import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
+import com.eegeo.mapapi.services.routing.*;
+import com.eegeo.mapapi.widgets.RouteView;
+import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
 
-public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 
 	private MapNavigationViewModel mapNavigationViewModel;
 	private MapView m_mapView;
@@ -40,6 +47,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private ProgressDialog loadingDialog;
 	private Marker navigationMarker, outNavigationMarker;
 	private BlueSphere m_bluesphere = null;
+	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private View root;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
@@ -59,7 +67,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		loadingDialog.setIndeterminate(false);
 		loadingDialog.show();
 
-		final OnMapsceneRequestCompletedListener listener = this;
+		final OnMapsceneRequestCompletedListener mapsceneRequestCompletedListener = this;
+		final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 
 		m_mapView.getMapAsync(new OnMapReadyCallback() {
 			@Override
@@ -69,7 +78,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
 						new MapsceneRequestOptions("https://wrld.mp/4bdda73")
-								.onMapsceneRequestCompletedListener(listener)
+								.onMapsceneRequestCompletedListener(mapsceneRequestCompletedListener)
 				);
 
 				RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
@@ -98,6 +107,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						initializeLocation();
 					}
 				});
+
+				RoutingService routingService = map.createRoutingService();
+
+				routingService.findRoutes(new RoutingQueryOptions()
+						.addIndoorWaypoint(new LatLng(39.891756, 32.783188), 1)
+						.addIndoorWaypoint(new LatLng(39.892025, 32.783200), 2)
+						.onRoutingQueryCompletedListener(routingQueryCompletedListener));
 			}
 		});
 		return root;
@@ -164,6 +180,23 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
 	}
+	@Override
+	public void onRoutingQueryCompleted(RoutingQuery query, RoutingQueryResponse response) {
+		if(response.succeeded()) {
+			Toast.makeText(getActivity(), "Found routes", Toast.LENGTH_LONG).show();
+		}
+		else{
+			Toast.makeText(getActivity(), "Failed to find routes", Toast.LENGTH_LONG).show();
+		}
+
+		for (Route route: response.getResults()) {
+			RouteViewOptions options = new RouteViewOptions()
+					.color(Color.argb(128, 255, 0, 0))
+					.width(8.0f);
+			RouteView routeView = new RouteView(m_eegeoMap, route, options);
+			m_routeViews.add(routeView);
+		}
+	}
 
 	@Override
 	public void onResume() {
@@ -182,6 +215,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+
+		if (m_eegeoMap != null) {
+			for (RouteView routeView: m_routeViews) {
+				routeView.removeFromMap();
+			}
+		}
+
 		m_mapView.onDestroy();
 	}
 }
