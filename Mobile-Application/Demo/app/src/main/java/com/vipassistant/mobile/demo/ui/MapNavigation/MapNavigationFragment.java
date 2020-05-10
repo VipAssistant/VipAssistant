@@ -68,7 +68,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
-						new MapsceneRequestOptions("https://wrld.mp/57d8552")
+						new MapsceneRequestOptions("https://wrld.mp/4bdda73")
 								.onMapsceneRequestCompletedListener(listener)
 				);
 
@@ -79,16 +79,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				findMeBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						CameraPosition position = new CameraPosition.Builder()
-								.target(39.891756, 32.783188) // TODO: get from BEACON
-								.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
-								.zoom(19)
-								.bearing(270)
-								.build();
-						CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
-								.build();
-						m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
-						Toast.makeText(getActivity(), "Centered Your Location", Toast.LENGTH_LONG).show();
+						centerLocation();
+					}
+				});
+
+				Button demoBtn = (Button) root.findViewById(R.id.demoButton);
+				demoBtn.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						navigateToLocation();
 					}
 				});
 
@@ -109,11 +108,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
 				.labelText("You Are Here!"));
 
-		m_bluesphere = m_eegeoMap.getBlueSphere();
-		m_bluesphere.setEnabled(true);
-		m_bluesphere.setPosition(new LatLng(39.891756, 32.783188));
-		m_bluesphere.setIndoorMap("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1);
-		m_bluesphere.setBearing(180);
+		this.m_bluesphere = m_eegeoMap.getBlueSphere();
+		this.m_bluesphere.setEnabled(true);
+		this.m_bluesphere.setPosition(new LatLng(39.891756, 32.783188));
+		this.m_bluesphere.setIndoorMap("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1);
+		this.m_bluesphere.setBearing(180);
 
 //		this.navigationMarker = m_eegeoMap.addMarker(new MarkerOptions()
 //				.position(new LatLng(39.891756, 32.783188)) // TODO: get from BEACON
@@ -124,6 +123,36 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void updateLocation() {
 		// TODO: Update this.navigationMarker periodically using this and Beacon data
+	}
+
+	private void centerLocation() {
+		CameraPosition position = new CameraPosition.Builder()
+				.target(39.891756, 32.783188) // TODO: get from BEACON
+				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1)
+				.zoom(19)
+				.bearing(270)
+				.build();
+		CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+				.build();
+		m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
+		Toast.makeText(getActivity(), "Centered Your Location", Toast.LENGTH_LONG).show();
+	}
+
+	public void navigateToLocation() {
+		/*
+			Found Routes Dialog showing:
+				- desc
+				- ETA and dist
+				- preview route button
+				- Start navigation button
+
+			OnPreviewRoutesClick
+
+			OnStartNavClickk
+		 */
+//		NavigationDialogFragment nDialog = new NavigationDialogFragment();
+//		nDialog.show(getFragmentManager(), "Diag");
+//		Toast.makeText(getActivity(), "Started Demo Routing", Toast.LENGTH_LONG).show();
 	}
 
 	@Override
