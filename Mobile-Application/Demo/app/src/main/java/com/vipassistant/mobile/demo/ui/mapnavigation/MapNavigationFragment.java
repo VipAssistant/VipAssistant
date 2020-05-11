@@ -71,8 +71,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
 		this.loadingDialog.show();
 
-		((MainActivity) getActivity()).toggleFabVisibility();
-
 		/* Initialize Map */
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
@@ -323,14 +321,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	public void onResume() {
 		super.onResume();
 		m_mapView.onResume();
-		((MainActivity) getActivity()).toggleFabVisibility();
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		m_mapView.onPause();
-		((MainActivity) getActivity()).toggleFabVisibility();
 	}
 
 	@Override
