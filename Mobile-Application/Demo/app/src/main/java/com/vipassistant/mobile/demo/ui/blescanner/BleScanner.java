@@ -1,6 +1,5 @@
-package com.vipassistant.mobile.demo.ui.BLEScanner;
+package com.vipassistant.mobile.demo.ui.blescanner;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -8,8 +7,6 @@ import android.content.Intent;
 
 import android.os.Handler;
 import android.bluetooth.le.*;
-
-import androidx.fragment.app.Fragment;
 
 public class BleScanner {
 

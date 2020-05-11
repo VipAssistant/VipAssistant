@@ -1,6 +1,5 @@
-package com.vipassistant.mobile.demo.ui.BLEScanner;
+package com.vipassistant.mobile.demo.ui.blescanner;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

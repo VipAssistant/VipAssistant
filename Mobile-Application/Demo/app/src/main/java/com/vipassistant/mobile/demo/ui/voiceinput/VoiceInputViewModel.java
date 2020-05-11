@@ -1,16 +1,16 @@
-package com.vipassistant.mobile.demo.ui.VoiceOutput;
+package com.vipassistant.mobile.demo.ui.voiceinput;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class VoiceOutputViewModel extends ViewModel {
+public class VoiceInputViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public VoiceOutputViewModel() {
+    public VoiceInputViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is Voice Output fragment");
+        mText.setValue("This is Voice Input fragment");
     }
 
     public LiveData<String> getText() {

@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.VoiceInput;
+package com.vipassistant.mobile.demo.ui.voiceinput;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
 

@@ -1,29 +1,18 @@
-package com.vipassistant.mobile.demo.ui.BLEScanner;
+package com.vipassistant.mobile.demo.ui.blescanner;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -31,8 +20,6 @@ import android.widget.ScrollView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import android.util.Log;
 
 public class BLEScannerFragment extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener {
 

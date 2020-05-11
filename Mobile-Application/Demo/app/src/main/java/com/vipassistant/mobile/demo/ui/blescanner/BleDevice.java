@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.BLEScanner;
+package com.vipassistant.mobile.demo.ui.blescanner;
 
 
 import android.bluetooth.BluetoothDevice;

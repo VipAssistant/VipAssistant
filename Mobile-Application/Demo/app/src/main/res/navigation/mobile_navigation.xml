@@ -7,31 +7,31 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.vipassistant.mobile.demo.ui.Home.HomeFragment"
+        android:name="com.vipassistant.mobile.demo.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" />
 
     <fragment
             android:id="@+id/nav_map_nav"
-            android:name="com.vipassistant.mobile.demo.ui.MapNavigation.MapNavigationFragment"
+            android:name="com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationFragment"
             android:label="@string/menu_map_nav"
             tools:layout="@layout/fragment_map_nav" />
 
     <fragment
         android:id="@+id/nav_voutput"
-        android:name="com.vipassistant.mobile.demo.ui.VoiceOutput.VoiceOutputFragment"
+        android:name="com.vipassistant.mobile.demo.ui.voiceoutput.VoiceOutputFragment"
         android:label="@string/menu_voutput"
         tools:layout="@layout/fragment_voutput" />
 
     <fragment
         android:id="@+id/nav_vinput"
-        android:name="com.vipassistant.mobile.demo.ui.VoiceInput.VoiceInputFragment"
+        android:name="com.vipassistant.mobile.demo.ui.voiceinput.VoiceInputFragment"
         android:label="@string/menu_vinput"
         tools:layout="@layout/fragment_vinput" />
 
     <fragment
         android:id="@+id/nav_blescanner"
-        android:name="com.vipassistant.mobile.demo.ui.BLEScanner.BLEScannerFragment"
+        android:name="com.vipassistant.mobile.demo.ui.blescanner.BLEScannerFragment"
         android:label="@string/menu_blescanner"
         tools:layout="@layout/fragment_blescanner" />
 

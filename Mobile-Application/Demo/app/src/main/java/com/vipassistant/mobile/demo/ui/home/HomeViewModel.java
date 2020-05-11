@@ -1,16 +1,16 @@
-package com.vipassistant.mobile.demo.ui.Integration.ViewModel;
+package com.vipassistant.mobile.demo.ui.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class IntegrationViewModel extends ViewModel {
+public class HomeViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public IntegrationViewModel() {
+    public HomeViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Welcome to the Vip Assistant Demo Application");
+        mText.setValue("Welcome to VIPA!");
     }
 
     public LiveData<String> getText() {

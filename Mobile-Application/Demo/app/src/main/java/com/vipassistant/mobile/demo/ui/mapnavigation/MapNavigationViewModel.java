@@ -1,16 +1,16 @@
-package com.vipassistant.mobile.demo.ui.Home;
+package com.vipassistant.mobile.demo.ui.mapnavigation;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class HomeViewModel extends ViewModel {
+public class MapNavigationViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public HomeViewModel() {
+    public MapNavigationViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Welcome to VIPA!");
+        mText.setValue("This is Map Navigation fragment");
     }
 
     public LiveData<String> getText() {

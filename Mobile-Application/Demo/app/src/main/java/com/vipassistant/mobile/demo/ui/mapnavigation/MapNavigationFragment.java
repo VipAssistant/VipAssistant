@@ -1,15 +1,17 @@
-package com.vipassistant.mobile.demo.ui.MapNavigation;
+package com.vipassistant.mobile.demo.ui.mapnavigation;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -58,7 +60,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState); // TODO: may not be needed
+		super.onCreate(savedInstanceState);
 		mapNavigationViewModel = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
 
@@ -110,12 +112,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				searchBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displaySearchDialog();
+						displaySearchDialog();
 					}
 				});
 
 				Button shareBtn = (Button) root.findViewById(R.id.shareLocationButton);
-				searchBtn.setOnClickListener(new View.OnClickListener() {
+				shareBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 //						displayShareDialog();
@@ -123,7 +125,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				});
 
 				Button saveBtn = (Button) root.findViewById(R.id.saveLocationButton);
-				searchBtn.setOnClickListener(new View.OnClickListener() {
+				saveBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 //						displaySaveDialog();
@@ -201,6 +203,60 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				.build();
 		m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
 		Toast.makeText(getActivity(), "Centered Your Location", Toast.LENGTH_LONG).show();
+	}
+
+	private void displaySearchDialog() {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+		alertDialogBuilder.setTitle("Search in Map");
+		alertDialogBuilder.setMessage("You can query the system in 3 different ways!");
+		alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+				innerDialogBuilder.setTitle("What do you want us to find for you?");
+				EditText locationInput = new EditText(getContext());
+				locationInput.setInputType(InputType.TYPE_CLASS_TEXT);
+				innerDialogBuilder.setView(locationInput);
+				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						locationInput.getText().toString(); // TODO continue
+					}
+				});
+				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.show().show();
+			}
+		});
+		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.setNeutralButton("Report Me Nearby Information", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+
+		AlertDialog dialog = alertDialogBuilder.show();
+
+		/*	Push dialog buttons to the left */
+		Button btn1 = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+		Button btn2 = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+		Button btn3 = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+		LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) btn1.getLayoutParams();
+		layoutParams.gravity = Gravity.LEFT;
+		btn1.setLayoutParams(layoutParams);
+		btn2.setLayoutParams(layoutParams);
+		btn3.setLayoutParams(layoutParams);
+		dialog.show();
 	}
 
 	private void navigateToLocation() {

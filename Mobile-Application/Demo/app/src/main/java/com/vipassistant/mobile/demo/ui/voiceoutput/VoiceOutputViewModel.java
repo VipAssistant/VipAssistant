@@ -1,16 +1,16 @@
-package com.vipassistant.mobile.demo.ui.MapNavigation;
+package com.vipassistant.mobile.demo.ui.voiceoutput;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class MapNavigationViewModel extends ViewModel {
+public class VoiceOutputViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public MapNavigationViewModel() {
+    public VoiceOutputViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is Map Navigation fragment");
+        mText.setValue("This is Voice Output fragment");
     }
 
     public LiveData<String> getText() {
