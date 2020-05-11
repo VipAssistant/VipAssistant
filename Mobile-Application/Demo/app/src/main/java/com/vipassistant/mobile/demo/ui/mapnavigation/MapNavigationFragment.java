@@ -45,43 +45,43 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
+import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
+public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener,
+		                                                       OnRoutingQueryCompletedListener {
+
+	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
 	private MapView m_mapView;
 	private EegeoMap m_eegeoMap = null;
 	private IndoorMapView m_interiorView = null;
-	private ProgressDialog loadingDialog;
 	private Marker navigationMarker, outNavigationMarker;
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
-	private View root;
-	private LatLng userLocation;
 	private Handler handler = new Handler();
+	private LatLng userLocation;
 	private Queue<LatLng> locationQueue = new LinkedList<>();
+	private ProgressDialog loadingDialog = buildLoadingDialog(getActivity(), "Loading Map Data...");
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mapNavigationViewModel = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
+		this.loadingDialog.show();
 
 		((MainActivity) getActivity()).toggleFabVisibility();
 
+		/* Initialize Map */
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
 		m_mapView.onCreate(savedInstanceState);
-
-		this.locationService = new LocationService(Constants.allLocations, Constants.typedLocations, Constants.floorLocations);
-
-		loadingDialog = new ProgressDialog(getActivity());
-		loadingDialog.setMessage("Loading Map Data...");
-		loadingDialog.setIndeterminate(false);
-		loadingDialog.show();
-
-		final OnMapsceneRequestCompletedListener mapsceneRequestCompletedListener = this;
+		final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 		final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
+
+		/* Initialize LocationService */
+		this.locationService = new LocationService(allLocations, typedLocations, floorLocations);
 
 		m_mapView.getMapAsync(new OnMapReadyCallback() {
 			@Override
@@ -90,8 +90,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
-						new MapsceneRequestOptions("https://wrld.mp/4bdda73")
-								.onMapsceneRequestCompletedListener(mapsceneRequestCompletedListener)
+						new MapsceneRequestOptions(mapSceneLink)
+								.onMapsceneRequestCompletedListener(mapSceneRequestCompletedListener)
 				);
 
 				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
@@ -150,15 +150,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	}
 
 	private void initializeLocation() {
-		/* Initialize Location Queue first */
-		locationQueue.add(new LatLng(39.891756, 32.783188));
+		/* Initialize Location Queue first with indoor map entrance Location */
+		locationQueue.add(demoIndoorMapEntrance);
 		/* Then initialize related variables */
 		this.userLocation = computeCurrentLocation();
-		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation).labelText("You Are Here!"));
+		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation).labelText(markerText));
 		this.m_bluesphere = m_eegeoMap.getBlueSphere();
 		this.m_bluesphere.setEnabled(true);
 		this.m_bluesphere.setPosition(userLocation);
-		this.m_bluesphere.setIndoorMap("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1);
+		this.m_bluesphere.setIndoorMap(demoIndoorMapId, 1);
 		this.m_bluesphere.setBearing(180);
 
 		/* Also now set-up Handler for periodic Map refreshing */
@@ -166,9 +166,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public void run() {
 				updateMapPeriodically();
-				handler.postDelayed(this, 1000); // TODO: Updating map every 1 second!
+				handler.postDelayed(this, mapRefreshMillis);
 			}
-		}, 1000);
+		}, mapRefreshMillis);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private void centerCurrentLocation() {
 		CameraPosition position = new CameraPosition.Builder()
 				.target(this.userLocation)
-				.indoor("EIM-71597625-a9b6-4753-b91f-1c0e74fc966d", 1) // TODO maybe also store floor info?
+				.indoor(demoIndoorMapId, 1) // TODO maybe also store floor info?
 				.zoom(19)
 				.bearing(270)
 				.build();
