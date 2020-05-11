@@ -81,7 +81,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 
 		/* Initialize LocationService */
-		this.locationService = new LocationService(allLocations, typedLocations, floorLocations);
+		this.locationService = new LocationService(allLocations);
 
 		m_mapView.getMapAsync(new OnMapReadyCallback() {
 			@Override
@@ -225,7 +225,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						locationInput.getText().toString(); // TODO continue
+						locationInput.getText().toString();
 					}
 				});
 				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

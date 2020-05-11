@@ -1,37 +1,57 @@
 package com.vipassistant.mobile.demo.ui.service;
 
+import android.os.Build;
+import androidx.annotation.RequiresApi;
 import com.eegeo.mapapi.geometry.LatLng;
+import com.vipassistant.mobile.demo.ui.constants.Constants;
+import com.vipassistant.mobile.demo.ui.model.Location;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.vipassistant.mobile.demo.ui.constants.Constants.locationLatEps;
+import static com.vipassistant.mobile.demo.ui.constants.Constants.locationLongEps;
 
 public class LocationService {
-	/* We keep Location Information in our custom Indoor Map in 3 different containers
-	 * First one is a HashTable of locations (locationName:location) for free map queries
-	 * Second one is a HashTable of HashTables (locationType:location) for "Find Me A.." types of queries
-	 * And the third one is a HashTable of HashTables (floor:location) again for "Report My Surroundings" types of queries
-	 */
-	private final Map<String, LatLng> allLocations;
-	private final Map<String, HashMap<String, LatLng>> typedLocations;
-	private final Map<Integer, HashMap<String, LatLng>> floorLocations;
+	/* We keep Location Information in our custom Indoor Map in 1 container
+	 * namely in an ArrayList and perform all our queries with stream operations on that list */
+	private final List<Location> allLocations;
 
-	public LocationService(HashMap<String, LatLng> allLocations,
-						   HashMap<String, HashMap<String, LatLng>> typedLocations,
-						   HashMap<Integer, HashMap<String, LatLng>> floorLocations) {
+	public LocationService(ArrayList<Location> allLocations) {
 		this.allLocations = allLocations;
-		this.typedLocations = typedLocations;
-		this.floorLocations = floorLocations;
 	}
 
-	public Map<String, LatLng> getAllLocations() {
+	public List<Location> getAllLocations() {
 		return allLocations;
 	}
 
-	public Map<String, HashMap<String, LatLng>> getTypedLocations() {
-		return typedLocations;
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<Location> getLocation(LatLng location) {
+		return allLocations.stream()
+				.filter(loc -> loc.getLocation() == location)
+				.findAny();
 	}
 
-	public Map<Integer, HashMap<String, LatLng>> getFloorLocations() {
-		return floorLocations;
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<List<Location>> findByName(String name) {
+		return Optional.of(allLocations.stream()
+								.filter(loc -> loc.getName() == name)
+								.collect(Collectors.toList()));
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<List<Location>> findByType(String type) {
+		return Optional.of(allLocations.stream()
+								.filter(loc -> loc.getType() == type)
+								.collect(Collectors.toList()));
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<List<Location>> findByFloorAndLocation(Integer floor, LatLng location) {
+		return Optional.of(allLocations.stream()
+								.filter(loc -> loc.getFloor() == floor)
+								.filter(loc -> Math.abs(loc.getLocation().latitude + loc.getLocEpsLat() - location.latitude) <= locationLatEps &&
+										       Math.abs(loc.getLocation().longitude + loc.getLocEpsLong() - location.longitude) <= locationLongEps)
+								.collect(Collectors.toList()));
 	}
 }
