@@ -62,14 +62,14 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private Handler handler = new Handler();
 	private LatLng userLocation;
 	private Queue<LatLng> locationQueue = new LinkedList<>();
-	private ProgressDialog loadingDialog = buildLoadingDialog(getActivity(), "Loading Map Data...");
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mapNavigationViewModel = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
-		this.loadingDialog.show();
+		ProgressDialog mapLoadingDialog = buildLoadingDialog(getActivity(), "Loading Map Data...");
+		mapLoadingDialog.show();
 
 		/* Initialize Map */
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
@@ -95,7 +95,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
 					@Override
 					public void onInitialStreamingComplete() {
-						loadingDialog.dismiss();
+						mapLoadingDialog.dismiss();
 						initializeLocation();
 					}
 				});
