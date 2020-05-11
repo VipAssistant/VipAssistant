@@ -120,19 +120,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 
-				Button shareBtn = (Button) root.findViewById(R.id.shareLocationButton);
-				shareBtn.setOnClickListener(new View.OnClickListener() {
+				Button infoBtn = (Button) root.findViewById(R.id.infoButton);
+				infoBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displayShareDialog(); todo
+//						displayInfoDialog(); todo
 					}
 				});
 
-				Button saveBtn = (Button) root.findViewById(R.id.saveLocationButton);
-				saveBtn.setOnClickListener(new View.OnClickListener() {
+				Button shareSaveBtn = (Button) root.findViewById(R.id.shareAndSaveButton);
+				shareSaveBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displaySaveDialog(); todo
+//						displayShareSaveDialog(); todo dialogta eski iconlarini kullan
 					}
 				});
 			}
@@ -216,12 +216,14 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void displaySearchDialog() {
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+		alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 		alertDialogBuilder.setTitle("Search in Map");
 		alertDialogBuilder.setMessage("You can query the system in 3 different ways!");
 		alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("What do you want us to find for you?");
 				EditText locationInput = new EditText(getContext());
 				locationInput.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -233,6 +235,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						Optional<List<Location>> queryResult = locationService.findByType(locType);
 						if (queryResult.isPresent()) {
 							AlertDialog.Builder secondInnerDialogBuilder = new AlertDialog.Builder(getActivity());
+							innerDialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 							secondInnerDialogBuilder.setTitle(String.format("Found %d %s", queryResult.get().size(), locType));
 							secondInnerDialogBuilder.setMessage("You can either see them on the map or directly request navigation for the closest one." +
 									" If you choose to see them on the map, you can still request navigation to location by clicking to the marker.");
@@ -284,13 +287,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // todo
+				dialog.dismiss(); // TODO1
 			}
 		});
 		alertDialogBuilder.setNeutralButton("Report Me Nearby Information", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // todo
+				dialog.dismiss(); // TODO2
 			}
 		});
 
@@ -355,6 +358,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				}
 			}
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+			dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 			dialogBuilder.setTitle("Successfully Found Shortest Route!");
 			dialogBuilder.setMessage("Shortest route to destination point is displayed on the background. Distance: %d ETA: %d");
 			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
@@ -381,6 +385,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			if (marker.getTitle() != "You Are Here!") {
 				Context context = MapNavigationFragment.this.getActivity();
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+				dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 				dialogBuilder.setTitle("Do you want to navigate to this location?");
 				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					@Override

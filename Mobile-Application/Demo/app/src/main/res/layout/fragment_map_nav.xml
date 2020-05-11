@@ -26,10 +26,10 @@
             android:layout_alignParentTop="true"/>
 
     <Button
-            android:id="@+id/shareLocationButton"
+            android:id="@+id/infoButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/ic_share_white_24dp"
+            android:background="@drawable/ic_info_outline_info_24dp"
             android:textColor="#fff"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"/>
@@ -44,10 +44,10 @@
             android:layout_alignParentEnd="true"/>
 
     <Button
-            android:id="@+id/saveLocationButton"
+            android:id="@+id/shareAndSaveButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/ic_add_location_white_24dp"
+            android:background="@drawable/ic_collections_bookmark_white_24dp"
             android:textColor="#fff"
             android:layout_alignParentBottom="true"/>
 
