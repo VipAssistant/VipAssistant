@@ -34,4 +34,10 @@ public class Constants {
 		loadingDialog.setIndeterminate(false);
 		return loadingDialog;
 	}
+
+	public static Double calculateEuclideanDistance(Location op1, Location op2) {
+		Double first = Math.pow(op1.getLocation().latitude - op2.getLocation().latitude, 2);
+		Double second = Math.pow(op1.getLocation().longitude - op2.getLocation().longitude, 2);
+		return Math.sqrt(first + second);
+	}
 }

@@ -35,16 +35,11 @@ import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
-import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
-import com.vipassistant.mobile.demo.ui.constants.Constants;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
@@ -53,6 +48,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
+	private RoutingService routingService;
 	private MapView m_mapView;
 	private EegeoMap m_eegeoMap = null;
 	private IndoorMapView m_interiorView = null;
@@ -61,7 +57,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
 	private Location userLocation;
-	private Queue<Location> locationQueue = new LinkedList<>();
+	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
+	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
+	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -75,16 +73,16 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
 		m_mapView.onCreate(savedInstanceState);
-		final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
-		final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 
 		/* Initialize LocationService */
 		this.locationService = new LocationService(allLocations);
+
 
 		m_mapView.getMapAsync(new OnMapReadyCallback() {
 			@Override
 			public void onMapReady(final EegeoMap map) {
 				m_eegeoMap = map;
+				routingService = map.createRoutingService();
 
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
@@ -134,14 +132,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 //						displaySaveDialog();
 					}
 				});
-
-				// TODO
-				RoutingService routingService = map.createRoutingService();
-
-//				routingService.findRoutes(new RoutingQueryOptions()
-//						.addIndoorWaypoint(, 1)
-//						.addIndoorWaypoint(new LatLng(39.892025, 32.783200), 2)
-//						.onRoutingQueryCompletedListener(routingQueryCompletedListener));
 			}
 		});
 		return root;
@@ -223,7 +213,40 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						locationInput.getText().toString();
+						String locType = locationInput.getText().toString();
+						Optional<List<Location>> queryResult = locationService.findByType(locType);
+						if (queryResult.isPresent()) {
+							AlertDialog.Builder secondInnerDialogBuilder = new AlertDialog.Builder(getActivity());
+							secondInnerDialogBuilder.setTitle(String.format("Found %d %s", queryResult.get().size(), locType));
+							secondInnerDialogBuilder.setMessage("You can either see them on the map or directly request navigation for the closest one." +
+									" If you choose to see them on the map, you can still request navigation to location by clicking to the marker.");
+							secondInnerDialogBuilder.setPositiveButton("See them on the Map", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss(); // todo
+								}
+							});
+							secondInnerDialogBuilder.setNegativeButton("Request Navigation for the Closest", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									/* Find Closest via Euclidean Formula */
+									Location closest = queryResult.get().get(0);
+									Double minDistance = calculateEuclideanDistance(userLocation, closest);
+									for (Location loc : queryResult.get()) {
+										Double tempDistance = calculateEuclideanDistance(userLocation, loc);
+										if (minDistance > tempDistance) {
+											closest = loc;
+											minDistance = tempDistance;
+										}
+									}
+									requestNavigationForLocation(closest);
+									dialog.dismiss();
+								}
+							});
+						} else {
+							Toast.makeText(getActivity(), String.format("There does not exist any locations with type %s in this building.", locType), Toast.LENGTH_LONG).show();
+						}
+						dialog.dismiss();
 					}
 				});
 				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -233,6 +256,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 				innerDialogBuilder.show().show();
+				dialog.dismiss();
 			}
 		});
 		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
@@ -262,27 +286,23 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		dialog.show();
 	}
 
-	private void navigateToLocation() {
-		/*
-			Found Routes Dialog showing:
-				- desc
-				- ETA and dist
-				- preview route button
-				- Start navigation button
-
-			OnPreviewRoutesClick
-
-			OnStartNavClickk
-		 */
-//		NavigationDialogFragment nDialog = new NavigationDialogFragment();
-//		nDialog.show(getFragmentManager(), "Diag");
-//		Toast.makeText(getActivity(), "Started Demo Routing", Toast.LENGTH_LONG).show();
+	/**
+	 * Method that requests routes via RoutingService
+	 * Its results are utilized in onRoutingQueryCompleted() since this class implements routingQueryCompletedListener
+	 * @param location
+	 */
+	private void requestNavigationForLocation(Location location) {
+		routingService.findRoutes(new RoutingQueryOptions()
+			.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
+			.addIndoorWaypoint(location.getLocation(), location.getFloor())
+			.onRoutingQueryCompletedListener(routingQueryCompletedListener));
 	}
 
 	/**
 	 * Method that is called periodically to update Map Fragment
 	 * updates user location etc.
-	 * updates existing routes ?
+	 * updates existing routes ? !!!!!!
+	 * direction
 	 * updates geoloc nav helper etc?
 	 */
 	private void updateMapPeriodically() {
@@ -303,17 +323,45 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	@Override
 	public void onRoutingQueryCompleted(RoutingQuery query, RoutingQueryResponse response) {
 		if (response.succeeded()) {
-			Toast.makeText(getActivity(), "Found routes", Toast.LENGTH_LONG).show();
+			Double routeDuration = .0, routeDistance = .0;
+			ArrayList<Location> queueRoutes = new ArrayList<>();
+			for (Route route : response.getResults()) {
+				routeDistance += route.distance;
+				routeDuration += route.duration;
+				RouteViewOptions options = new RouteViewOptions()
+						.color(Color.argb(128, 255, 0, 0))
+						.width(8.0f);
+				RouteView routeView = new RouteView(m_eegeoMap, route, options);
+				m_routeViews.add(routeView);
+				for (RouteSection routeSection : route.sections) {
+					for (RouteStep routeStep : routeSection.steps) {
+						int floor = routeStep.indoorFloorId;
+						String indoorId = routeStep.indoorId;
+						for (LatLng path : routeStep.path) {
+							queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+						}
+					}
+				}
+			}
+			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+			dialogBuilder.setTitle("Successfully Found Shortest Route!");
+			dialogBuilder.setMessage("Shortest route to destination point is displayed on the background. Distance: %d ETA: %d");
+			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					locationQueue.addAll(queueRoutes);
+					// TODO: DISPLAY NAV HELPER...
+					dialog.dismiss();
+				}
+			});
+			dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
 		} else {
-			Toast.makeText(getActivity(), "Failed to find routes", Toast.LENGTH_LONG).show();
-		}
-
-		for (Route route : response.getResults()) {
-			RouteViewOptions options = new RouteViewOptions()
-					.color(Color.argb(128, 255, 0, 0))
-					.width(8.0f);
-			RouteView routeView = new RouteView(m_eegeoMap, route, options);
-			m_routeViews.add(routeView);
+			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
 		}
 	}
 
