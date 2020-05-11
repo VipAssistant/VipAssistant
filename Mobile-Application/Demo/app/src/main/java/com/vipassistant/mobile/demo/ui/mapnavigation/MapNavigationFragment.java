@@ -2,6 +2,7 @@ package com.vipassistant.mobile.demo.ui.mapnavigation;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import com.eegeo.mapapi.map.OnInitialStreamingCompleteListener;
 import com.eegeo.mapapi.map.OnMapReadyCallback;
 import com.eegeo.mapapi.markers.Marker;
 import com.eegeo.mapapi.markers.MarkerOptions;
+import com.eegeo.mapapi.markers.OnMarkerClickListener;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
@@ -43,8 +45,7 @@ import java.util.*;
 
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
-public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener,
-		                                                       OnRoutingQueryCompletedListener {
+public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
@@ -52,7 +53,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private MapView m_mapView;
 	private EegeoMap m_eegeoMap = null;
 	private IndoorMapView m_interiorView = null;
-	private Marker navigationMarker, outNavigationMarker;
+	private Marker outNavigationMarker;
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
@@ -60,6 +61,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
+	private final OnMarkerClickListener m_markerTappedListener = new MarkerClickListenerImpl();
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -83,6 +85,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			public void onMapReady(final EegeoMap map) {
 				m_eegeoMap = map;
 				routingService = map.createRoutingService();
+				m_eegeoMap.addMarkerClickListener(m_markerTappedListener);
 
 				MapsceneService mapsceneService = map.createMapsceneService();
 				mapsceneService.requestMapscene(
@@ -121,7 +124,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				shareBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displayShareDialog();
+//						displayShareDialog(); todo
 					}
 				});
 
@@ -129,7 +132,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				saveBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displaySaveDialog();
+//						displaySaveDialog(); todo
 					}
 				});
 			}
@@ -147,7 +150,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.m_bluesphere.setEnabled(true);
 		this.m_bluesphere.setPosition(userLocation.getLocation());
 		this.m_bluesphere.setIndoorMap(userLocation.getIndoorMapId(), userLocation.getFloor());
-		this.m_bluesphere.setBearing(180); // TODO
+		this.m_bluesphere.setBearing(180); // TODO DIRECTION
 
 		/* Also now set-up Handler for periodic Map refreshing */
 		this.handler.postDelayed(new Runnable() {
@@ -161,6 +164,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	/**
 	 * Computes the new location of user by BLE Infrastructure in real time
+	 *
 	 * @return LatLng -- user's new location
 	 */
 	private Location computeCurrentLocation() {
@@ -183,6 +187,18 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.outNavigationMarker.setPosition(newLocation.getLocation());
 		this.m_bluesphere.setPosition(userLocation.getLocation());
 		this.m_bluesphere.setBearing(180); // TODO DIRECTION
+	}
+
+	/**
+	 * Method that is called periodically to update Map Fragment
+	 * updates user location etc.
+	 * updates existing routes ? !!!!!!
+	 * direction
+	 * updates geoloc nav helper etc?
+	 */
+	private void updateMapPeriodically() {
+		updateLocation(computeCurrentLocation());
+		// TODO nav helper - finish navigation and stuff..
 	}
 
 	private void centerCurrentLocation() {
@@ -223,7 +239,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 							secondInnerDialogBuilder.setPositiveButton("See them on the Map", new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss(); // todo
+									/* Create clickable marker for each result in the map */
+									for (Location location : queryResult.get()) {
+										m_eegeoMap.addMarker(new MarkerOptions()
+												.position(location.getLocation())
+												.labelText(location.getName()));
+									}
+									dialog.dismiss();
 								}
 							});
 							secondInnerDialogBuilder.setNegativeButton("Request Navigation for the Closest", new DialogInterface.OnClickListener() {
@@ -262,13 +284,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
+				dialog.dismiss(); // todo
 			}
 		});
 		alertDialogBuilder.setNeutralButton("Report Me Nearby Information", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
+				dialog.dismiss(); // todo
 			}
 		});
 
@@ -289,25 +311,14 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	/**
 	 * Method that requests routes via RoutingService
 	 * Its results are utilized in onRoutingQueryCompleted() since this class implements routingQueryCompletedListener
+	 *
 	 * @param location
 	 */
 	private void requestNavigationForLocation(Location location) {
 		routingService.findRoutes(new RoutingQueryOptions()
-			.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
-			.addIndoorWaypoint(location.getLocation(), location.getFloor())
-			.onRoutingQueryCompletedListener(routingQueryCompletedListener));
-	}
-
-	/**
-	 * Method that is called periodically to update Map Fragment
-	 * updates user location etc.
-	 * updates existing routes ? !!!!!!
-	 * direction
-	 * updates geoloc nav helper etc?
-	 */
-	private void updateMapPeriodically() {
-		updateLocation(computeCurrentLocation());
-		// TODO
+				.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
+				.addIndoorWaypoint(location.getLocation(), location.getFloor())
+				.onRoutingQueryCompletedListener(routingQueryCompletedListener));
 	}
 
 	@Override
@@ -328,7 +339,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			for (Route route : response.getResults()) {
 				routeDistance += route.distance;
 				routeDuration += route.duration;
-				RouteViewOptions options = new RouteViewOptions()
+				RouteViewOptions options = new RouteViewOptions() // todo styling etc
 						.color(Color.argb(128, 255, 0, 0))
 						.width(8.0f);
 				RouteView routeView = new RouteView(m_eegeoMap, route, options);
@@ -362,6 +373,30 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			});
 		} else {
 			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private class MarkerClickListenerImpl implements OnMarkerClickListener {
+		public void onMarkerClick(Marker marker) {
+			if (marker.getTitle() != "You Are Here!") {
+				Context context = MapNavigationFragment.this.getActivity();
+				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+				dialogBuilder.setTitle("Do you want to navigate to this location?");
+				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						requestNavigationForLocation(new Location("dest", "dest", marker.getPosition(),
+								.0, .0, marker.getIndoorFloorId(), marker.getIndoorMapId()));
+						dialog.dismiss();
+					}
+				});
+				dialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+			}
 		}
 	}
 
