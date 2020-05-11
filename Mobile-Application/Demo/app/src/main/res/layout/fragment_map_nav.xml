@@ -38,7 +38,7 @@
             android:id="@+id/findMeButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/ic_my_location_white_24dp"
+            android:background="@drawable/ic_near_me_white_24dp"
             android:textColor="#fff"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"/>

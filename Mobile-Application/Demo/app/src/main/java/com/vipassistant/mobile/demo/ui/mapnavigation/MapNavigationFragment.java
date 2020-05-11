@@ -38,6 +38,7 @@ import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.constants.Constants;
+import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
 
 import java.util.ArrayList;
@@ -49,7 +50,6 @@ import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener,
 		                                                       OnRoutingQueryCompletedListener {
-
 	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
@@ -60,8 +60,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
-	private LatLng userLocation;
-	private Queue<LatLng> locationQueue = new LinkedList<>();
+	private Location userLocation;
+	private Queue<Location> locationQueue = new LinkedList<>();
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -152,12 +152,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		locationQueue.add(demoIndoorMapEntrance);
 		/* Then initialize related variables */
 		this.userLocation = computeCurrentLocation();
-		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation).labelText(markerText));
+		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation.getLocation()).labelText(markerText));
 		this.m_bluesphere = m_eegeoMap.getBlueSphere();
 		this.m_bluesphere.setEnabled(true);
-		this.m_bluesphere.setPosition(userLocation);
-		this.m_bluesphere.setIndoorMap(demoIndoorMapId, 1);
-		this.m_bluesphere.setBearing(180);
+		this.m_bluesphere.setPosition(userLocation.getLocation());
+		this.m_bluesphere.setIndoorMap(userLocation.getIndoorMapId(), userLocation.getFloor());
+		this.m_bluesphere.setBearing(180); // TODO
 
 		/* Also now set-up Handler for periodic Map refreshing */
 		this.handler.postDelayed(new Runnable() {
@@ -173,7 +173,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 * Computes the new location of user by BLE Infrastructure in real time
 	 * @return LatLng -- user's new location
 	 */
-	private LatLng computeCurrentLocation() {
+	private Location computeCurrentLocation() {
 		/* ..BLE Calculation.. */
 		if (locationQueue.size() != 1) {
 			/* If queue does not contain only 1 element then pop the head */
@@ -188,17 +188,17 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 * Method that is called periodically to update user's location with its markers
 	 * inside map. Utilizes computeCurrentLocation() for resolving new location
 	 */
-	private void updateLocation(LatLng newLocation) {
+	private void updateLocation(Location newLocation) {
 		this.userLocation = newLocation;
-		this.outNavigationMarker.setPosition(newLocation);
-		this.m_bluesphere.setPosition(userLocation);
+		this.outNavigationMarker.setPosition(newLocation.getLocation());
+		this.m_bluesphere.setPosition(userLocation.getLocation());
 		this.m_bluesphere.setBearing(180); // TODO DIRECTION
 	}
 
 	private void centerCurrentLocation() {
 		CameraPosition position = new CameraPosition.Builder()
-				.target(this.userLocation)
-				.indoor(demoIndoorMapId, 1) // TODO maybe also store floor info?
+				.target(userLocation.getLocation())
+				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
 				.zoom(19)
 				.bearing(270)
 				.build();

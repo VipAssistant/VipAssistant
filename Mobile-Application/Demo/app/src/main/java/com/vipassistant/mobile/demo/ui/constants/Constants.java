@@ -14,10 +14,10 @@ public class Constants {
 	public static final ArrayList<Location> allLocations = new ArrayList<>();
 
 	/* MapNavigation Constants */
-	public static final LatLng demoIndoorMapEntrance = new LatLng(39.891756, 32.783188);
+	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
+	public static final Location demoIndoorMapEntrance = new Location("Entrance", "entrance", new LatLng(39.891756, 32.783188), .0, .0, 1, demoIndoorMapId);
 	public static final String mapSceneLink = "https://wrld.mp/4bdda73";
 	public static final String markerText = "You Are Here!";
-	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
 	public static final int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
 	public static final double locationLatEps = 0.000016;
 	public static final double locationLongEps = 0.000024;
