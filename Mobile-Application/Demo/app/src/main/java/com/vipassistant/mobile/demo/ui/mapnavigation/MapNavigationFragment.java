@@ -37,6 +37,8 @@ import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.ui.constants.Constants;
+import com.vipassistant.mobile.demo.ui.service.LocationService;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -46,6 +48,7 @@ import java.util.Queue;
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 
 	private MapNavigationViewModel mapNavigationViewModel;
+	private LocationService locationService;
 	private MapView m_mapView;
 	private EegeoMap m_eegeoMap = null;
 	private IndoorMapView m_interiorView = null;
@@ -69,6 +72,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
 		m_mapView.onCreate(savedInstanceState);
+
+		this.locationService = new LocationService(Constants.allLocations, Constants.typedLocations, Constants.floorLocations);
 
 		loadingDialog = new ProgressDialog(getActivity());
 		loadingDialog.setMessage("Loading Map Data...");
