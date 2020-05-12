@@ -40,6 +40,7 @@ import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
+import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
 import java.util.*;
 
@@ -224,16 +225,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				List<String> allLocationTypes = locationService.getAllLocationTypes();
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("What do you want us to find for you?");
-				EditText locationInput = new EditText(getContext());
-				locationInput.setInputType(InputType.TYPE_CLASS_TEXT);
-				innerDialogBuilder.setView(locationInput);
+				AutoCompleteArrayAdapter locNamesAdapter = new AutoCompleteArrayAdapter(getContext(), android.R.layout.simple_dropdown_item_1line, allLocationTypes);
+				AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
+				autoCompleteTextView.setThreshold(1);
+				autoCompleteTextView.setAdapter(locNamesAdapter);
+				innerDialogBuilder.setView(autoCompleteTextView);
 				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						String locType = locationInput.getText().toString();
+						String locType = autoCompleteTextView.getText().toString();
 						List<Location> queryResult = locationService.findByType(locType);
 						if (queryResult != null && !queryResult.isEmpty()) {
 							AlertDialog.Builder secondInnerDialogBuilder = new AlertDialog.Builder(getActivity());
@@ -256,7 +260,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 													.position(location.getLocation())
 													.labelText(location.getName()));
 										}
-
 									}
 									dialog.dismiss();
 								}
@@ -298,13 +301,67 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // TODO
+				List<String> allLocationNames = locationService.getAllLocationNames();
+				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
+				innerDialogBuilder.setTitle("Where do you want to go?");
+				AutoCompleteArrayAdapter locNamesAdapter = new AutoCompleteArrayAdapter(getContext(), android.R.layout.simple_dropdown_item_1line, allLocationNames);
+				AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
+				autoCompleteTextView.setThreshold(1);
+				autoCompleteTextView.setAdapter(locNamesAdapter);
+				innerDialogBuilder.setView(autoCompleteTextView);
+				innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String locName = autoCompleteTextView.getText().toString();
+						Optional<Location> queryResult = locationService.findByName(locName);
+						if (queryResult.isPresent()) {
+							requestNavigationForLocation(queryResult.get());
+						} else {
+							Toast.makeText(getActivity(), String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
+						}
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.show().show();
+				dialog.dismiss();
 			}
 		});
-		alertDialogBuilder.setNeutralButton("Report Me Nearby Information", new DialogInterface.OnClickListener() {
+		alertDialogBuilder.setNeutralButton("Report My Surroundings", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // TODO
+				List<Location> allNearbyLocations = locationService.findByFloorAndLocation(userLocation.getFloor(), userLocation.getLocation());
+				List<String> nearbyLocationNames = locationService.convertToLocationNames(allNearbyLocations);
+				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+				String innerTitle = String.format("You are in floor %d of building %s", userLocation.getFloor(), demoBuildingName);
+				String innerMessage = String.format("Name of the location you're in: %s\n" +
+						"Type of the location you're in: %s\n" +
+						"Your Geolocation is: (%f, %f)\n\n" +
+						"Below is a list locations that are adjacent to you:",
+						userLocation.getName(), userLocation.getType(),
+						userLocation.getLocation().latitude, userLocation.getLocation().longitude);
+				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_mylocation);
+				innerDialogBuilder.setTitle(innerTitle);
+				innerDialogBuilder.setMessage(innerMessage);
+				ArrayAdapter<String> locNamesAdapter = new ArrayAdapter<String>(getContext(),
+						android.R.layout.simple_spinner_item, nearbyLocationNames);
+				ListView listView = new ListView(getContext());
+				listView.setAdapter(locNamesAdapter);
+				innerDialogBuilder.setView(listView);
+				innerDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.show().show();
+				dialog.dismiss();
 			}
 		});
 
@@ -371,7 +428,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 			dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 			dialogBuilder.setTitle("Successfully Found Shortest Route!");
-			dialogBuilder.setMessage("Shortest route to destination point is displayed on the background. Distance: %d ETA: %d");
+			dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background.\n\n" +
+					"Distance: %f meters\n" +
+					"ETA: %f seconds", routeDistance, routeDuration));
 			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
