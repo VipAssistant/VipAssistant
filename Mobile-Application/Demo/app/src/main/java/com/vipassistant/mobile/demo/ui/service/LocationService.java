@@ -26,17 +26,46 @@ public class LocationService {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<String> getAllLocationNames() {
+		return convertToLocationNames(allLocations);
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<String> getAllLocationTypes() {
+		return convertToLocationTypes(allLocations);
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<String> convertToLocationNames(List<Location> locations) {
+		return locations.stream()
+				.map(location -> location.getName())
+				.collect(Collectors.toList());
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<String> convertToLocationTypes(List<Location> locations) {
+		return locations.stream()
+				.map(location -> location.getType())
+				.collect(Collectors.toList());
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
 	public Optional<Location> getLocation(LatLng location) {
 		return allLocations.stream()
 				.filter(loc -> loc.getLocation().equals(location))
 				.findAny();
 	}
 
+	/**
+	 * Name is unique for each location inside the map
+	 * @param name
+	 * @return
+	 */
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public List<Location> findByName(String name) {
+	public Optional<Location> findByName(String name) {
 		return allLocations.stream()
 					.filter(loc -> loc.getName().equals(name))
-					.collect(Collectors.toList());
+					.findFirst();
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)

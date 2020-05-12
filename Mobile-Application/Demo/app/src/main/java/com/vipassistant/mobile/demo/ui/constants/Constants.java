@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class Constants {
 	/* MapNavigation Constants */
 	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
+	public static final String demoBuildingName = "METU-CENG Block A";
 	public static final Location demoIndoorMapEntrance = new Location("Entrance", "entrance", new LatLng(39.891756, 32.783188), .0, .0, 1, demoIndoorMapId);
 	public static final String mapSceneLink = "https://wrld.mp/4bdda73";
 	public static final String markerText = "You Are Here!";
@@ -21,7 +22,7 @@ public class Constants {
 	public static final ArrayList<Location> allLocations = new ArrayList<>();
 
 	static {
-		allLocations
+		allLocations // TODO
 				.add(new Location("1st Floor WC", "wc", new LatLng(39.891883, 32.783255), .000030, .000009, 2, demoIndoorMapId));
 	}
 
