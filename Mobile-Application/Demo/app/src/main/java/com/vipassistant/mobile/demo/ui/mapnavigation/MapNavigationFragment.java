@@ -186,7 +186,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.userLocation = newLocation;
 		this.outNavigationMarker.setPosition(newLocation.getLocation());
 		this.m_bluesphere.setPosition(userLocation.getLocation());
-		this.m_bluesphere.setBearing(180); // TODO DIRECTION
+		this.m_bluesphere.setIndoorMap(userLocation.getIndoorMapId(), userLocation.getFloor());
+		this.m_bluesphere.setBearing(180); // TODO DIRECTION get from newlocation..
 	}
 
 	/**
@@ -198,7 +199,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 */
 	private void updateMapPeriodically() {
 		updateLocation(computeCurrentLocation());
-		// TODO nav helper - finish navigation and stuff..
+		// TODO USER MARKER I TAKIP ET
+		// TODO nav helper - finish navigation and stuff.. if queue len = 1 and routeviews exist
 	}
 
 	private void centerCurrentLocation() {
@@ -232,21 +234,29 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						String locType = locationInput.getText().toString();
-						Optional<List<Location>> queryResult = locationService.findByType(locType);
-						if (queryResult.isPresent()) {
+						List<Location> queryResult = locationService.findByType(locType);
+						if (queryResult != null && !queryResult.isEmpty()) {
 							AlertDialog.Builder secondInnerDialogBuilder = new AlertDialog.Builder(getActivity());
 							innerDialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
-							secondInnerDialogBuilder.setTitle(String.format("Found %d %s", queryResult.get().size(), locType));
+							secondInnerDialogBuilder.setTitle(String.format("Found %d %s", queryResult.size(), locType));
 							secondInnerDialogBuilder.setMessage("You can either see them on the map or directly request navigation for the closest one." +
 									" If you choose to see them on the map, you can still request navigation to location by clicking to the marker.");
 							secondInnerDialogBuilder.setPositiveButton("See them on the Map", new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									/* Create clickable marker for each result in the map */
-									for (Location location : queryResult.get()) {
-										m_eegeoMap.addMarker(new MarkerOptions()
-												.position(location.getLocation())
-												.labelText(location.getName()));
+									for (Location location : queryResult) {
+										if (location.getIndoorMapId() != null) {
+											m_eegeoMap.addMarker(new MarkerOptions() // todo styling
+													.position(location.getLocation())
+													.indoor(location.getIndoorMapId(), location.getFloor())
+													.labelText(location.getName()));
+										} else {
+											m_eegeoMap.addMarker(new MarkerOptions()
+													.position(location.getLocation())
+													.labelText(location.getName()));
+										}
+
 									}
 									dialog.dismiss();
 								}
@@ -255,9 +265,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									/* Find Closest via Euclidean Formula */
-									Location closest = queryResult.get().get(0);
+									Location closest = queryResult.get(0);
 									Double minDistance = calculateEuclideanDistance(userLocation, closest);
-									for (Location loc : queryResult.get()) {
+									for (Location loc : queryResult) {
 										Double tempDistance = calculateEuclideanDistance(userLocation, loc);
 										if (minDistance > tempDistance) {
 											closest = loc;
@@ -268,6 +278,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 									dialog.dismiss();
 								}
 							});
+							secondInnerDialogBuilder.show().show();
 						} else {
 							Toast.makeText(getActivity(), String.format("There does not exist any locations with type %s in this building.", locType), Toast.LENGTH_LONG).show();
 						}
@@ -287,13 +298,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // TODO1
+				dialog.dismiss(); // TODO
 			}
 		});
 		alertDialogBuilder.setNeutralButton("Report Me Nearby Information", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss(); // TODO2
+				dialog.dismiss(); // TODO
 			}
 		});
 
@@ -375,6 +386,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					dialog.dismiss();
 				}
 			});
+			dialogBuilder.show().show();
 		} else {
 			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
 		}
@@ -401,6 +413,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						dialog.dismiss();
 					}
 				});
+				dialogBuilder.show().show();
 			}
 		}
 	}

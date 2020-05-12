@@ -28,30 +28,30 @@ public class LocationService {
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public Optional<Location> getLocation(LatLng location) {
 		return allLocations.stream()
-				.filter(loc -> loc.getLocation() == location)
+				.filter(loc -> loc.getLocation().equals(location))
 				.findAny();
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public Optional<List<Location>> findByName(String name) {
-		return Optional.of(allLocations.stream()
-								.filter(loc -> loc.getName() == name)
-								.collect(Collectors.toList()));
+	public List<Location> findByName(String name) {
+		return allLocations.stream()
+					.filter(loc -> loc.getName().equals(name))
+					.collect(Collectors.toList());
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public Optional<List<Location>> findByType(String type) {
-		return Optional.of(allLocations.stream()
-								.filter(loc -> loc.getType() == type)
-								.collect(Collectors.toList()));
+	public List<Location> findByType(String type) {
+		return allLocations.stream()
+					.filter(loc -> loc.getType().equals(type))
+					.collect(Collectors.toList());
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public Optional<List<Location>> findByFloorAndLocation(Integer floor, LatLng location) {
-		return Optional.of(allLocations.stream()
-								.filter(loc -> loc.getFloor() == floor)
-								.filter(loc -> Math.abs(loc.getLocation().latitude + loc.getLocEpsLat() - location.latitude) <= locationLatEps &&
-										       Math.abs(loc.getLocation().longitude + loc.getLocEpsLong() - location.longitude) <= locationLongEps)
-								.collect(Collectors.toList()));
+	public List<Location> findByFloorAndLocation(Integer floor, LatLng location) {
+		return allLocations.stream()
+					.filter(loc -> loc.getFloor().equals(floor))
+					.filter(loc -> Math.abs(loc.getLocation().latitude + loc.getLocEpsLat() - location.latitude) <= locationLatEps &&
+								   Math.abs(loc.getLocation().longitude + loc.getLocEpsLong() - location.longitude) <= locationLongEps)
+					.collect(Collectors.toList());
 	}
 }

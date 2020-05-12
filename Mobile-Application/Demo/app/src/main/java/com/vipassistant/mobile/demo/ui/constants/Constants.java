@@ -6,13 +6,8 @@ import com.eegeo.mapapi.geometry.LatLng;
 import com.vipassistant.mobile.demo.ui.model.Location;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Constants {
-	/* Our Indoor Map's Location Container */
-	public static final ArrayList<Location> allLocations = new ArrayList<>();
-
 	/* MapNavigation Constants */
 	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
 	public static final Location demoIndoorMapEntrance = new Location("Entrance", "entrance", new LatLng(39.891756, 32.783188), .0, .0, 1, demoIndoorMapId);
@@ -22,8 +17,17 @@ public class Constants {
 	public static final double locationLatEps = 0.000016;
 	public static final double locationLongEps = 0.000024;
 
+	/* Our Indoor Map's Location Container */
+	public static final ArrayList<Location> allLocations = new ArrayList<>();
+
+	static {
+		allLocations
+				.add(new Location("1st Floor WC", "wc", new LatLng(39.891883, 32.783255), .000030, .000009, 2, demoIndoorMapId));
+	}
+
 	/**
 	 * Builds and returns a loading dialog with provided content
+	 *
 	 * @param activity
 	 * @param loadingMessage
 	 * @return
