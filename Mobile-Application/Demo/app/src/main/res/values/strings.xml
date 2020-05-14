@@ -2,15 +2,15 @@
     <string name="app_name">VIPA</string>
 	<string name="navigation_drawer_open">Open navigation drawer</string>
 	<string name="navigation_drawer_close">Close navigation drawer</string>
-	<string name="nav_header_title">Vip Assistant Demo Version</string>
-	<string name="nav_header_subtitle">info@vipassistant.com</string>
+	<string name="nav_header_title">Vip Assistant Version 1.0.0</string>
+	<string name="nav_header_subtitle">vipassistant.portal3@gmail.com</string>
 	<string name="nav_header_desc">Navigation header</string>
 	<string name="action_settings">Settings</string>
 
 	<string name="menu_home">Home</string>
-	<string name="menu_voutput">Voice Output</string>
-	<string name="menu_vinput">Voice Input</string>
-	<string name="menu_blescanner">BLE Scanner</string>
+	<string name="menu_heatmap">See Heatmap</string>
+	<string name="menu_monitor">Calibrate and Monitor</string>
+	<string name="menu_corona_demo">Covid-19 Demo</string>
 	<string name="menu_map_nav">Navigate</string>
 <!--	<string name="menu_share">Share</string>-->
 <!--	<string name="menu_send">Send</string>-->

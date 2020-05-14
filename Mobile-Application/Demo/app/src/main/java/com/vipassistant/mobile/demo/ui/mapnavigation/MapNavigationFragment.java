@@ -436,6 +436,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				public void onClick(DialogInterface dialog, int which) {
 					locationQueue.addAll(queueRoutes);
 					// TODO: DISPLAY NAV HELPER...
+					// SHOW: ROUTE DIRECTIONS FROM PATH routeDirections...
+					// rem eta/distance etc.
 					dialog.dismiss();
 				}
 			});
