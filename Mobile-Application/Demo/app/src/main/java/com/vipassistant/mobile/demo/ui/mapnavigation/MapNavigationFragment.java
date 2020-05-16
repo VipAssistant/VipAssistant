@@ -1,5 +1,6 @@
 package com.vipassistant.mobile.demo.ui.mapnavigation;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -8,12 +9,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import com.eegeo.indoors.IndoorMapView;
@@ -44,6 +43,7 @@ import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
 import java.util.*;
 
+import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
@@ -63,6 +63,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 	private final OnMarkerClickListener m_markerTappedListener = new MarkerClickListenerImpl();
+	private Integer findMePressed = 0;
+	private Button findMeBtn;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -105,7 +107,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 				m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 
-				Button findMeBtn = (Button) root.findViewById(R.id.findMeButton);
+				findMeBtn = (Button) root.findViewById(R.id.findMeButton);
 				findMeBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -136,6 +138,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 //						displayShareSaveDialog(); todo dialogta eski iconlarini kullan
 					}
 				});
+			}
+		});
+
+		RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
+		uiContainer.setOnTouchListener(new View.OnTouchListener() {
+			@SuppressLint("ClickableViewAccessibility")
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (event.getAction() != ACTION_BUTTON_PRESS) {
+					findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_near_me_white_24dp));
+					findMePressed = 0; // TODO CHECK
+				}
+				return false;
 			}
 		});
 		return root;
@@ -200,16 +215,30 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 */
 	private void updateMapPeriodically() {
 		updateLocation(computeCurrentLocation());
-		// TODO USER MARKER I TAKIP ET
+		if (this.findMePressed == 3) {
+			CameraPosition position = new CameraPosition.Builder()
+					.target(userLocation.getLocation())
+					.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
+					.zoom(19) // TODO change
+					.bearing(0) // TODO direction
+					.build();
+			CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+					.build();
+			m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
+		} else if (this.findMePressed != 0) {
+			this.findMePressed++;
+		}
 		// TODO nav helper - finish navigation and stuff.. if queue len = 1 and routeviews exist
 	}
 
 	private void centerCurrentLocation() {
+		findMePressed = 1;
+		findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_navigation_white_opak_24dp));
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
-				.zoom(19)
-				.bearing(270)
+				.zoom(19) // TODO change
+				.bearing(0) // TODO direction?
 				.build();
 		CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
 				.build();
