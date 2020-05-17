@@ -147,7 +147,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getAction() != ACTION_BUTTON_PRESS) {
-					findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_near_me_white_24dp));
+					findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.nav_find_me_1));
 					findMePressed = 0; // TODO CHECK
 				}
 				return false;
@@ -233,7 +233,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void centerCurrentLocation() {
 		findMePressed = 1;
-		findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_navigation_white_opak_24dp));
+		findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.nav_find_me_2));
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
