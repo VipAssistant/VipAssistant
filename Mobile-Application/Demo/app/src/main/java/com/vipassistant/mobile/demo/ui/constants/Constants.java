@@ -2,10 +2,13 @@ package com.vipassistant.mobile.demo.ui.constants;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.widget.AutoCompleteTextView;
 import com.eegeo.mapapi.geometry.LatLng;
 import com.vipassistant.mobile.demo.ui.model.Location;
+import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Constants {
 	/* MapNavigation Constants */
@@ -25,7 +28,7 @@ public class Constants {
 	public static ArrayList<Location> allLocations = new ArrayList<Location>() {{
 		/* Basement */
 		add(new Location("Server Room", "Server Room", new LatLng(39.892068, 32.783152), .000014, .000058, 0, demoIndoorMapId));
-		add(new Location("Digital Lab", "Lab", new LatLng(39.891960, 32.783153), .000088, .000038, 0, demoIndoorMapId));
+		add(new Location("Digital Lab", "Lab", new LatLng(39.891962, 32.783152), .000088, .000038, 0, demoIndoorMapId));
 		add(new Location("Stationary", "Stationary", new LatLng(39.891855, 32.783169), .000018, .000035, 0, demoIndoorMapId));
 		add(new Location("Basement Back Upstairs", "Stairs", new LatLng(39.892025, 32.783237), .000005, .000023, 0, demoIndoorMapId));
 		add(new Location("Basement Hallway", "Hallway", new LatLng(39.891941, 32.783212), .000110, .000011, 0, demoIndoorMapId));
@@ -161,7 +164,19 @@ public class Constants {
 		ProgressDialog loadingDialog = new ProgressDialog(activity);
 		loadingDialog.setMessage(loadingMessage);
 		loadingDialog.setIndeterminate(false);
+		loadingDialog.setCancelable(false);
+		loadingDialog.setCanceledOnTouchOutside(false);
 		return loadingDialog;
+	}
+
+
+	public static AutoCompleteTextView buildAutoCompleteTextView(Context activity, List<String> content) {
+		AutoCompleteArrayAdapter adapter = new AutoCompleteArrayAdapter(activity, android.R.layout.simple_dropdown_item_1line, content);
+		AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(activity);
+		autoCompleteTextView.setThreshold(1);
+		autoCompleteTextView.setAdapter(adapter);
+		autoCompleteTextView.requestFocus();
+		return autoCompleteTextView;
 	}
 
 	public static Double calculateEuclideanDistance(Location op1, Location op2) {

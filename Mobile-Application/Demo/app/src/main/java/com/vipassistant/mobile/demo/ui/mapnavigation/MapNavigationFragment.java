@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -58,21 +59,24 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
-	private Location userLocation;
+	private Location userLocation, destinationLocation = null;
+	private Boolean isNavigating = false;
 	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 	private final OnMarkerClickListener m_markerTappedListener = new MarkerClickListenerImpl();
 	private Integer findMePressed = 0;
 	private Button findMeBtn;
+	private ProgressDialog mapLoading, navigationRequestLoading, recalculatingRouteLoading;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mapNavigationViewModel = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
-		ProgressDialog mapLoadingDialog = buildLoadingDialog(getActivity(), "Loading Map Data...");
-		mapLoadingDialog.show();
+		navigationRequestLoading = buildLoadingDialog(getActivity(), "Finding Shortest Possible Route For You...");
+		mapLoading = buildLoadingDialog(getActivity(), "Loading Map Data...");
+		mapLoading.show();
 
 		/* Initialize Map */
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
@@ -99,7 +103,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
 					@Override
 					public void onInitialStreamingComplete() {
-						mapLoadingDialog.dismiss();
+						mapLoading.dismiss();
 						initializeLocation();
 					}
 				});
@@ -215,6 +219,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 */
 	private void updateMapPeriodically() {
 		updateLocation(computeCurrentLocation());
+
 		if (this.findMePressed == 3) {
 			CameraPosition position = new CameraPosition.Builder()
 					.target(userLocation.getLocation())
@@ -229,7 +234,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		} else if (this.findMePressed != 0) {
 			this.findMePressed++;
 		}
-		// TODO nav helper - finish navigation and stuff.. if queue len = 1 and routeviews exist
+
+		if (isNavigating && locationQueue.size() == 1) {
+			isNavigating = false;
+			destinationLocation = null;
+			/* Remove all routes */
+			for (RouteView routeView : m_routeViews) {
+				routeView.removeFromMap();
+			}
+			// TODO When navigation finished show on nav helper.
+		} else if (isNavigating) {
+			/* Remove route */
+			// TODO nav helper update
+		}
 	}
 
 	private void centerCurrentLocation() {
@@ -238,7 +255,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
-				.zoom(cameraZoom)
+				.zoom(19)
 				.tilt(cameraTilt)
 				.bearing(0) // TODO direction?
 				.build();
@@ -257,17 +274,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationTypes = locationService.getAllLocationTypes();
+				AutoCompleteTextView autoCompleteTextView = buildAutoCompleteTextView(getContext(), allLocationTypes);
+				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("What do you want us to find for you?");
-				AutoCompleteArrayAdapter locNamesAdapter = new AutoCompleteArrayAdapter(getContext(), android.R.layout.simple_dropdown_item_1line, allLocationTypes);
-				AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
-				autoCompleteTextView.setThreshold(1);
-				autoCompleteTextView.setAdapter(locNamesAdapter);
 				innerDialogBuilder.setView(autoCompleteTextView);
 				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+
 						String locType = autoCompleteTextView.getText().toString();
 						List<Location> queryResult = locationService.findByType(locType);
 						if (queryResult != null && !queryResult.isEmpty()) {
@@ -322,6 +341,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
 						dialog.dismiss();
 					}
 				});
@@ -333,17 +354,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationNames = locationService.getAllLocationNames();
+				AutoCompleteTextView autoCompleteTextView = buildAutoCompleteTextView(getContext(), allLocationNames);
+				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("Where do you want to go?");
-				AutoCompleteArrayAdapter locNamesAdapter = new AutoCompleteArrayAdapter(getContext(), android.R.layout.simple_dropdown_item_1line, allLocationNames);
-				AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(getContext());
-				autoCompleteTextView.setThreshold(1);
-				autoCompleteTextView.setAdapter(locNamesAdapter);
 				innerDialogBuilder.setView(autoCompleteTextView);
 				innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+
 						String locName = autoCompleteTextView.getText().toString();
 						Optional<Location> queryResult = locationService.findByName(locName);
 						if (queryResult.isPresent()) {
@@ -357,6 +380,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
 						dialog.dismiss();
 					}
 				});
@@ -410,19 +435,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		dialog.show();
 	}
 
-	/**
-	 * Method that requests routes via RoutingService
-	 * Its results are utilized in onRoutingQueryCompleted() since this class implements routingQueryCompletedListener
-	 *
-	 * @param location
-	 */
-	private void requestNavigationForLocation(Location location) {
-		routingService.findRoutes(new RoutingQueryOptions()
-				.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
-				.addIndoorWaypoint(location.getLocation(), location.getFloor())
-				.onRoutingQueryCompletedListener(routingQueryCompletedListener));
-	}
-
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
 		if (response.succeeded()) {
@@ -433,8 +445,24 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		}
 	}
 
+	/**
+	 * Method that requests routes via RoutingService
+	 * Its results are utilized in onRoutingQueryCompleted() since this class implements routingQueryCompletedListener
+	 *
+	 * @param location
+	 */
+	private void requestNavigationForLocation(Location location) {
+		navigationRequestLoading.show();
+		destinationLocation = location;
+		routingService.findRoutes(new RoutingQueryOptions()
+				.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
+				.addIndoorWaypoint(location.getLocation(), location.getFloor())
+				.onRoutingQueryCompletedListener(routingQueryCompletedListener));
+	}
+
 	@Override
 	public void onRoutingQueryCompleted(RoutingQuery query, RoutingQueryResponse response) {
+		navigationRequestLoading.dismiss();
 		if (response.succeeded()) {
 			Double routeDuration = .0, routeDistance = .0;
 			ArrayList<Location> queueRoutes = new ArrayList<>();
@@ -451,7 +479,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						int floor = routeStep.indoorFloorId;
 						String indoorId = routeStep.indoorId;
 						for (LatLng path : routeStep.path) {
-							queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+							if (path == routeStep.path.get(routeStep.path.size() - 1) &&
+							routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
+							routeSection == route.sections.get(route.sections.size() - 1) &&
+							route == response.getResults().get(response.getResults().size() - 1)) {
+								queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+								queueRoutes.add(destinationLocation);
+							} else {
+								queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+							}
 						}
 					}
 				}
@@ -465,6 +501,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					isNavigating = true;
+					destinationLocation = null;
 					locationQueue.addAll(queueRoutes);
 					// TODO: DISPLAY NAV HELPER...
 					// SHOW: ROUTE DIRECTIONS FROM PATH routeDirections...
@@ -475,6 +513,10 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					for (RouteView routeView : m_routeViews) {
+						routeView.removeFromMap();
+					}
+					isNavigating = false;
 					dialog.dismiss();
 				}
 			});
