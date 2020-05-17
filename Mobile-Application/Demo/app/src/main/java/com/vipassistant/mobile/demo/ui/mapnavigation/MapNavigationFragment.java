@@ -5,10 +5,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputType;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -40,7 +40,6 @@ import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
-import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
 import java.util.*;
 
@@ -140,7 +139,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				shareSaveBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displayShareSaveDialog(); todo dialogta eski iconlarini kullan
+						displayShareSaveDialog();
 					}
 				});
 			}
@@ -284,20 +283,20 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationTypes = locationService.getAllLocationTypes();
-				AutoCompleteTextView autoCompleteTextView = buildAutoCompleteTextView(getContext(), allLocationTypes);
+				RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Type", allLocationTypes);
 				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("What do you want us to find for you?");
-				innerDialogBuilder.setView(autoCompleteTextView);
+				innerDialogBuilder.setView(autoCompleteTextViewLayout);
 				innerDialogBuilder.setPositiveButton("Find!", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 
-						String locType = autoCompleteTextView.getText().toString();
+						String locType = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
 						List<Location> queryResult = locationService.findByType(locType);
 						if (queryResult != null && !queryResult.isEmpty()) {
 							AlertDialog.Builder secondInnerDialogBuilder = new AlertDialog.Builder(getActivity());
@@ -356,7 +355,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 						dialog.dismiss();
 					}
 				});
@@ -368,20 +367,20 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationNames = locationService.getAllLocationNames();
-				AutoCompleteTextView autoCompleteTextView = buildAutoCompleteTextView(getContext(), allLocationNames);
+				RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
 				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 				innerDialogBuilder.setTitle("Where do you want to go?");
-				innerDialogBuilder.setView(autoCompleteTextView);
+				innerDialogBuilder.setView(autoCompleteTextViewLayout);
 				innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 
-						String locName = autoCompleteTextView.getText().toString();
+						String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
 						Optional<Location> queryResult = locationService.findByName(locName);
 						if (queryResult.isPresent()) {
 							requestNavigationForLocation(queryResult.get());
@@ -395,7 +394,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextView.getWindowToken(), 0);
+						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 						dialog.dismiss();
 					}
 				});
@@ -483,9 +482,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			for (Route route : response.getResults()) {
 				routeDistance += route.distance;
 				routeDuration += route.duration;
-				RouteViewOptions options = new RouteViewOptions() // todo styling etc
-						.color(Color.argb(128, 255, 0, 0))
-						.width(8.0f);
+				RouteViewOptions options = new RouteViewOptions()
+						.color(Color.argb(168, 255, 255, 255)) // TODO route color white
+						.width(15.0f);
 				RouteView routeView = new RouteView(m_eegeoMap, route, options);
 				m_routeViews.add(routeView);
 				for (RouteSection routeSection : route.sections) {
@@ -515,6 +514,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				}
 			}
+			routeDuration = routeDistance / 1.4; // TODO: check
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 			dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 			dialogBuilder.setTitle("Successfully Found Shortest Route!");
@@ -556,6 +556,69 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		} else {
 			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
 		}
+	}
+
+	private void displayShareSaveDialog() {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+		alertDialogBuilder.setIcon(R.drawable.nav_locs);
+		alertDialogBuilder.setTitle("Location Pinned");
+		alertDialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				List<String> allLocationTypes = locationService.getAllLocationTypes();
+				LinearLayout relativeLayout = buildEditTextAndAutoTextLayout(getContext(),
+						"Name of your location", "Type of your location", allLocationTypes);
+				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+
+				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_save);
+				innerDialogBuilder.setTitle("Save this location");
+				innerDialogBuilder.setView(relativeLayout);
+				innerDialogBuilder.setPositiveButton("Save!", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(relativeLayout.getWindowToken(), 0);
+						String locName = ((EditText) relativeLayout.getChildAt(0)).getText().toString();
+						String locType = ((AutoCompleteTextView) relativeLayout.getChildAt(1)).getText().toString();
+						allLocations.add(new Location(locName, locType, userLocation.getLocation(),
+								userLocation.getLocEpsLat(), userLocation.getLocEpsLong(),
+								userLocation.getFloor(), userLocation.getIndoorMapId()));
+						// TODO: also send to server..
+						Toast.makeText(getActivity(), "Your Current Location is Saved Successfully", Toast.LENGTH_LONG).show();
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.setNegativeButton("Cancel!", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(relativeLayout.getWindowToken(), 0);
+						dialog.dismiss();
+					}
+				});
+				innerDialogBuilder.show().show();
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.setNegativeButton("Share", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Intent share = new Intent(Intent.ACTION_SEND);
+				share.setType("text/plain");
+				share.putExtra(Intent.EXTRA_TEXT, packLocationDataToSend(userLocation));
+				startActivity(Intent.createChooser(share, "Share My Location!"));
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.show().show();
 	}
 
 	private class MarkerClickListenerImpl implements OnMarkerClickListener {

@@ -2,7 +2,11 @@ package com.vipassistant.mobile.demo.ui.constants;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.view.Gravity;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import com.eegeo.mapapi.geometry.LatLng;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
@@ -170,18 +174,86 @@ public class Constants {
 	}
 
 
-	public static AutoCompleteTextView buildAutoCompleteTextView(Context activity, List<String> content) {
+	public static RelativeLayout buildAutoCompleteTextViewLayout(Context activity, String hint, List<String> content) {
 		AutoCompleteArrayAdapter adapter = new AutoCompleteArrayAdapter(activity, android.R.layout.simple_dropdown_item_1line, content);
+		RelativeLayout.LayoutParams textViewLp = new RelativeLayout.LayoutParams(650, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		textViewLp.addRule(RelativeLayout.CENTER_IN_PARENT);
+		textViewLp.setMargins(0, 10, 0, 0);
+
 		AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(activity);
 		autoCompleteTextView.setThreshold(1);
 		autoCompleteTextView.setAdapter(adapter);
 		autoCompleteTextView.requestFocus();
-		return autoCompleteTextView;
+		autoCompleteTextView.setLayoutParams(textViewLp);
+		autoCompleteTextView.setHint(hint);
+
+		RelativeLayout relativeLayout = new RelativeLayout(activity);
+		RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+		relativeLayout.addView(autoCompleteTextView);
+		relativeLayout.setLayoutParams(rlp);
+		return relativeLayout;
+	}
+
+	public static LinearLayout buildEditTextAndAutoTextLayout(Context activity, String hint1, String hint2, List<String> content) {
+		LinearLayout.LayoutParams editTextViewLp = new LinearLayout.LayoutParams(650, LinearLayout.LayoutParams.WRAP_CONTENT);
+		editTextViewLp.setMargins(0, 10, 0, 0);
+
+		EditText editText = new EditText(activity);
+		editText.requestFocus();
+		editText.setLayoutParams(editTextViewLp);
+		editText.setHint(hint1);
+
+		AutoCompleteArrayAdapter adapter = new AutoCompleteArrayAdapter(activity, android.R.layout.simple_dropdown_item_1line, content);
+		LinearLayout.LayoutParams autoTextViewLp = new LinearLayout.LayoutParams(650, LinearLayout.LayoutParams.WRAP_CONTENT);
+		autoTextViewLp.setMargins(0, 60, 0, 0);
+
+		AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(activity);
+		autoCompleteTextView.setThreshold(1);
+		autoCompleteTextView.setAdapter(adapter);
+		autoCompleteTextView.setLayoutParams(autoTextViewLp);
+		autoCompleteTextView.setHint(hint2);
+
+		LinearLayout linearLayout = new LinearLayout(activity);
+		LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+		linearLayout.addView(editText);
+		linearLayout.addView(autoCompleteTextView);
+		linearLayout.setLayoutParams(rlp);
+		linearLayout.setOrientation(LinearLayout.VERTICAL);
+		linearLayout.setGravity(Gravity.CENTER);
+		return linearLayout;
 	}
 
 	public static Double calculateEuclideanDistance(Location op1, Location op2) {
 		Double first = Math.pow(op1.getLocation().latitude - op2.getLocation().latitude, 2);
 		Double second = Math.pow(op1.getLocation().longitude - op2.getLocation().longitude, 2);
 		return Math.sqrt(first + second);
+	}
+
+	public static String packLocationDataToSend(Location location) {
+		String packMessage;
+		if (location.getIndoorMapId() != null) {
+			packMessage = String.format("Hi I am sharing my location details with you!\n\n" +
+							"Geolocation: %s\n" +
+							"Building Name: %s\n" +
+							"Floor: %s\n" +
+							"Name of the location I am currently in: %s\n" +
+							"Type of the location I am currently in: %s\n\n" +
+							"Sent from VipAssistant Version 1.0.0",
+					String.format("(%s, %s)", location.getLocation().latitude, location.getLocation().longitude),
+					String.format("METU-CENG Block A / %s", location.getIndoorMapId()),
+					location.getFloor(),
+					location.getName(),
+					location.getType());
+		} else {
+			packMessage = String.format("Hi I am sharing my location details with you!\n\n" +
+							"Geolocation: %s\n" +
+							"Name of the location I am currently in: %s\n" +
+							"Type of the location I am currently in: %s\n\n" +
+							"Sent from VipAssistant Version 1.0.0",
+					String.format("(%s, %s)", location.getLocation().latitude, location.getLocation().longitude),
+					location.getName(),
+					location.getType());
+		}
+		return packMessage;
 	}
 }
