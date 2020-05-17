@@ -44,9 +44,10 @@ public class LocationService {
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public List<String> convertToLocationTypes(List<Location> locations) {
-		return locations.stream()
-				.map(location -> location.getType())
-				.collect(Collectors.toList());
+		Set<String> locationTypes = locations.stream()
+					.map(location -> location.getType())
+					.collect(Collectors.toSet());
+		return new ArrayList<>(locationTypes);
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)

@@ -29,8 +29,8 @@ public class Constants {
 		add(new Location("Stationary", "Stationary", new LatLng(39.891855, 32.783169), .000018, .000035, 0, demoIndoorMapId));
 		add(new Location("Basement Back Upstairs", "Stairs", new LatLng(39.892025, 32.783237), .000005, .000023, 0, demoIndoorMapId));
 		add(new Location("Basement Hallway", "Hallway", new LatLng(39.891941, 32.783212), .000110, .000011, 0, demoIndoorMapId));
-		add(new Location("Z-103", "Room", new LatLng(39.891951, 32.783267), .000019, .000040, 0, demoIndoorMapId));
-		add(new Location("Z-102", "Room", new LatLng(39.891911, 32.783274), .000017, .000040, 0, demoIndoorMapId));
+		add(new Location("Z-103", "Staff Room", new LatLng(39.891951, 32.783267), .000019, .000040, 0, demoIndoorMapId));
+		add(new Location("Z-102", "Staff Room", new LatLng(39.891911, 32.783274), .000017, .000040, 0, demoIndoorMapId));
 		add(new Location("Basement Disabled Restroom/Wc", "Disabled Restroom/Wc", new LatLng(39.891868, 32.783253), .000016, .000017, 0, demoIndoorMapId));
 		add(new Location("Basement Woman Restroom/Wc", "Woman Restroom/Wc", new LatLng(39.891868, 32.783292), .000016, .000006, 0, demoIndoorMapId));
 		add(new Location("Basement Man Restroom/Wc", "Man Restroom/Wc", new LatLng(39.891876, 32.783309), .000019, .000006, 0, demoIndoorMapId));
