@@ -219,7 +219,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			CameraPosition position = new CameraPosition.Builder()
 					.target(userLocation.getLocation())
 					.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
-					.zoom(19) // TODO change
+					.zoom(cameraZoom)
+					.tilt(cameraTilt)
 					.bearing(0) // TODO direction
 					.build();
 			CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
@@ -237,7 +238,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
-				.zoom(19) // TODO change
+				.zoom(cameraZoom)
+				.tilt(cameraTilt)
 				.bearing(0) // TODO direction?
 				.build();
 		CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()

@@ -17,6 +17,9 @@ public class Constants {
 	public static final int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
 	public static final double locationLatEps = 0.0001;
 	public static final double locationLongEps = 0.0001;
+	public static double cameraZoom = 20;
+	public static double cameraTilt = 35;
+
 
 	/* Our Indoor Map's Location Container */
 	public static ArrayList<Location> allLocations = new ArrayList<Location>() {{
