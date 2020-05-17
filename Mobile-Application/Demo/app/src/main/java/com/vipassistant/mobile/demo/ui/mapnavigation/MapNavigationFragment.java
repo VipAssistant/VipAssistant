@@ -60,6 +60,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
 	private Location userLocation, destinationLocation = null;
+	private List<Marker> nav_markers = new ArrayList<>(), see_on_map_markers = new ArrayList<>();
 	private Boolean isNavigating = false;
 	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
@@ -165,7 +166,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		locationQueue.add(demoIndoorMapEntrance);
 		/* Then initialize related variables */
 		this.userLocation = computeCurrentLocation();
-		this.outNavigationMarker = m_eegeoMap.addMarker(new MarkerOptions().position(userLocation.getLocation()).labelText(markerText));
+		this.outNavigationMarker = m_eegeoMap.addMarker(
+				new MarkerOptions()
+						.position(userLocation.getLocation())
+						.iconKey("my_location")
+						.labelText(markerText));
 		this.m_bluesphere = m_eegeoMap.getBlueSphere();
 		this.m_bluesphere.setEnabled(true);
 		this.m_bluesphere.setPosition(userLocation.getLocation());
@@ -239,6 +244,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			isNavigating = false;
 			destinationLocation = null;
 			/* Remove all routes */
+			for (Marker marker : nav_markers) {
+				m_eegeoMap.removeMarker(marker);
+			}
 			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
 			}
@@ -246,16 +254,18 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		} else if (isNavigating) {
 			/* Remove route */
 			// TODO nav helper update
+
 		}
 	}
 
 	private void centerCurrentLocation() {
 		findMePressed = 1;
 		findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.nav_find_me_2));
+		Double zoomValue = userLocation.getIndoorMapId() != null ? cameraZoom : 19;
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
-				.zoom(19)
+				.zoom(zoomValue)
 				.tilt(cameraTilt)
 				.bearing(0) // TODO direction?
 				.build();
@@ -300,16 +310,20 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 								public void onClick(DialogInterface dialog, int which) {
 									/* Create clickable marker for each result in the map */
 									for (Location location : queryResult) {
+										Marker locMarker;
 										if (location.getIndoorMapId() != null) {
-											m_eegeoMap.addMarker(new MarkerOptions() // todo styling
+											locMarker = m_eegeoMap.addMarker(new MarkerOptions()
 													.position(location.getLocation())
 													.indoor(location.getIndoorMapId(), location.getFloor())
+													.iconKey("dir_route_end")
 													.labelText(location.getName()));
 										} else {
-											m_eegeoMap.addMarker(new MarkerOptions()
+											locMarker = m_eegeoMap.addMarker(new MarkerOptions()
 													.position(location.getLocation())
+													.iconKey("dir_route_end")
 													.labelText(location.getName()));
 										}
+										see_on_map_markers.add(locMarker);
 									}
 									dialog.dismiss();
 								}
@@ -487,6 +501,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 								queueRoutes.add(destinationLocation);
 							} else {
 								queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+								if (path == routeStep.path.get(0)) {
+									/* Add marker */
+									MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
+									if (routeStep.isIndoors) {
+										markerOptions.indoor(indoorId, floor);
+									}
+									Marker marker = m_eegeoMap.addMarker(markerOptions);
+									nav_markers.add(marker);
+								}
 							}
 						}
 					}
@@ -502,7 +525,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					isNavigating = true;
-					destinationLocation = null;
+
+					MarkerOptions markerOptions = new MarkerOptions()
+							.position(destinationLocation.getLocation())
+							.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+							.iconKey("dir_enter_map");
+					nav_markers.add(m_eegeoMap.addMarker(markerOptions));
 					locationQueue.addAll(queueRoutes);
 					// TODO: DISPLAY NAV HELPER...
 					// SHOW: ROUTE DIRECTIONS FROM PATH routeDirections...
@@ -513,10 +541,14 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					isNavigating = false;
+					destinationLocation = null;
+					for (Marker marker : nav_markers) {
+						m_eegeoMap.removeMarker(marker);
+					}
 					for (RouteView routeView : m_routeViews) {
 						routeView.removeFromMap();
 					}
-					isNavigating = false;
 					dialog.dismiss();
 				}
 			});
@@ -536,7 +568,10 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						requestNavigationForLocation(new Location("dest", "dest", marker.getPosition(),
+						for (Marker remMarker : see_on_map_markers) {
+							m_eegeoMap.removeMarker(remMarker);
+						}
+						requestNavigationForLocation(new Location(marker.getTitle(), "Destination", marker.getPosition(),
 								.0, .0, marker.getIndoorFloorId(), marker.getIndoorMapId()));
 						dialog.dismiss();
 					}
@@ -571,6 +606,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		if (m_eegeoMap != null) {
 			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
+			}
+			for (Marker navMarker : nav_markers) {
+				m_eegeoMap.removeMarker(navMarker);
+			}
+			for (Marker remMarker : see_on_map_markers) {
+				m_eegeoMap.removeMarker(remMarker);
 			}
 		}
 
