@@ -1,23 +1,28 @@
 package com.vipassistant.mobile.demo;
 
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.WindowManager;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.view.Menu;
+import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationFragment;
+import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
+    private MapNavigationViewModel mapNavVM;
+    private Menu optionsMenu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,14 +41,46 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        mapNavVM = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
+
+        /* Dont let phone go sleep while the app is running */
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // TODO modify
-        // Inflate the menu; this adds items to the action bar if it is present.
+        optionsMenu = menu;
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.caching_toggle:
+                if (mapNavVM.getCachingActivated()) {
+                    mapNavVM.setCachingToastActivated(false);
+                    String newDisplayTitle = "Display Caching Logs: Off";
+                    optionsMenu.getItem(1).setTitle(newDisplayTitle);
+                }
+                mapNavVM.setCachingActivated(!mapNavVM.getCachingActivated());
+                String newTitle = item.getTitle().equals("Caching: On") ? "Caching: Off" : "Caching: On";
+                item.setTitle(newTitle);
+                return true;
+            case R.id.show_caching_messages_toggle:
+                mapNavVM.setCachingToastActivated(!mapNavVM.getCachingToastActivated());
+                String newDisplayTitle = item.getTitle().equals("Display Caching Logs: On") ?
+                        "Display Caching Logs: Off" : "Display Caching Logs: On";
+                item.setTitle(newDisplayTitle);
+                return true;
+            case R.id.show_help:
+//                showHelp(); tODO?
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

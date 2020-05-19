@@ -6,14 +6,25 @@ import androidx.lifecycle.ViewModel;
 
 public class MapNavigationViewModel extends ViewModel {
 
-    private MutableLiveData<String> mText;
+    private Boolean cachingActivated = true, cachingToastActivated = false;
 
     public MapNavigationViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is Map Navigation fragment");
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public Boolean getCachingActivated() {
+        return cachingActivated;
     }
+
+    public void setCachingActivated(Boolean cachingActivated) {
+        this.cachingActivated = cachingActivated;
+    }
+
+    public Boolean getCachingToastActivated() {
+        return cachingToastActivated;
+    }
+
+    public void setCachingToastActivated(Boolean cachingToastActivated) {
+        this.cachingToastActivated = cachingToastActivated;
+    }
+
 }
