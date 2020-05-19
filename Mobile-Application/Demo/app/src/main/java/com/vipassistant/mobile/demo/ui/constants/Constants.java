@@ -1,20 +1,25 @@
 package com.vipassistant.mobile.demo.ui.constants;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.*;
+import androidx.core.content.ContextCompat;
 import com.eegeo.mapapi.geometry.LatLng;
+import com.eegeo.mapapi.services.routing.RouteDirections;
+import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.model.Location;
+import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Constants {
+
 	/* MapNavigation Constants */
 	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
 	public static final String demoBuildingName = "METU-CENG Block A";
@@ -26,7 +31,7 @@ public class Constants {
 	public static final double locationLongEps = 0.0001;
 	public static double cameraZoom = 20;
 	public static double cameraTilt = 35;
-
+	public static final double PERSON_WALKING_SPEED = 1.4;
 
 	/* Our Indoor Map's Location Container */
 	public static ArrayList<Location> allLocations = new ArrayList<Location>() {{
@@ -255,5 +260,142 @@ public class Constants {
 					location.getType());
 		}
 		return packMessage;
+	}
+
+	public static String getETAString(Double plusSeconds) {
+		Calendar calendar = Calendar.getInstance();
+		Integer hours = calendar.get(Calendar.HOUR_OF_DAY);
+		Integer minutes = calendar.get(Calendar.MINUTE);
+		Integer seconds = calendar.get(Calendar.SECOND);
+		seconds += plusSeconds.intValue();
+		if (seconds > 60) {
+			seconds -= 60;
+			minutes ++;
+			if (minutes > 60) {
+				minutes = 0;
+				hours++;
+				if (hours > 24) {
+					hours = 0;
+				}
+			}
+		}
+		String sHours = hours < 10 ? "0" + hours.toString() : hours.toString();
+		String sMins = minutes < 10 ? "0" + minutes.toString() : minutes.toString();
+		String sSecs = seconds < 10 ? "0" + seconds.toString() : seconds.toString();
+		return String.format("%s:%s:%s", sHours, sMins, sSecs);
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static String navHelperSideTextBuilder(Double remDistance, Double remTime) {
+		String eta = getETAString(remTime);
+		return String.format("Remaining\nDistance: %.2f m\nTime: %.2f sec\n\nETA:%s", remDistance, remTime, eta);
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static String navHelperUpNextTextBuilder(StepInfo stepInfo) {
+		String upNext, tempModif;
+		if (stepInfo.getDirectionModifier().equals("straight")) {
+			tempModif = "go straight";
+		} else {
+			tempModif = stepInfo.getDirectionModifier();
+		}
+		switch (stepInfo.getDirectionType()) {
+//			case "start":
+//				upNext = "Start Walking";
+//				break;
+			case "arrive":
+				upNext = "Arrive Destination Ahead";
+				break;
+			case "new name":
+				upNext = "Ongoing Stairs";
+				break;
+			case "end of road":
+				if (stepInfo.getDirectionModifier().equals("left")) {
+					upNext = "end of road turn left";
+
+				} else {
+					upNext = "end of road turn right";
+				}
+				break;
+			case "elevator":
+				if (stepInfo.getDirectionModifier().equals("go straight")) {
+					upNext = "elevator on straight";
+				}
+				else if (stepInfo.getDirectionModifier().equals("slight left")) {
+					upNext = "elevator on slight left";
+				} else {
+					upNext = "elevator on slight right";
+				}
+				break;
+			case "entrance":
+				upNext = "Depart";
+				break;
+			default:
+				upNext = !stepInfo.getDirectionModifier().equals("") ?
+						String.format("%s %s", stepInfo.getDirectionType(), tempModif) :
+						stepInfo.getDirectionType();
+				break;
+		}
+		upNext = "UP NEXT:\n" + upNext;
+		return upNext.toUpperCase();
+	}
+
+	public static Drawable navHelperUpNextDrawableBuilder(Context context, String upNext) {
+		Drawable returnIcon = null;
+		switch (upNext) {
+//			case "START WALKING":
+//				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_start_walking);
+//				break;
+			case "UP NEXT:\nARRIVE DESTINATION AHEAD":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_arrive);
+				break;
+			case "UP NEXT:\nTURN RIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_turn_right);
+				break;
+			case "UP NEXT:\nTURN LEFT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_turn_left);
+				break;
+			case "UP NEXT:\nDEPART":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_start_walking);
+				break;
+			case "UP NEXT:\nCONTINUE LEFT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_cont_left);
+				break;
+			case "UP NEXT:\nCONTINUE RIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_cont_right);
+				break;
+			case "UP NEXT:\nSTAIRS GO STRAIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_stairs);
+				break;
+			case "UP NEXT:\nONGOING STAIRS":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_stairs);
+				break;
+			case "UP NEXT:\nEND OF ROAD TURN LEFT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_end_left);
+				break;
+			case "UP NEXT:\nEND OF ROAD TURN RIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_end_right);
+				break;
+			case "UP NEXT:\nELEVATOR ON STRAIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_elevator);
+				break;
+			case "UP NEXT:\nELEVATOR ON SLIGHT LEFT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_elevator);
+				break;
+			case "UP NEXT:\nELEVATOR ON SLIGHT RIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_elevator);
+				break;
+			case "UP NEXT:\nTURN GO STRAIGHT": // todo go straight?
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_go_straight);
+				break;
+			default:
+				Toast.makeText(context, "new upnext: " + upNext, Toast.LENGTH_LONG).show();
+				break;
+		}
+		return returnIcon;
+	}
+
+	public static Boolean isTwoLocationEquals(LatLng op1, LatLng op2) {
+		return op1.latitude == op2.latitude && op1.longitude == op2.longitude;
 	}
 }
