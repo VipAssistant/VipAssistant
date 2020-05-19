@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:id="@+id/save_loc_view">
+
+	<EditText
+			android:layout_marginTop="10dp"
+			android:layout_width="250dp"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:hint="Name for Your Location"
+			android:padding="5dp"
+			android:singleLine="true"
+			android:id="@+id/locName"
+			android:autofillHints=""/>
+	<AutoCompleteTextView
+			android:layout_width="250dp"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:layout_marginTop="60dp"
+			android:hint="Type of your location"
+			android:padding="5dp"
+			android:singleLine="true"
+			android:id="@+id/locType"
+			android:autofillHints=""/>
+</RelativeLayout>

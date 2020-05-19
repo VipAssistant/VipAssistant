@@ -37,4 +37,5 @@
 	<string name="modules">Modules</string>
 
 	<string name="eegeo_api_key">25b2eeb1333be857a00491a7523126e4</string>
+	<string name="nav_helper_icon">ICON</string>
 </resources>

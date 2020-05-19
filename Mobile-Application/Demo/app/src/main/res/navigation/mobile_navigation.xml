@@ -19,9 +19,9 @@
 
     <fragment
         android:id="@+id/nav_heatmap"
-        android:name="com.vipassistant.mobile.demo.ui.voiceoutput.VoiceOutputFragment"
+        android:name="com.vipassistant.mobile.demo.ui.heatmap.HeatmapFragment"
         android:label="@string/menu_heatmap"
-        tools:layout="@layout/fragment_voutput" />
+        tools:layout="@layout/fragment_heatmap" />
 
     <fragment
         android:id="@+id/nav_monitor"

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
@@ -30,6 +31,8 @@ import com.eegeo.mapapi.map.OnMapReadyCallback;
 import com.eegeo.mapapi.markers.Marker;
 import com.eegeo.mapapi.markers.MarkerOptions;
 import com.eegeo.mapapi.markers.OnMarkerClickListener;
+import com.eegeo.mapapi.precaching.OnPrecacheOperationCompletedListener;
+import com.eegeo.mapapi.precaching.PrecacheOperationResult;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
@@ -39,6 +42,7 @@ import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.model.Location;
+import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
 
 import java.util.*;
@@ -46,7 +50,7 @@ import java.util.*;
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
-public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
+public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
@@ -59,20 +63,30 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
 	private Location userLocation, destinationLocation = null;
+	private Double userDirection = 180., finalNavBearing = 180.;
+	private StepInfo nextStepInfo = null;
 	private List<Marker> nav_markers = new ArrayList<>(), see_on_map_markers = new ArrayList<>();
 	private Boolean isNavigating = false;
 	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
+	private Queue<StepInfo> navDirectionQueue = new LinkedList<>(); // For demo purposes
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
+	private final OnPrecacheOperationCompletedListener precacheOperationCompletedListener = this;
 	private final OnMarkerClickListener m_markerTappedListener = new MarkerClickListenerImpl();
 	private Integer findMePressed = 0;
-	private Button findMeBtn;
+	private Button findMeBtn, searchBtn, shareSaveBtn, cancelNavBtn;
+	private LinearLayout navigationHelper1, navigationHelper2;
+	private TextView navHelperSideText, navHelperUpNextText;
+	private Double navRemainingDistance = null, navRemainingTime = null;
+	private ImageView navHelperUpNextIcon;
+	private LatLng preCacheLocation = null;
 	private ProgressDialog mapLoading, navigationRequestLoading, recalculatingRouteLoading;
+	private int cachingTimeout = 0;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mapNavigationViewModel = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
+		mapNavigationViewModel = ViewModelProviders.of(getActivity()).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
 		navigationRequestLoading = buildLoadingDialog(getActivity(), "Finding Shortest Possible Route For You...");
 		mapLoading = buildLoadingDialog(getActivity(), "Loading Map Data...");
@@ -86,6 +100,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		/* Initialize LocationService */
 		this.locationService = new LocationService(allLocations);
 
+		/* Inflate Navigation Helper */
+		navigationHelper1 = (LinearLayout) root.findViewById(R.id.nav_helper_1);
+		navHelperSideText = (TextView) root.findViewById(R.id.nav_helper_side_text);
+		navigationHelper2 = (LinearLayout) root.findViewById(R.id.nav_helper_2);
+		navHelperUpNextText = (TextView) root.findViewById(R.id.nav_up_next_text);
+		navHelperUpNextIcon = (ImageView) root.findViewById(R.id.nav_helper_up_next_icon);
 
 		m_mapView.getMapAsync(new OnMapReadyCallback() {
 			@Override
@@ -119,7 +139,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 
-				Button searchBtn = (Button) root.findViewById(R.id.searchButton);
+				searchBtn = (Button) root.findViewById(R.id.searchButton);
 				searchBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -127,15 +147,15 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					}
 				});
 
-				Button infoBtn = (Button) root.findViewById(R.id.infoButton);
-				infoBtn.setOnClickListener(new View.OnClickListener() {
+				cancelNavBtn = (Button) root.findViewById(R.id.cancelNavButton);
+				cancelNavBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-//						displayInfoDialog(); todo
+						displayCancelNavigationDialog();
 					}
 				});
 
-				Button shareSaveBtn = (Button) root.findViewById(R.id.shareAndSaveButton);
+				shareSaveBtn = (Button) root.findViewById(R.id.shareAndSaveButton);
 				shareSaveBtn.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -174,7 +194,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.m_bluesphere.setEnabled(true);
 		this.m_bluesphere.setPosition(userLocation.getLocation());
 		this.m_bluesphere.setIndoorMap(userLocation.getIndoorMapId(), userLocation.getFloor());
-		this.m_bluesphere.setBearing(180); // TODO DIRECTION
+		this.m_bluesphere.setBearing(userDirection);
 
 		/* Also now set-up Handler for periodic Map refreshing */
 		this.handler.postDelayed(new Runnable() {
@@ -211,18 +231,23 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		this.outNavigationMarker.setPosition(newLocation.getLocation());
 		this.m_bluesphere.setPosition(userLocation.getLocation());
 		this.m_bluesphere.setIndoorMap(userLocation.getIndoorMapId(), userLocation.getFloor());
-		this.m_bluesphere.setBearing(180); // TODO DIRECTION get from newlocation..
+		this.m_bluesphere.setBearing(userDirection);
 	}
 
 	/**
 	 * Method that is called periodically to update Map Fragment
 	 * updates user location etc.
 	 * updates existing routes ? !!!!!!
-	 * direction
 	 * updates geoloc nav helper etc?
 	 */
 	private void updateMapPeriodically() {
 		updateLocation(computeCurrentLocation());
+
+		if (mapNavigationViewModel.getCachingActivated() && cachingTimeout >= 3) {
+			cacheCurrentCameraLocation(m_eegeoMap.getCameraPosition().target);
+			cachingTimeout = 0;
+		}
+		cachingTimeout++;
 
 		if (this.findMePressed == 3) {
 			CameraPosition position = new CameraPosition.Builder()
@@ -230,7 +255,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
 					.zoom(cameraZoom)
 					.tilt(cameraTilt)
-					.bearing(0) // TODO direction
+					.bearing(userDirection - 180)
 					.build();
 			CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
 					.build();
@@ -240,8 +265,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		}
 
 		if (isNavigating && locationQueue.size() == 1) {
+			userDirection = finalNavBearing;
 			isNavigating = false;
 			destinationLocation = null;
+			nextStepInfo = null;
+			navRemainingTime = .0;
+			navRemainingDistance = .0;
 			/* Remove all routes */
 			for (Marker marker : nav_markers) {
 				m_eegeoMap.removeMarker(marker);
@@ -249,24 +278,42 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
 			}
-			// TODO When navigation finished show on nav helper.
+			navigationHelper1.setVisibility(View.INVISIBLE);
+			navigationHelper2.setVisibility(View.INVISIBLE);
+			cancelNavBtn.setVisibility(View.INVISIBLE);
+			searchBtn.setVisibility(View.VISIBLE);
+			Toast.makeText(getContext(), "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
 		} else if (isNavigating) {
-			/* Remove route */
-			// TODO nav helper update
-
+			/* Update Navigation Helper and etc. */
+			navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
+			navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
+			if (!navDirectionQueue.isEmpty() && isTwoLocationEquals(userLocation.getLocation(), nextStepInfo.getDirectionLocation())) {
+				nextStepInfo = navDirectionQueue.remove();
+				userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+				String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+				navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+				upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
+						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
+						!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
+						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
+						upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
+				navHelperUpNextText.setText(upNext);
+			}
+			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
 		}
 	}
 
 	private void centerCurrentLocation() {
 		findMePressed = 1;
 		findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.nav_find_me_2));
-		Double zoomValue = userLocation.getIndoorMapId() != null ? cameraZoom : 19;
+		CameraPosition currentCamPosition = m_eegeoMap.getCameraPosition();
+		Double zoomValue = currentCamPosition.targetIndoorMapId.equals("") ? 19 : cameraZoom;
 		CameraPosition position = new CameraPosition.Builder()
 				.target(userLocation.getLocation())
 				.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
 				.zoom(zoomValue)
 				.tilt(cameraTilt)
-				.bearing(0) // TODO direction?
+				.bearing(userDirection - 180)
 				.build();
 		CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
 				.build();
@@ -479,11 +526,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		if (response.succeeded()) {
 			Double routeDuration = .0, routeDistance = .0;
 			ArrayList<Location> queueRoutes = new ArrayList<>();
+			ArrayList<StepInfo> navDirQueueDirections = new ArrayList<>();
 			for (Route route : response.getResults()) {
 				routeDistance += route.distance;
 				routeDuration += route.duration;
 				RouteViewOptions options = new RouteViewOptions()
-						.color(Color.argb(168, 255, 255, 255)) // TODO route color white
+						.color(Color.argb(168, 255, 0, 0)) // TODO route color red
 						.width(15.0f);
 				RouteView routeView = new RouteView(m_eegeoMap, route, options);
 				m_routeViews.add(routeView);
@@ -511,30 +559,53 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 								}
 							}
 						}
+						navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
+								routeStep.directions.modifier,
+								routeStep.directions.location,
+								routeStep.directions.bearingBefore,
+								routeStep.directions.bearingAfter,
+								routeStep.duration,
+								routeStep.distance));
 					}
 				}
 			}
-			routeDuration = routeDistance / 1.4; // TODO: check
+			routeDuration = routeDistance / PERSON_WALKING_SPEED; // TODO: check
+			String eta = getETAString(routeDuration);
 			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 			dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
 			dialogBuilder.setTitle("Successfully Found Shortest Route!");
 			dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background.\n\n" +
-					"Distance: %f meters\n" +
-					"ETA: %f seconds", routeDistance, routeDuration));
+					"Distance: %.2f meters\n" +
+					"Duration: %.2f seconds\n" +
+					"ETA: %s", routeDistance, routeDuration, eta));
+			Double finalRouteDistance = routeDistance;
+			Double finalRouteDuration = routeDuration;
 			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					isNavigating = true;
-
+					searchBtn.setVisibility(View.INVISIBLE);
+					cancelNavBtn.setVisibility(View.VISIBLE);
+					navRemainingDistance = finalRouteDistance;
+					navRemainingTime = finalRouteDuration;
 					MarkerOptions markerOptions = new MarkerOptions()
 							.position(destinationLocation.getLocation())
 							.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
 							.iconKey("dir_enter_map");
 					nav_markers.add(m_eegeoMap.addMarker(markerOptions));
 					locationQueue.addAll(queueRoutes);
-					// TODO: DISPLAY NAV HELPER...
-					// SHOW: ROUTE DIRECTIONS FROM PATH routeDirections...
-					// rem eta/distance etc.
+					navDirectionQueue.addAll(navDirQueueDirections);
+					nextStepInfo = navDirectionQueue.remove();
+					finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
+					userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+					navigationHelper1.setVisibility(View.VISIBLE);
+					navigationHelper2.setVisibility(View.VISIBLE);
+					navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+					String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+					navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+					upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
+							upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
+					navHelperUpNextText.setText(upNext);
 					dialog.dismiss();
 				}
 			});
@@ -619,6 +690,73 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			}
 		});
 		alertDialogBuilder.show().show();
+	}
+
+	private void displayCancelNavigationDialog() {
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+		alertDialogBuilder.setIcon(R.drawable.nav_cancel);
+		alertDialogBuilder.setTitle("Cancel Navigation?");
+		alertDialogBuilder.setPositiveButton("Yes, Please", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				/* Refresh location queue */
+				locationQueue = new LinkedList<>(Arrays.asList(userLocation));
+				navDirectionQueue = new LinkedList<>();
+				isNavigating = false;
+				destinationLocation = null;
+				nextStepInfo = null;
+				navRemainingTime = .0;
+				navRemainingDistance = .0;
+				/* Remove all routes */
+				for (Marker marker : nav_markers) {
+					m_eegeoMap.removeMarker(marker);
+				}
+				for (RouteView routeView : m_routeViews) {
+					routeView.removeFromMap();
+				}
+				navigationHelper1.setVisibility(View.INVISIBLE);
+				navigationHelper2.setVisibility(View.INVISIBLE);
+				cancelNavBtn.setVisibility(View.INVISIBLE);
+				searchBtn.setVisibility(View.VISIBLE);
+				Toast.makeText(getContext(), "Cancelled your current navigation", Toast.LENGTH_LONG).show();
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.setNeutralButton("No, Go Back", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		alertDialogBuilder.show().show();
+	}
+
+	/**
+	 * Begin an operation to precache a spherical area of the map. This allows that area to load faster in future.
+	 * @param location
+	 */
+	public void cacheCurrentCameraLocation(LatLng location) {
+		this.preCacheLocation = location;
+		// Precache a 3000 meter radius around this point
+		m_eegeoMap.precache(
+				location,
+				3000.0,
+				precacheOperationCompletedListener);
+	}
+
+	@Override
+	public void onPrecacheOperationCompleted(PrecacheOperationResult precacheOperationResult) {
+		if (mapNavigationViewModel.getCachingToastActivated()) {
+			String toastMessage;
+			if (precacheOperationResult.succeeded()) {
+				toastMessage = String.format("Successfully cached a radius of 3km around (%.2f, %.2f). Now this area will load faster than ever!",
+						preCacheLocation.latitude, preCacheLocation.longitude);
+			} else {
+				toastMessage = String.format("Could not cache 3km radius around (%.2f, %.2f)!",
+						preCacheLocation.latitude, preCacheLocation.longitude);
+			}
+			Toast.makeText(getContext(), toastMessage, Toast.LENGTH_LONG).show();
+		}
 	}
 
 	private class MarkerClickListenerImpl implements OnMarkerClickListener {
