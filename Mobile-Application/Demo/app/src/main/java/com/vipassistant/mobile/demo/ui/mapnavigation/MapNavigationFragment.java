@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
@@ -49,6 +48,7 @@ import java.util.*;
 
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
+import static com.vipassistant.mobile.demo.ui.constants.Utils.*;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
@@ -82,6 +82,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private LatLng preCacheLocation = null;
 	private ProgressDialog mapLoading, navigationRequestLoading, recalculatingRouteLoading;
 	private int cachingTimeout = 0;
+	private Set<LatLng> cacheLocationSet = new HashSet<>();
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -287,7 +288,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			/* Update Navigation Helper and etc. */
 			navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
 			navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
-			if (!navDirectionQueue.isEmpty() && isTwoLocationEquals(userLocation.getLocation(), nextStepInfo.getDirectionLocation())) {
+			if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
 				nextStepInfo = navDirectionQueue.remove();
 				userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
 				String upNext = navHelperUpNextTextBuilder(nextStepInfo);
@@ -457,9 +458,9 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
 				String innerTitle = String.format("You are in floor %d of building %s", userLocation.getFloor(), demoBuildingName);
 				String innerMessage = String.format("Name of the location you're in: %s\n" +
-						"Type of the location you're in: %s\n" +
-						"Your Geolocation is: (%f, %f)\n\n" +
-						"Below is a list locations that are adjacent to you:",
+								"Type of the location you're in: %s\n" +
+								"Your Geolocation is: (%f, %f)\n\n" +
+								"Below is a list locations that are adjacent to you:",
 						userLocation.getName(), userLocation.getType(),
 						userLocation.getLocation().latitude, userLocation.getLocation().longitude);
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_mylocation);
@@ -498,8 +499,10 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
 		if (response.succeeded()) {
-			String message = "Mapscene '" + response.getMapscene().name + "' loaded"; // TODO: may remove later.
-			Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+//			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+//			alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
+//			alertDialogBuilder.setTitle("Welcome non-VIP Navigation Module!");
+//			alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
 		} else {
 			Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
@@ -541,13 +544,13 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						String indoorId = routeStep.indoorId;
 						for (LatLng path : routeStep.path) {
 							if (path == routeStep.path.get(routeStep.path.size() - 1) &&
-							routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
-							routeSection == route.sections.get(route.sections.size() - 1) &&
-							route == response.getResults().get(response.getResults().size() - 1)) {
-								queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+									routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
+									routeSection == route.sections.get(route.sections.size() - 1) &&
+									route == response.getResults().get(response.getResults().size() - 1)) {
+								queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
 								queueRoutes.add(destinationLocation);
 							} else {
-								queueRoutes.add(new Location("path", "path", path, .0, .0, floor, indoorId));
+								queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
 								if (path == routeStep.path.get(0)) {
 									/* Add marker */
 									MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
@@ -733,15 +736,19 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	/**
 	 * Begin an operation to precache a spherical area of the map. This allows that area to load faster in future.
+	 *
 	 * @param location
 	 */
 	public void cacheCurrentCameraLocation(LatLng location) {
-		this.preCacheLocation = location;
-		// Precache a 3000 meter radius around this point
-		m_eegeoMap.precache(
-				location,
-				3000.0,
-				precacheOperationCompletedListener);
+		if (!cacheLocationSet.contains(location)) {
+			cacheLocationSet.add(location);
+			this.preCacheLocation = location;
+			// Precache a 3000 meter radius around this point
+			m_eegeoMap.precache(
+					location,
+					3000.0,
+					precacheOperationCompletedListener);
+		}
 	}
 
 	@Override
@@ -749,7 +756,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		if (mapNavigationViewModel.getCachingToastActivated()) {
 			String toastMessage;
 			if (precacheOperationResult.succeeded()) {
-				toastMessage = String.format("Successfully cached a radius of 3km around (%.2f, %.2f). Now this area will load faster than ever!",
+				toastMessage = String.format("Successfully cached a radius of 3km around (%.2f, %.2f).\n" +
+								"Now this area will load faster than ever!",
 						preCacheLocation.latitude, preCacheLocation.longitude);
 			} else {
 				toastMessage = String.format("Could not cache 3km radius around (%.2f, %.2f)!",

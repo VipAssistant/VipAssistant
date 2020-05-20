@@ -1,5 +1,6 @@
 package com.vipassistant.mobile.demo.ui.model;
 
+import androidx.annotation.Nullable;
 import com.eegeo.mapapi.geometry.LatLng;
 
 public class Location {
@@ -75,5 +76,15 @@ public class Location {
 
 	public void setIndoorMapId(String indoorMapId) {
 		this.indoorMapId = indoorMapId;
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		Location op2 = (Location) obj;
+		return  this.location.latitude == op2.getLocation().latitude &&
+				this.location.longitude == op2.getLocation().longitude &&
+				this.indoorMapId.equals(op2.getIndoorMapId()) &&
+				this.getFloor() == op2.getFloor();
+
 	}
 }
