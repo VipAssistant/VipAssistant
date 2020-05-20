@@ -238,7 +238,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 
 	private void initializeLocation() {
 		/* Initialize Location Queue first with indoor map entrance Location */
-		locationQueue.add(demoIndoorMapEntrance);
+		locationQueue.add(heatmapInitialLocation);
 		/* Then initialize related variables */
 		this.userLocation = computeCurrentLocation();
 		this.outNavigationMarker = m_eegeoMap.addMarker(
@@ -401,7 +401,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 			m_eegeoMap.removeHeatmap(heatmap);
 		}
 		heatmaps = new ArrayList<>();
-		switch (floor) { // TODO: Cikar acc. to annes phone
+		switch (floor) {
 			case 0:
 				createBasementHeatmapData();
 				break;
@@ -461,10 +461,10 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		// hall
 		points.addAll(generateRandomData(2, new LatLng(39.891836, 32.783127), new LatLng(39.891822, 32.783317)));
 		// study room
-		points.addAll(generateRandomData(8, new LatLng(39.891809, 32.783245), new LatLng(39.891756, 32.783322)));
+		points.addAll(generateRandomData(10, new LatLng(39.891809, 32.783245), new LatLng(39.891756, 32.783322)));
 		// front stairs
 		points.addAll(generateRandomData(1, new LatLng(39.891797, 32.783156), new LatLng(39.891761, 32.783185)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 0);
+		createHeatmap(points, 0);
 	}
 
 	private void createEntranceHeatmapData() {
@@ -476,9 +476,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891801, 32.783157), new LatLng(39.891767, 32.783220)));
 		// entrance hall
 		points.addAll(generateRandomData(2, new LatLng(39.891760, 32.783136), new LatLng(39.891741, 32.783246)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 1);
-
-		// TODO USER LOCATION HEATMAP POINT!!!
+		createHeatmap(points, 1);
 	}
 
 	private void createFirstFloorHeatmapData() {
@@ -514,7 +512,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891801, 32.783157), new LatLng(39.891767, 32.783220)));
 		// B block crossover
 		points.addAll(generateRandomData(3, new LatLng(39.891851, 32.783321), new LatLng(39.891835, 32.783520)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 2);
+		createHeatmap(points, 2);
 	}
 
 	private void createFirstHalfFloorHeatmapData() {
@@ -528,7 +526,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891796, 32.783131), new LatLng(39.891741, 32.783246)));
 		// bmb4
 		points.addAll(generateRandomData(30, new LatLng(39.891727, 32.783142), new LatLng(39.891641, 32.783260)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 3);
+		createHeatmap(points, 3);
 	}
 
 	private void createSecondFloorHeatmapData() {
@@ -564,7 +562,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891801, 32.783157), new LatLng(39.891767, 32.783220)));
 		// B block crossover
 		points.addAll(generateRandomData(3, new LatLng(39.891851, 32.783321), new LatLng(39.891835, 32.783520)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 4);
+		createHeatmap(points, 4);
 	}
 
 	private void createSecondHalfFloorHeatmapData() {
@@ -576,7 +574,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891801, 32.783157), new LatLng(39.891767, 32.783220)));
 		// hall
 		points.addAll(generateRandomData(1, new LatLng(39.891763, 32.783162), new LatLng(39.891737, 32.783218)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 5);
+		createHeatmap(points, 5);
 	}
 
 	private void createThirdFloorHeatmapData() {
@@ -616,7 +614,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891795, 32.783111), new LatLng(39.891745, 32.783155)));
 		// bmb5
 		points.addAll(generateRandomData(30, new LatLng(39.891727, 32.783142), new LatLng(39.891641, 32.783260)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 6);
+		createHeatmap(points, 6);
 	}
 
 	private void createThirdHalfFloorHeatmapData() {
@@ -628,7 +626,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891801, 32.783157), new LatLng(39.891767, 32.783220)));
 		// hall
 		points.addAll(generateRandomData(1, new LatLng(39.891763, 32.783162), new LatLng(39.891737, 32.783218)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 7);
+		createHeatmap(points, 7);
 	}
 
 	private void createFourthFloorHeatmapData() {
@@ -662,15 +660,16 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		points.addAll(generateRandomData(2, new LatLng(39.891837, 32.783126), new LatLng(39.891804, 32.783189)));
 		// a401
 		points.addAll(generateRandomData(3, new LatLng(39.891810, 32.783246), new LatLng(39.891756, 32.783322)));
-		createHeatmap(points.toArray(new WeightedLatLngAlt[0]), 8);
+		createHeatmap(points, 8);
 	}
 
-	private void createHeatmap(WeightedLatLngAlt[] pointsPerPolygon, int floor) {
+	private void createHeatmap(List<WeightedLatLngAlt> pointsPerPolygon, int floor) {
+		pointsPerPolygon.add(new WeightedLatLngAlt(userLocation.getLocation().latitude, userLocation.getLocation().longitude, 1));
 		heatmaps.add(
 				m_eegeoMap.addHeatmap(
 					new HeatmapOptions()
 							.polygon(new PolygonOptions().indoor(demoIndoorMapId, floor))
-							.add(pointsPerPolygon)
+							.add(pointsPerPolygon.toArray(new WeightedLatLngAlt[0]))
 							.weightMin(2.0)
 							.weightMax(8.0)
 //						 sets normative value to be mid-point between weightMin and weightMax,
@@ -678,7 +677,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 							.intensityBias(0.5f)
 							.interpolateDensityByZoom(18.0, 21.5)
 							.addDensityStop(0.0f, 0.6, 1.0)
-							.addDensityStop(0.5f, 1.3, 0.75) // TODO STYLE
+							.addDensityStop(0.5f, 1.3, 0.75)
 							.addDensityStop(1.0f, 2.1, 0.5)
 							.gradient(
 									// transparent at mid-point, with differing hues either side,

@@ -215,6 +215,9 @@ public class Utils {
 			case "UP NEXT:\nDEPART":
 				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_start_walking);
 				break;
+			case "UP NEXT:\nDEPART GO STRAIGHT":
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_start_walking);
+				break;
 			case "UP NEXT:\nCONTINUE LEFT":
 				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_cont_left);
 				break;
@@ -242,11 +245,11 @@ public class Utils {
 			case "UP NEXT:\nELEVATOR ON SLIGHT RIGHT":
 				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_elevator);
 				break;
-			case "UP NEXT:\nTURN GO STRAIGHT": // todo go straight?
+			case "UP NEXT:\nTURN GO STRAIGHT":
 				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_go_straight);
 				break;
 			default:
-				Toast.makeText(context, "new upnext: " + upNext, Toast.LENGTH_LONG).show();
+				returnIcon = ContextCompat.getDrawable(context, R.drawable.ic_go_straight);
 				break;
 		}
 		return returnIcon;

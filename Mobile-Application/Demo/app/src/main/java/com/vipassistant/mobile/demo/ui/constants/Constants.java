@@ -12,8 +12,9 @@ public class Constants {
 	/* MapNavigation Constants */
 	public static final String demoIndoorMapId = "EIM-71597625-a9b6-4753-b91f-1c0e74fc966d";
 	public static final String demoBuildingName = "METU-CENG Block A";
-	public static final Location demoIndoorMapEntrance = new Location("Entrance", "Building Entrance", new LatLng(39.891753, 32.783191), .000030, .000007, 1, demoIndoorMapId);
-	public static final String mapSceneLink = "https://wrld.mp/4bdda73";
+	public static final Location navigateInitialLocation = new Location("Entrance", "Building Entrance", new LatLng(39.891753, 32.783191), .000030, .000007, 1, demoIndoorMapId);
+	public static final Location heatmapInitialLocation = new Location("BMB-5", "Classroom", new LatLng(39.891681, 32.783200), .000050, .000081, 6, demoIndoorMapId);
+	public static final String mapSceneLink = "https://wrld.mp/df1ba6a";
 	public static final String markerText = "You Are Here!";
 	public static final int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
 	public static final double locationLatEps = 0.0001;
@@ -43,7 +44,7 @@ public class Constants {
 		add(new Location("Basement Front Upstairs", "Stairs", new LatLng(39.891780, 32.783169), .000008, .000015, 0, demoIndoorMapId));
 
 		/* Entrance */
-		add(demoIndoorMapEntrance);
+		add(navigateInitialLocation);
 		add(new Location("Entrance Front Upstairs", "Stairs", new LatLng(39.891784, 32.783203), .000008, .000015, 1, demoIndoorMapId));
 		add(new Location("Entrance Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 1, demoIndoorMapId));
 		add(new Location("Entrance Back Upstairs", "Stairs", new LatLng(39.892024, 32.783238), .000005, .000023, 1, demoIndoorMapId));

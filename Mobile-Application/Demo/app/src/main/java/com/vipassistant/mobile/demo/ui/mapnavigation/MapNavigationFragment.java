@@ -183,7 +183,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void initializeLocation() {
 		/* Initialize Location Queue first with indoor map entrance Location */
-		locationQueue.add(demoIndoorMapEntrance);
+		locationQueue.add(navigateInitialLocation);
 		/* Then initialize related variables */
 		this.userLocation = computeCurrentLocation();
 		this.outNavigationMarker = m_eegeoMap.addMarker(
