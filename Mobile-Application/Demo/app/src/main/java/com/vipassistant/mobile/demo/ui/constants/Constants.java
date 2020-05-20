@@ -152,71 +152,71 @@ public class Constants {
 		add(new Location("Fourth Floor Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 8, demoIndoorMapId));
 	}};
 
-	/* Demo Heatmap data for each floor */
-	public static WeightedLatLngAlt[] heatmapPoints0 = new WeightedLatLngAlt[]{
-			// Stairs
-			new WeightedLatLngAlt(39.891778, 32.783168, 3.0),
-			new WeightedLatLngAlt(39.891787, 32.783173, 3.0),
-
-			// Hall
-			new WeightedLatLngAlt(39.891829, 32.783145, 4.0),
-			new WeightedLatLngAlt(39.891829, 32.783145, 5.0),
-			new WeightedLatLngAlt(39.891839, 32.783278, 6.0),
-			new WeightedLatLngAlt(39.891812, 32.783199, 1.0),
-			new WeightedLatLngAlt(39.891805, 32.783224, 1.0),
-
-			// Stationary
-			new WeightedLatLngAlt(39.891870, 32.783139, 6.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891872, 32.783189, 4.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints1 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints2 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints3 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints4 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints5 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints6 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints7 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
-
-	public static WeightedLatLngAlt[] heatmapPoints8 = new WeightedLatLngAlt[]{
-			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
-			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
-			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
-	};
+//	/* Demo Heatmap data for each floor */
+//	public static WeightedLatLngAlt[] heatmapPoints0 = new WeightedLatLngAlt[]{
+//			// Stairs
+//			new WeightedLatLngAlt(39.891778, 32.783168, 3.0),
+//			new WeightedLatLngAlt(39.891787, 32.783173, 3.0),
+//
+//			// Hall
+//			new WeightedLatLngAlt(39.891829, 32.783145, 4.0),
+//			new WeightedLatLngAlt(39.891829, 32.783145, 5.0),
+//			new WeightedLatLngAlt(39.891839, 32.783278, 6.0),
+//			new WeightedLatLngAlt(39.891812, 32.783199, 1.0),
+//			new WeightedLatLngAlt(39.891805, 32.783224, 1.0),
+//
+//			// Stationary
+//			new WeightedLatLngAlt(39.891870, 32.783139, 6.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891872, 32.783189, 4.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints1 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints2 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints3 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints4 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints5 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints6 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints7 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
+//
+//	public static WeightedLatLngAlt[] heatmapPoints8 = new WeightedLatLngAlt[]{
+//			new WeightedLatLngAlt(39.891819, 32.783168, 1.0),
+//			new WeightedLatLngAlt(39.891858, 32.783138, 6.0),
+//			new WeightedLatLngAlt(39.891861, 32.783174, 4.0),
+//	};
 }

@@ -811,7 +811,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
 		if (m_eegeoMap != null) {
 			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
@@ -823,7 +822,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				m_eegeoMap.removeMarker(remMarker);
 			}
 		}
-
 		m_mapView.onDestroy();
 	}
 }

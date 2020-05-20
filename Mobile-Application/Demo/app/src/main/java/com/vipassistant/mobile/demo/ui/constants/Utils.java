@@ -14,6 +14,7 @@ import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
@@ -251,14 +252,14 @@ public class Utils {
 		return returnIcon;
 	}
 
-	public static WeightedLatLngAlt[] generateRandomData(int count, LatLng sw, LatLng ne) {
-		Random random = new Random(1);
-		WeightedLatLngAlt points[] = new WeightedLatLngAlt[count];
+	public static List<WeightedLatLngAlt> generateRandomData(int peopleCount, LatLng sw, LatLng ne) {
+		Random random = new Random();
+		List<WeightedLatLngAlt> points = new ArrayList<>();
 
-		for (int i = 0; i < count; ++i) {
+		for (int i = 0; i < peopleCount; ++i) {
 			double lat = random.nextDouble() * (ne.latitude - sw.latitude) + sw.latitude;
 			double lng = random.nextDouble() * (ne.longitude - sw.longitude) + sw.longitude;
-			points[i] = new WeightedLatLngAlt(lat, lng, 1.0);
+			points.add(new WeightedLatLngAlt(lat, lng, random.nextInt(12))); // TODO: intensity value!!!
 		}
 
 		return points;
