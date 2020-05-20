@@ -83,12 +83,18 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private ProgressDialog mapLoading, navigationRequestLoading, recalculatingRouteLoading;
 	private int cachingTimeout = 0;
 	private Set<LatLng> cacheLocationSet = new HashSet<>();
+	private boolean recalcOngoing = false;
+	/* For demo of the recalculating the route feature first set below three to true.
+	* Then in the app, first go to the Z-103 and first demo happens, then try to go to the Room A-306
+	* which will trigger the second and the third demos. */
+	private Boolean incorrectDemo1Activated = false, incorrectDemo2Activated = false, incorrectDemo3Activated = false;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mapNavigationViewModel = ViewModelProviders.of(getActivity()).get(MapNavigationViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
+		recalculatingRouteLoading = buildLoadingDialog(getActivity(), "Recalculating The Route...");
 		navigationRequestLoading = buildLoadingDialog(getActivity(), "Finding Shortest Possible Route For You...");
 		mapLoading = buildLoadingDialog(getActivity(), "Loading Map Data...");
 		mapLoading.show();
@@ -265,9 +271,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			this.findMePressed++;
 		}
 
-		if (isNavigating && locationQueue.size() == 1) {
-			userDirection = finalNavBearing;
-			isNavigating = false;
+		if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) &&
+				userLocation.getType().equals("stop")) {
+			userLocation.setType("not-stop-anymore");
+			navDirectionQueue.clear();
+			recalcOngoing = false;
 			destinationLocation = null;
 			nextStepInfo = null;
 			navRemainingTime = .0;
@@ -279,28 +287,59 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			for (RouteView routeView : m_routeViews) {
 				routeView.removeFromMap();
 			}
-			navigationHelper1.setVisibility(View.INVISIBLE);
-			navigationHelper2.setVisibility(View.INVISIBLE);
-			cancelNavBtn.setVisibility(View.INVISIBLE);
-			searchBtn.setVisibility(View.VISIBLE);
-			Toast.makeText(getContext(), "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
-		} else if (isNavigating) {
-			/* Update Navigation Helper and etc. */
-			navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
-			navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
-			if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
-				nextStepInfo = navDirectionQueue.remove();
-				userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
-				String upNext = navHelperUpNextTextBuilder(nextStepInfo);
-				navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
-				upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
-						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
-						!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
-						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
-						upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
-				navHelperUpNextText.setText(upNext);
+			if (incorrectDemo1Activated)
+				requestNavigationForLocation(locationService.findByName("Z-103").get());
+			else
+				requestNavigationForLocation(locationService.findByName("Room A-306").get());
+		} else {
+			if (isNavigating && locationQueue.size() == 1 &&
+					((recalcOngoing && !(!incorrectDemo1Activated && !incorrectDemo2Activated && incorrectDemo3Activated))
+							|| !(incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated))) {
+				recalcOngoing = false;
+				userDirection = finalNavBearing;
+				isNavigating = false;
+				destinationLocation = null;
+				nextStepInfo = null;
+				navRemainingTime = .0;
+				navRemainingDistance = .0;
+				/* Remove all routes */
+				for (Marker marker : nav_markers) {
+					m_eegeoMap.removeMarker(marker);
+				}
+				for (RouteView routeView : m_routeViews) {
+					routeView.removeFromMap();
+				}
+				navigationHelper1.setVisibility(View.INVISIBLE);
+				navigationHelper2.setVisibility(View.INVISIBLE);
+				cancelNavBtn.setVisibility(View.INVISIBLE);
+				searchBtn.setVisibility(View.VISIBLE);
+				Toast.makeText(getContext(), "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
+			} else if (isNavigating) {
+				/* Update Navigation Helper and etc. */
+				navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
+				navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
+				if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
+					nextStepInfo = navDirectionQueue.remove();
+					userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+					String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+					navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+					upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
+							!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
+							!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
+							!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
+							upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
+					navHelperUpNextText.setText(upNext);
+				}
+				navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
 			}
-			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+
+			if (locationQueue.size() == 2) {
+				if ((incorrectDemo1Activated || incorrectDemo2Activated)) {
+					userDirection = 270.;
+				} else if (incorrectDemo3Activated) {
+					userDirection = 90.;
+				}
+			}
 		}
 	}
 
@@ -515,7 +554,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 * @param location
 	 */
 	private void requestNavigationForLocation(Location location) {
-		navigationRequestLoading.show();
+		if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) && isNavigating) {
+			recalculatingRouteLoading.show();
+		} else {
+			navigationRequestLoading.show();
+		}
 		destinationLocation = location;
 		routingService.findRoutes(new RoutingQueryOptions()
 				.addIndoorWaypoint(userLocation.getLocation(), userLocation.getFloor())
@@ -525,110 +568,227 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	@Override
 	public void onRoutingQueryCompleted(RoutingQuery query, RoutingQueryResponse response) {
-		navigationRequestLoading.dismiss();
+		if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) && isNavigating) {
+			recalculatingRouteLoading.dismiss();
+		} else {
+			navigationRequestLoading.dismiss();
+		}
+
 		if (response.succeeded()) {
-			Double routeDuration = .0, routeDistance = .0;
-			ArrayList<Location> queueRoutes = new ArrayList<>();
-			ArrayList<StepInfo> navDirQueueDirections = new ArrayList<>();
-			for (Route route : response.getResults()) {
-				routeDistance += route.distance;
-				routeDuration += route.duration;
-				RouteViewOptions options = new RouteViewOptions()
-						.color(Color.argb(168, 255, 0, 0)) // TODO route color red
-						.width(15.0f);
-				RouteView routeView = new RouteView(m_eegeoMap, route, options);
-				m_routeViews.add(routeView);
-				for (RouteSection routeSection : route.sections) {
-					for (RouteStep routeStep : routeSection.steps) {
-						int floor = routeStep.indoorFloorId;
-						String indoorId = routeStep.indoorId;
-						for (LatLng path : routeStep.path) {
-							if (path == routeStep.path.get(routeStep.path.size() - 1) &&
-									routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
-									routeSection == route.sections.get(route.sections.size() - 1) &&
-									route == response.getResults().get(response.getResults().size() - 1)) {
-								queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
-								queueRoutes.add(destinationLocation);
-							} else {
-								queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
-								if (path == routeStep.path.get(0)) {
-									/* Add marker */
-									MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
-									if (routeStep.isIndoors) {
-										markerOptions.indoor(indoorId, floor);
+			if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) && isNavigating) {
+				recalculatingTheRoute(response.getResults());
+			} else {
+				Double routeDuration = .0, routeDistance = .0;
+				ArrayList<Location> queueRoutes = new ArrayList<>();
+				ArrayList<StepInfo> navDirQueueDirections = new ArrayList<>();
+				for (Route route : response.getResults()) {
+					routeDistance += route.distance;
+					routeDuration += route.duration;
+					RouteViewOptions options = new RouteViewOptions()
+							.color(Color.argb(168, 255, 0, 0))
+							.width(15.0f);
+					RouteView routeView = new RouteView(m_eegeoMap, route, options);
+					m_routeViews.add(routeView);
+					for (RouteSection routeSection : route.sections) {
+						for (RouteStep routeStep : routeSection.steps) {
+							int floor = routeStep.indoorFloorId;
+							String indoorId = routeStep.indoorId;
+							for (LatLng path : routeStep.path) {
+								if (path == routeStep.path.get(routeStep.path.size() - 1) &&
+										routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
+										routeSection == route.sections.get(route.sections.size() - 1) &&
+										route == response.getResults().get(response.getResults().size() - 1)) {
+									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+									queueRoutes.add(destinationLocation);
+								} else {
+									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+									if (path == routeStep.path.get(0)) {
+										/* Add marker */
+										MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
+										if (routeStep.isIndoors) {
+											markerOptions.indoor(indoorId, floor);
+										}
+										Marker marker = m_eegeoMap.addMarker(markerOptions);
+										nav_markers.add(marker);
 									}
-									Marker marker = m_eegeoMap.addMarker(markerOptions);
-									nav_markers.add(marker);
 								}
 							}
+							navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
+									routeStep.directions.modifier,
+									routeStep.directions.location,
+									routeStep.directions.bearingBefore,
+									routeStep.directions.bearingAfter,
+									routeStep.duration,
+									routeStep.distance));
 						}
-						navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
-								routeStep.directions.modifier,
-								routeStep.directions.location,
-								routeStep.directions.bearingBefore,
-								routeStep.directions.bearingAfter,
-								routeStep.duration,
-								routeStep.distance));
 					}
 				}
+				routeDuration = routeDistance / PERSON_WALKING_SPEED; // TODO: check
+				String eta = getETAString(routeDuration);
+				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+				dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
+				dialogBuilder.setTitle("Successfully Found Shortest Route!");
+				dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background.\n\n" +
+						"Distance: %.2f meters\n" +
+						"Duration: %.2f seconds\n" +
+						"ETA: %s", routeDistance, routeDuration, eta));
+				Double finalRouteDistance = routeDistance;
+				Double finalRouteDuration = routeDuration;
+				dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						isNavigating = true;
+						searchBtn.setVisibility(View.INVISIBLE);
+						cancelNavBtn.setVisibility(View.VISIBLE);
+						navRemainingDistance = finalRouteDistance;
+						navRemainingTime = finalRouteDuration;
+						MarkerOptions markerOptions = new MarkerOptions()
+								.position(destinationLocation.getLocation())
+								.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+								.iconKey("dir_enter_map");
+						nav_markers.add(m_eegeoMap.addMarker(markerOptions));
+						recalculationDemoFix(queueRoutes);
+						locationQueue.addAll(queueRoutes);
+						navDirectionQueue.addAll(navDirQueueDirections);
+						nextStepInfo = navDirectionQueue.remove();
+						finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
+						userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+						navigationHelper1.setVisibility(View.VISIBLE);
+						navigationHelper2.setVisibility(View.VISIBLE);
+						navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+						String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+						navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+						upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
+								upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
+						navHelperUpNextText.setText(upNext);
+						dialog.dismiss();
+					}
+				});
+				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						isNavigating = false;
+						destinationLocation = null;
+						for (Marker marker : nav_markers) {
+							m_eegeoMap.removeMarker(marker);
+						}
+						for (RouteView routeView : m_routeViews) {
+							routeView.removeFromMap();
+						}
+						dialog.dismiss();
+					}
+				});
+				dialogBuilder.show().show();
 			}
-			routeDuration = routeDistance / PERSON_WALKING_SPEED; // TODO: check
-			String eta = getETAString(routeDuration);
-			AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-			dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
-			dialogBuilder.setTitle("Successfully Found Shortest Route!");
-			dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background.\n\n" +
-					"Distance: %.2f meters\n" +
-					"Duration: %.2f seconds\n" +
-					"ETA: %s", routeDistance, routeDuration, eta));
-			Double finalRouteDistance = routeDistance;
-			Double finalRouteDuration = routeDuration;
-			dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					isNavigating = true;
-					searchBtn.setVisibility(View.INVISIBLE);
-					cancelNavBtn.setVisibility(View.VISIBLE);
-					navRemainingDistance = finalRouteDistance;
-					navRemainingTime = finalRouteDuration;
-					MarkerOptions markerOptions = new MarkerOptions()
-							.position(destinationLocation.getLocation())
-							.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
-							.iconKey("dir_enter_map");
-					nav_markers.add(m_eegeoMap.addMarker(markerOptions));
-					locationQueue.addAll(queueRoutes);
-					navDirectionQueue.addAll(navDirQueueDirections);
-					nextStepInfo = navDirectionQueue.remove();
-					finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
-					userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
-					navigationHelper1.setVisibility(View.VISIBLE);
-					navigationHelper2.setVisibility(View.VISIBLE);
-					navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
-					String upNext = navHelperUpNextTextBuilder(nextStepInfo);
-					navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
-					upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
-							upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
-					navHelperUpNextText.setText(upNext);
-					dialog.dismiss();
-				}
-			});
-			dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					isNavigating = false;
-					destinationLocation = null;
-					for (Marker marker : nav_markers) {
-						m_eegeoMap.removeMarker(marker);
-					}
-					for (RouteView routeView : m_routeViews) {
-						routeView.removeFromMap();
-					}
-					dialog.dismiss();
-				}
-			});
-			dialogBuilder.show().show();
 		} else {
 			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private void recalculatingTheRoute(List<Route> results) {
+		recalcOngoing = true;
+		Double routeDuration = .0, routeDistance = .0;
+		ArrayList<Location> queueRoutes = new ArrayList<>();
+		ArrayList<StepInfo> navDirQueueDirections = new ArrayList<>();
+		for (Route route : results) {
+			routeDistance += route.distance;
+			routeDuration += route.duration;
+			RouteViewOptions options = new RouteViewOptions()
+					.color(Color.argb(168, 255, 0, 0))
+					.width(15.0f);
+			RouteView routeView = new RouteView(m_eegeoMap, route, options);
+			m_routeViews.add(routeView);
+			for (RouteSection routeSection : route.sections) {
+				for (RouteStep routeStep : routeSection.steps) {
+					int floor = routeStep.indoorFloorId;
+					String indoorId = routeStep.indoorId;
+					for (LatLng path : routeStep.path) {
+						if (path == routeStep.path.get(routeStep.path.size() - 1) &&
+								routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
+								routeSection == route.sections.get(route.sections.size() - 1) &&
+								route == results.get(results.size() - 1)) {
+							queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+							queueRoutes.add(destinationLocation);
+						} else {
+							queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+							if (path == routeStep.path.get(0)) {
+								/* Add marker */
+								MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
+								if (routeStep.isIndoors) {
+									markerOptions.indoor(indoorId, floor);
+								}
+								Marker marker = m_eegeoMap.addMarker(markerOptions);
+								nav_markers.add(marker);
+							}
+						}
+					}
+					navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
+							routeStep.directions.modifier,
+							routeStep.directions.location,
+							routeStep.directions.bearingBefore,
+							routeStep.directions.bearingAfter,
+							routeStep.duration,
+							routeStep.distance));
+				}
+			}
+		}
+		routeDuration = routeDistance / PERSON_WALKING_SPEED;
+		isNavigating = true;
+		navRemainingDistance = routeDistance;
+		navRemainingTime = routeDuration;
+		MarkerOptions markerOptions = new MarkerOptions()
+				.position(destinationLocation.getLocation())
+				.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+				.iconKey("dir_enter_map");
+		nav_markers.add(m_eegeoMap.addMarker(markerOptions));
+
+		if (incorrectDemo1Activated) {
+			incorrectDemo1Activated = false;
+		}
+		else if (incorrectDemo2Activated) {
+			incorrectDemo2Activated = false;
+			recalculationDemoFix(queueRoutes);
+		}
+		else if (incorrectDemo3Activated) {
+			incorrectDemo3Activated = false;
+		}
+
+		locationQueue.addAll(queueRoutes);
+		navDirectionQueue.addAll(navDirQueueDirections);
+		nextStepInfo = navDirectionQueue.remove();
+		finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
+		userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+		navigationHelper1.setVisibility(View.VISIBLE);
+		navigationHelper2.setVisibility(View.VISIBLE);
+		navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+		String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+		navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+		upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
+				upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
+		navHelperUpNextText.setText(upNext);
+	}
+
+	private ArrayList<Location> recalculationDemoFix(ArrayList<Location> queueRoutes) {
+		if (incorrectDemo1Activated) {
+			// z-103
+			queueRoutes.subList(13, queueRoutes.size()).clear();
+			queueRoutes.add(new Location("Inc Demo-1 path", "path", new LatLng(39.891833, 32.783265), .000011, .000011, 0, demoIndoorMapId));
+			queueRoutes.add(new Location("Inc Demo-1 stop", "stop", new LatLng(39.891835, 32.783302), .000011, .000011, 0, demoIndoorMapId));
+			return queueRoutes;
+		} else if (incorrectDemo2Activated) {
+			// a-306
+			queueRoutes.subList(35, queueRoutes.size()).clear();
+			queueRoutes.add(new Location("Inc Demo-2 path", "path", new LatLng(39.891836, 32.783302), .000011, .000011, 6, demoIndoorMapId));
+			queueRoutes.add(new Location("Inc Demo-2 stop", "stop", new LatLng(39.891843, 32.783386), .000011, .000011, 6, demoIndoorMapId));
+			return queueRoutes;
+		} else if (incorrectDemo3Activated) {
+			// a-306 again
+			queueRoutes.subList(4, queueRoutes.size()).clear();
+			queueRoutes.add(new Location("Inc Demo-3 path", "path", new LatLng(39.891825, 32.783187), .000011, .000011, 6, demoIndoorMapId));
+			queueRoutes.add(new Location("Inc Demo-3 stop", "stop", new LatLng(39.891820, 32.783142), .000011, .000011, 6, demoIndoorMapId));
+			return queueRoutes;
+		} else {
+			return queueRoutes;
 		}
 	}
 
@@ -773,7 +933,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				Context context = MapNavigationFragment.this.getActivity();
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 				dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
-				dialogBuilder.setTitle("Do you want to navigate to this location?");
+				dialogBuilder.setTitle(String.format("Do you want to navigate to %s?", marker.getTitle()));
 				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
