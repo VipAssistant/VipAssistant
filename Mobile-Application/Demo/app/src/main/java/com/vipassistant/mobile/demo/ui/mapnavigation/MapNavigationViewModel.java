@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 public class MapNavigationViewModel extends ViewModel {
 
-    private Boolean cachingActivated = true, cachingToastActivated = false;
+    private Boolean cachingActivated = false, cachingToastActivated = false;
 
     public MapNavigationViewModel() {
     }
