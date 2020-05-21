@@ -19,6 +19,10 @@
                         android:icon="@drawable/ic_near_me_black_24dp_opaque"
                         android:title="@string/menu_map_nav" />
                 <item
+                        android:id="@+id/nav_vipnavigation"
+                        android:icon="@drawable/ic_near_me_black_24dp_opaque"
+                        android:title="@string/vip_navigate" />
+                <item
                         android:id="@+id/nav_heatmap"
                         android:icon="@drawable/ic_map_black_24dp"
                         android:title="@string/menu_heatmap" />

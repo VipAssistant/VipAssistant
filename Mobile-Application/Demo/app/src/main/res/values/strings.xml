@@ -38,4 +38,5 @@
 
 	<string name="eegeo_api_key">9921c23436e704dc0ed380eafa5afb02</string>
 	<string name="nav_helper_icon">ICON</string>
+	<string name="vip_navigate">Vip Navigate</string>
 </resources>
