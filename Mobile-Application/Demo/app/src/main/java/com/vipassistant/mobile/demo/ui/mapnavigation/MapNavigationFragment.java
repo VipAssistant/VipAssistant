@@ -366,7 +366,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 		alertDialogBuilder.setTitle("Search in Map");
 		alertDialogBuilder.setMessage("You can query the system in 3 different ways!");
-		alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
+		alertDialogBuilder.setPositiveButton("Find Me A ... inside the building!", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationTypes = locationService.getAllLocationTypes();
@@ -423,6 +423,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 									for (Location loc : queryResult) {
 										Double tempDistance = calculateEuclideanDistance(userLocation, loc);
 										if (minDistance > tempDistance) {
+											if (!(userLocation.getFloor() != loc.getFloor() && userLocation.getFloor() == closest.getFloor())) {
+												closest = loc;
+												minDistance = tempDistance;
+											}
+										} else if (userLocation.getFloor() == loc.getFloor() && userLocation.getFloor() != closest.getFloor()) {
 											closest = loc;
 											minDistance = tempDistance;
 										}
