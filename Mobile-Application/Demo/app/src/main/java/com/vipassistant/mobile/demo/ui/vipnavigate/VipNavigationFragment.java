@@ -40,6 +40,8 @@ import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationFragment;
+import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
@@ -48,7 +50,7 @@ import java.util.*;
 
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
-import static com.vipassistant.mobile.demo.ui.constants.Utils.*;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
 public class VipNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
@@ -104,8 +106,7 @@ public class VipNavigationFragment extends Fragment implements OnMapsceneRequest
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
 		m_mapView.onCreate(savedInstanceState);
 
-		/* Initialize LocationService */
-		this.locationService = new LocationService(allLocations);
+		this.locationService = new LocationService(allLocations, allOutdoorLocations);
 
 		/* Inflate Navigation Helper */
 		navigationHelper1 = (LinearLayout) root.findViewById(R.id.nav_helper_1);
@@ -288,9 +289,9 @@ public class VipNavigationFragment extends Fragment implements OnMapsceneRequest
 				routeView.removeFromMap();
 			}
 			if (incorrectDemo1Activated)
-				requestNavigationForLocation(locationService.findByName("Z-103").get());
+				requestNavigationForLocation(locationService.findByIndoorName("Z-103").get());
 			else
-				requestNavigationForLocation(locationService.findByName("Room A-306").get());
+				requestNavigationForLocation(locationService.findByIndoorName("Room A-306").get());
 		} else {
 			if (isNavigating && locationQueue.size() == 1 &&
 					((recalcOngoing && !(!incorrectDemo1Activated && !incorrectDemo2Activated && incorrectDemo3Activated))
@@ -366,7 +367,7 @@ public class VipNavigationFragment extends Fragment implements OnMapsceneRequest
 		alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
 		alertDialogBuilder.setTitle("Search in Map");
 		alertDialogBuilder.setMessage("You can query the system in 3 different ways!");
-		alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
+		alertDialogBuilder.setPositiveButton("Find me a '...' inside the building!", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationTypes = locationService.getAllLocationTypes();
@@ -423,6 +424,11 @@ public class VipNavigationFragment extends Fragment implements OnMapsceneRequest
 									for (Location loc : queryResult) {
 										Double tempDistance = calculateEuclideanDistance(userLocation, loc);
 										if (minDistance > tempDistance) {
+											if (!(userLocation.getFloor() != loc.getFloor() && userLocation.getFloor() == closest.getFloor())) {
+												closest = loc;
+												minDistance = tempDistance;
+											}
+										} else if (userLocation.getFloor() == loc.getFloor() && userLocation.getFloor() != closest.getFloor()) {
 											closest = loc;
 											minDistance = tempDistance;
 										}
@@ -450,42 +456,79 @@ public class VipNavigationFragment extends Fragment implements OnMapsceneRequest
 				dialog.dismiss();
 			}
 		});
-		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
+		String freeMapSearchTitle = m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("") ? "Free World Map Search" : "Free Indoor Map Search";
+		alertDialogBuilder.setNegativeButton(freeMapSearchTitle, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				List<String> allLocationNames = locationService.getAllLocationNames();
-				RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
-				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
-				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
-				innerDialogBuilder.setTitle("Where do you want to go?");
-				innerDialogBuilder.setView(autoCompleteTextViewLayout);
-				innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+				if (m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("")) {
+					List<String> allLocationNames = locationService.getAllOutdoorLocationNames();
+					RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
+					InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+					AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+					innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
+					innerDialogBuilder.setTitle("Where do you want to discover in the world?");
+					innerDialogBuilder.setView(autoCompleteTextViewLayout);
+					innerDialogBuilder.setPositiveButton("Go!", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 
-						String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
-						Optional<Location> queryResult = locationService.findByName(locName);
-						if (queryResult.isPresent()) {
-							requestNavigationForLocation(queryResult.get());
-						} else {
-							Toast.makeText(getActivity(), String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
+							String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
+							Optional<Location> queryResult = locationService.findByOutdoorName(locName);
+							if (queryResult.isPresent()) {
+								requestNavigationForLocation(queryResult.get());
+							} else {
+								Toast.makeText(getActivity(), String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
+							}
+							dialog.dismiss();
 						}
-						dialog.dismiss();
-					}
-				});
-				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
-						dialog.dismiss();
-					}
-				});
-				innerDialogBuilder.show().show();
+					});
+					innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.show().show();
+				} else {
+					List<String> allLocationNames = locationService.getAllIndoorLocationNames();
+					RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
+					InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+					AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+					innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
+					innerDialogBuilder.setTitle("Where do you want to go inside the building?");
+					innerDialogBuilder.setView(autoCompleteTextViewLayout);
+					innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+
+							String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
+							Optional<Location> queryResult = locationService.findByIndoorName(locName);
+							if (queryResult.isPresent()) {
+								requestNavigationForLocation(queryResult.get());
+							} else {
+								Toast.makeText(getActivity(), String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
+							}
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.show().show();
+				}
 				dialog.dismiss();
 			}
 		});

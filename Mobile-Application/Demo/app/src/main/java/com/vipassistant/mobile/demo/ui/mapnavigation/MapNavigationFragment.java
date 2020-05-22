@@ -1,6 +1,7 @@
 package com.vipassistant.mobile.demo.ui.mapnavigation;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -44,11 +45,14 @@ import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
-import static com.vipassistant.mobile.demo.ui.constants.Utils.*;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
@@ -62,17 +66,21 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
 	private Handler handler = new Handler();
-	private Location userLocation, destinationLocation = null;
-	private Double userDirection = 180., finalNavBearing = 180.;
-	private StepInfo nextStepInfo = null;
+	private Location userLocation, destinationLocation = null, prevUserLocation;
+	private Double userDirection = 180., finalNavBearing = 180., prevUserDirection = 180., prevFinalNavBearing = 180.;
+	private StepInfo nextStepInfo = null, prevNextStepInfo = null;
 	private List<Marker> nav_markers = new ArrayList<>(), see_on_map_markers = new ArrayList<>();
-	private Boolean isNavigating = false;
-	private Queue<Location> locationQueue = new LinkedList<>(); // For demo purposes
-	private Queue<StepInfo> navDirectionQueue = new LinkedList<>(); // For demo purposes
+	private Boolean isNavigating = false, previewingRoute = false, isCurrentlyPreviewing = false;
+	private Queue<Location> locationQueue = new LinkedList<>(), prevLocationQueue = new LinkedList<>(); // For demo purposes
+	private Queue<Location> previewRoute = new LinkedList<>();
+	private Queue<StepInfo> navDirectionQueue = new LinkedList<>(), prevNavDirectionQueue = new LinkedList<>(); // For demo purposes
 	private final OnMapsceneRequestCompletedListener mapSceneRequestCompletedListener = this;
 	private final OnRoutingQueryCompletedListener routingQueryCompletedListener = this;
 	private final OnPrecacheOperationCompletedListener precacheOperationCompletedListener = this;
 	private final OnMarkerClickListener m_markerTappedListener = new MarkerClickListenerImpl();
+	private Double navRouteDuration, navRouteDistance;
+	private ArrayList<Location> navReqQueueRoutes;
+	private ArrayList<StepInfo> navReqNavDirQueueDirections;
 	private Integer findMePressed = 0;
 	private Button findMeBtn, searchBtn, shareSaveBtn, cancelNavBtn;
 	private LinearLayout navigationHelper1, navigationHelper2;
@@ -104,8 +112,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
 		m_mapView.onCreate(savedInstanceState);
 
-		/* Initialize LocationService */
-		this.locationService = new LocationService(allLocations);
+		this.locationService = new LocationService(allLocations, allOutdoorLocations);
 
 		/* Inflate Navigation Helper */
 		navigationHelper1 = (LinearLayout) root.findViewById(R.id.nav_helper_1);
@@ -230,6 +237,22 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	}
 
 	/**
+	 * Computes the new location of user by BLE Infrastructure in real time
+	 *
+	 * @return LatLng -- user's new location
+	 */
+	private Location previewComputeCurrentLocation() {
+		/* ..BLE Calculation.. */
+		if (prevLocationQueue.size() != 1) {
+			/* If queue does not contain only 1 element then pop the head */
+			return prevLocationQueue.remove();
+		} else {
+			/* Else do not pop since user stays still */
+			return prevLocationQueue.element();
+		}
+	}
+
+	/**
 	 * Method that is called periodically to update user's location with its markers
 	 * inside map. Utilizes computeCurrentLocation() for resolving new location
 	 */
@@ -242,62 +265,92 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	}
 
 	/**
+	 * Method that is called periodically to update user's location with its markers
+	 * inside map. Utilizes computeCurrentLocation() for resolving new location
+	 */
+	private void prevUpdateLocation(Location newLocation) {
+		this.prevUserLocation = newLocation;
+		this.m_bluesphere.setPosition(prevUserLocation.getLocation());
+		this.m_bluesphere.setIndoorMap(prevUserLocation.getIndoorMapId(), prevUserLocation.getFloor());
+		this.m_bluesphere.setBearing(prevUserDirection);
+	}
+
+
+	/**
 	 * Method that is called periodically to update Map Fragment
 	 * updates user location etc.
 	 * updates existing routes ? !!!!!!
 	 * updates geoloc nav helper etc?
 	 */
 	private void updateMapPeriodically() {
-		updateLocation(computeCurrentLocation());
-
 		if (mapNavigationViewModel.getCachingActivated() && cachingTimeout >= 3) {
 			cacheCurrentCameraLocation(m_eegeoMap.getCameraPosition().target);
 			cachingTimeout = 0;
 		}
 		cachingTimeout++;
 
-		if (this.findMePressed == 3) {
+		if (previewingRoute) {
+			prevUpdateLocation(previewComputeCurrentLocation());
+			if (isCurrentlyPreviewing && prevLocationQueue.size() == 1) {
+				mapRefreshMillis = 1000;
+				prevLocationQueue.clear();
+				prevNavDirectionQueue.clear();
+				prevUserDirection = prevFinalNavBearing;
+				isCurrentlyPreviewing = false;
+				previewingRoute = false;
+				prevNextStepInfo = null;
+				CameraPosition position = new CameraPosition.Builder()
+						.target(userLocation.getLocation())
+						.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
+						.zoom(cameraZoom)
+						.tilt(cameraTilt)
+						.bearing(userDirection - 180)
+						.build();
+				CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+						.build();
+				m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
+				displayNavigationResultDialog();
+			} else if (isCurrentlyPreviewing) {
+				if (!prevNavDirectionQueue.isEmpty() && prevUserLocation.getLocation().equals(prevNextStepInfo.getDirectionLocation())) {
+					prevNextStepInfo = prevNavDirectionQueue.remove();
+					prevUserDirection = prevNextStepInfo.getDirectionBearingBefore() - 180;
+				}
+			}
+
 			CameraPosition position = new CameraPosition.Builder()
-					.target(userLocation.getLocation())
-					.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
+					.target(prevUserLocation.getLocation())
+					.indoor(prevUserLocation.getIndoorMapId(), prevUserLocation.getFloor())
 					.zoom(cameraZoom)
 					.tilt(cameraTilt)
-					.bearing(userDirection - 180)
+					.bearing(prevUserDirection - 180)
 					.build();
 			CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+					.duration(0.3)
 					.build();
 			m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
-		} else if (this.findMePressed != 0) {
-			this.findMePressed++;
-		}
-
-		if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) &&
-				userLocation.getType().equals("stop")) {
-			userLocation.setType("not-stop-anymore");
-			navDirectionQueue.clear();
-			recalcOngoing = false;
-			destinationLocation = null;
-			nextStepInfo = null;
-			navRemainingTime = .0;
-			navRemainingDistance = .0;
-			/* Remove all routes */
-			for (Marker marker : nav_markers) {
-				m_eegeoMap.removeMarker(marker);
-			}
-			for (RouteView routeView : m_routeViews) {
-				routeView.removeFromMap();
-			}
-			if (incorrectDemo1Activated)
-				requestNavigationForLocation(locationService.findByName("Z-103").get());
-			else
-				requestNavigationForLocation(locationService.findByName("Room A-306").get());
 		} else {
-			if (isNavigating && locationQueue.size() == 1 &&
-					((recalcOngoing && !(!incorrectDemo1Activated && !incorrectDemo2Activated && incorrectDemo3Activated))
-							|| !(incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated))) {
+			updateLocation(computeCurrentLocation());
+
+			if (this.findMePressed == 3) {
+				CameraPosition position = new CameraPosition.Builder()
+						.target(userLocation.getLocation())
+						.indoor(userLocation.getIndoorMapId(), userLocation.getFloor())
+						.zoom(cameraZoom)
+						.tilt(cameraTilt)
+						.bearing(userDirection - 180)
+						.build();
+				CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+						.build();
+				m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
+			} else if (this.findMePressed != 0) {
+				this.findMePressed++;
+			}
+
+			if ((incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated) &&
+					userLocation.getType().equals("stop")) {
+				userLocation.setType("not-stop-anymore");
+				navDirectionQueue.clear();
 				recalcOngoing = false;
-				userDirection = finalNavBearing;
-				isNavigating = false;
 				destinationLocation = null;
 				nextStepInfo = null;
 				navRemainingTime = .0;
@@ -309,35 +362,58 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				for (RouteView routeView : m_routeViews) {
 					routeView.removeFromMap();
 				}
-				navigationHelper1.setVisibility(View.INVISIBLE);
-				navigationHelper2.setVisibility(View.INVISIBLE);
-				cancelNavBtn.setVisibility(View.INVISIBLE);
-				searchBtn.setVisibility(View.VISIBLE);
-				Toast.makeText(getContext(), "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
-			} else if (isNavigating) {
-				/* Update Navigation Helper and etc. */
-				navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
-				navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
-				if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
-					nextStepInfo = navDirectionQueue.remove();
-					userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
-					String upNext = navHelperUpNextTextBuilder(nextStepInfo);
-					navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
-					upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
-							!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
-							!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
-							!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
-							upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
-					navHelperUpNextText.setText(upNext);
+				if (incorrectDemo1Activated)
+					requestNavigationForLocation(locationService.findByIndoorName("Z-103").get());
+				else
+					requestNavigationForLocation(locationService.findByIndoorName("Room A-306").get());
+			} else {
+				if (isNavigating && locationQueue.size() == 1 &&
+						((recalcOngoing && !(!incorrectDemo1Activated && !incorrectDemo2Activated && incorrectDemo3Activated))
+								|| !(incorrectDemo1Activated || incorrectDemo2Activated || incorrectDemo3Activated))) {
+					recalcOngoing = false;
+					userDirection = finalNavBearing;
+					isNavigating = false;
+					destinationLocation = null;
+					nextStepInfo = null;
+					navRemainingTime = .0;
+					navRemainingDistance = .0;
+					/* Remove all routes */
+					for (Marker marker : nav_markers) {
+						m_eegeoMap.removeMarker(marker);
+					}
+					for (RouteView routeView : m_routeViews) {
+						routeView.removeFromMap();
+					}
+					navigationHelper1.setVisibility(View.INVISIBLE);
+					navigationHelper2.setVisibility(View.INVISIBLE);
+					cancelNavBtn.setVisibility(View.INVISIBLE);
+					searchBtn.setVisibility(View.VISIBLE);
+					Toast.makeText(getContext(), "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
+				} else if (isNavigating) {
+					/* Update Navigation Helper and etc. */
+					navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
+					navRemainingTime = navRemainingTime - mapRefreshMillis / 1000 >= 0 ? navRemainingTime - mapRefreshMillis / 1000 : 0;
+					if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
+						nextStepInfo = navDirectionQueue.remove();
+						userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+						String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+						navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+						upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
+								!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
+								!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
+								!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
+								upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
+						navHelperUpNextText.setText(upNext);
+					}
+					navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
 				}
-				navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
-			}
 
-			if (locationQueue.size() == 2) {
-				if ((incorrectDemo1Activated || incorrectDemo2Activated)) {
-					userDirection = 270.;
-				} else if (incorrectDemo3Activated) {
-					userDirection = 90.;
+				if (locationQueue.size() == 2) {
+					if ((incorrectDemo1Activated || incorrectDemo2Activated)) {
+						userDirection = 270.;
+					} else if (incorrectDemo3Activated) {
+						userDirection = 90.;
+					}
 				}
 			}
 		}
@@ -363,10 +439,10 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void displaySearchDialog() {
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-		alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
+		alertDialogBuilder.setIcon(R.drawable.nav_search_interface);
 		alertDialogBuilder.setTitle("Search in Map");
-		alertDialogBuilder.setMessage("You can query the system in 3 different ways!");
-		alertDialogBuilder.setPositiveButton("Find Me A ... inside the building!", new DialogInterface.OnClickListener() {
+		alertDialogBuilder.setMessage("You can query our platform in 3 different ways");
+		alertDialogBuilder.setPositiveButton("Find me a '...' inside " + demoBuildingName, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				List<String> allLocationTypes = locationService.getAllLocationTypes();
@@ -455,42 +531,90 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				dialog.dismiss();
 			}
 		});
-		alertDialogBuilder.setNegativeButton("Free Map Search", new DialogInterface.OnClickListener() {
+		String freeMapSearchTitle = m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("") ? "Search by name in World Map" : "Search by name in " + demoBuildingName;
+		alertDialogBuilder.setNegativeButton(freeMapSearchTitle, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				List<String> allLocationNames = locationService.getAllLocationNames();
-				RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
-				InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-				inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
-				AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
-				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
-				innerDialogBuilder.setTitle("Where do you want to go?");
-				innerDialogBuilder.setView(autoCompleteTextViewLayout);
-				innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+				if (m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("")) {
+					List<String> allLocationNames = locationService.getAllOutdoorLocationNames();
+					RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
+					InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+					AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+					innerDialogBuilder.setIcon(R.drawable.nav_map);
+					innerDialogBuilder.setTitle("Where do you want to see in the world?");
+					innerDialogBuilder.setView(autoCompleteTextViewLayout);
+					innerDialogBuilder.setPositiveButton("Discover!", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
 
-						String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
-						Optional<Location> queryResult = locationService.findByName(locName);
-						if (queryResult.isPresent()) {
-							requestNavigationForLocation(queryResult.get());
-						} else {
-							Toast.makeText(getActivity(), String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
+							String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
+							Optional<Location> queryResult = locationService.findByOutdoorName(locName);
+							if (queryResult.isPresent()) {
+								CameraPosition position = new CameraPosition.Builder()
+										.target(queryResult.get().getLocation())
+										.zoom(outdoorSearchCameraZoom)
+										.tilt(cameraTilt)
+										.bearing(userDirection - 180)
+										.build();
+								CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
+										.snapIfDistanceExceedsThreshold(false)
+										.snapDistanceThreshold(40075)
+										.build();
+								m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
+								Toast.makeText(getActivity(), String.format("Welcome to %s!", locName), Toast.LENGTH_LONG).show();
+							} else {
+								Toast.makeText(getActivity(), String.format("Oops! We could not find any location with name %s in the world.", locName), Toast.LENGTH_LONG).show();
+							}
+							dialog.dismiss();
 						}
-						dialog.dismiss();
-					}
-				});
-				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
-						dialog.dismiss();
-					}
-				});
-				innerDialogBuilder.show().show();
+					});
+					innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.show().show();
+				} else {
+					List<String> allLocationNames = locationService.getAllIndoorLocationNames();
+					RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
+					InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+					inputMethodManager.toggleSoftInputFromWindow(root.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+					AlertDialog.Builder innerDialogBuilder = new AlertDialog.Builder(getActivity());
+					innerDialogBuilder.setIcon(R.drawable.nav_search_interface);
+					innerDialogBuilder.setTitle("Where do you want to go inside " + demoBuildingName + "?");
+					innerDialogBuilder.setView(autoCompleteTextViewLayout);
+					innerDialogBuilder.setPositiveButton("Get Directions", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+
+							String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
+							Optional<Location> queryResult = locationService.findByIndoorName(locName);
+							if (queryResult.isPresent()) {
+								requestNavigationForLocation(queryResult.get());
+							} else {
+								Toast.makeText(getActivity(), String.format("Oops! We could not find any location with that name in this building.", locName), Toast.LENGTH_LONG).show();
+							}
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(autoCompleteTextViewLayout.getWindowToken(), 0);
+							dialog.dismiss();
+						}
+					});
+					innerDialogBuilder.show().show();
+				}
 				dialog.dismiss();
 			}
 		});
@@ -509,7 +633,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						userLocation.getLocation().latitude, userLocation.getLocation().longitude);
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_mylocation);
 				innerDialogBuilder.setTitle(innerTitle);
-				innerDialogBuilder.setMessage(innerMessage);
+				innerDialogBuilder.setMessage(innerMessage); // todo style
 				ArrayAdapter<String> locNamesAdapter = new ArrayAdapter<String>(getContext(),
 						android.R.layout.simple_spinner_item, nearbyLocationNames);
 				ListView listView = new ListView(getContext());
@@ -599,95 +723,129 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 							int floor = routeStep.indoorFloorId;
 							String indoorId = routeStep.indoorId;
 							for (LatLng path : routeStep.path) {
-								if (path == routeStep.path.get(routeStep.path.size() - 1) &&
-										routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
-										routeSection == route.sections.get(route.sections.size() - 1) &&
-										route == response.getResults().get(response.getResults().size() - 1)) {
-									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
-									queueRoutes.add(destinationLocation);
-								} else {
-									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
-									if (path == routeStep.path.get(0)) {
-										/* Add marker */
-										MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
-										if (routeStep.isIndoors) {
-											markerOptions.indoor(indoorId, floor);
+								if (checkShouldGo(path, floor)) {
+									if (path == routeStep.path.get(routeStep.path.size() - 1) &&
+											routeStep == routeSection.steps.get(routeSection.steps.size() - 1) &&
+											routeSection == route.sections.get(route.sections.size() - 1) &&
+											route == response.getResults().get(response.getResults().size() - 1)) {
+										queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+										queueRoutes.add(destinationLocation);
+									} else {
+										queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+										if (path == routeStep.path.get(0)) {
+											/* Add marker */
+											MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
+											if (routeStep.isIndoors) {
+												markerOptions.indoor(indoorId, floor);
+											}
+											Marker marker = m_eegeoMap.addMarker(markerOptions);
+											nav_markers.add(marker);
 										}
-										Marker marker = m_eegeoMap.addMarker(markerOptions);
-										nav_markers.add(marker);
 									}
 								}
 							}
-							navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
-									routeStep.directions.modifier,
-									routeStep.directions.location,
-									routeStep.directions.bearingBefore,
-									routeStep.directions.bearingAfter,
-									routeStep.duration,
-									routeStep.distance));
+							if (checkShouldGo(routeStep.directions.location, floor)) {
+								navDirQueueDirections.add(new StepInfo(routeStep.directions.type,
+										routeStep.directions.modifier,
+										routeStep.directions.location,
+										routeStep.directions.bearingBefore,
+										routeStep.directions.bearingAfter,
+										routeStep.duration,
+										routeStep.distance));
+							} else {
+								routeDistance -= routeStep.distance;
+								routeDuration -= routeStep.duration;
+							}
 						}
 					}
 				}
-				routeDuration = routeDistance / PERSON_WALKING_SPEED; // TODO: check
-				String eta = getETAString(routeDuration);
-				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-				dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
-				dialogBuilder.setTitle("Successfully Found Shortest Route!");
-				dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background.\n\n" +
-						"Distance: %.2f meters\n" +
-						"Duration: %.2f seconds\n" +
-						"ETA: %s", routeDistance, routeDuration, eta));
-				Double finalRouteDistance = routeDistance;
-				Double finalRouteDuration = routeDuration;
-				dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						isNavigating = true;
-						searchBtn.setVisibility(View.INVISIBLE);
-						cancelNavBtn.setVisibility(View.VISIBLE);
-						navRemainingDistance = finalRouteDistance;
-						navRemainingTime = finalRouteDuration;
-						MarkerOptions markerOptions = new MarkerOptions()
-								.position(destinationLocation.getLocation())
-								.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
-								.iconKey("dir_enter_map");
-						nav_markers.add(m_eegeoMap.addMarker(markerOptions));
-						recalculationDemoFix(queueRoutes);
-						locationQueue.addAll(queueRoutes);
-						navDirectionQueue.addAll(navDirQueueDirections);
-						nextStepInfo = navDirectionQueue.remove();
-						finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
-						userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
-						navigationHelper1.setVisibility(View.VISIBLE);
-						navigationHelper2.setVisibility(View.VISIBLE);
-						navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
-						String upNext = navHelperUpNextTextBuilder(nextStepInfo);
-						navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
-						upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
-								upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
-						navHelperUpNextText.setText(upNext);
-						dialog.dismiss();
-					}
-				});
-				dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						isNavigating = false;
-						destinationLocation = null;
-						for (Marker marker : nav_markers) {
-							m_eegeoMap.removeMarker(marker);
-						}
-						for (RouteView routeView : m_routeViews) {
-							routeView.removeFromMap();
-						}
-						dialog.dismiss();
-					}
-				});
-				dialogBuilder.show().show();
+				routeDuration = routeDistance / PERSON_WALKING_SPEED;
+				navRouteDuration = routeDuration;
+				navRouteDistance = routeDistance;
+				navReqQueueRoutes = queueRoutes;
+				navReqNavDirQueueDirections = navDirQueueDirections;
+				displayNavigationResultDialog();
 			}
 		} else {
 			Toast.makeText(getActivity(), "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
 		}
+	}
+
+	private void displayNavigationResultDialog() {
+		String eta = getETAString(navRouteDuration);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+		dialogBuilder.setIcon(R.drawable.nav_directions);
+		dialogBuilder.setTitle("Successfully Found Shortest Route!");
+		dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background, you can preview it.\n\n" +
+				"Distance: %.2f meters\n" +
+				"Duration: %.2f seconds\n" +
+				"ETA: %s", navRouteDistance, navRouteDuration, eta));
+		Double finalRouteDistance = navRouteDistance;
+		Double finalRouteDuration = navRouteDuration;
+		dialogBuilder.setPositiveButton("Start!", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				isNavigating = true;
+				searchBtn.setVisibility(View.INVISIBLE);
+				cancelNavBtn.setVisibility(View.VISIBLE);
+				navRemainingDistance = finalRouteDistance;
+				navRemainingTime = finalRouteDuration;
+				MarkerOptions markerOptions = new MarkerOptions()
+						.position(destinationLocation.getLocation())
+						.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+						.iconKey("dir_enter_map");
+				nav_markers.add(m_eegeoMap.addMarker(markerOptions));
+				recalculationDemoFix(navReqQueueRoutes);
+				locationQueue.addAll(navReqQueueRoutes);
+				navDirectionQueue.addAll(navReqNavDirQueueDirections);
+				nextStepInfo = navDirectionQueue.remove();
+				finalNavBearing = navReqNavDirQueueDirections.get(navReqNavDirQueueDirections.size() - 1).getDirectionBearingAfter();
+				userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+				navigationHelper1.setVisibility(View.VISIBLE);
+				navigationHelper2.setVisibility(View.VISIBLE);
+				navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+				String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+				navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(getActivity(), upNext));
+				upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
+						upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
+				navHelperUpNextText.setText(upNext);
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setNegativeButton("Preview Route", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				previewingRoute = true;
+				isCurrentlyPreviewing = true;
+				MarkerOptions markerOptions = new MarkerOptions()
+						.position(destinationLocation.getLocation())
+						.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+						.iconKey("dir_enter_map");
+				nav_markers.add(m_eegeoMap.addMarker(markerOptions));
+				prevLocationQueue.addAll(navReqQueueRoutes);
+				prevNavDirectionQueue.addAll(navReqNavDirQueueDirections);
+				prevNextStepInfo = prevNavDirectionQueue.remove();
+				prevFinalNavBearing = navReqNavDirQueueDirections.get(navReqNavDirQueueDirections.size() - 1).getDirectionBearingAfter();
+				prevUserDirection = prevNextStepInfo.getDirectionBearingBefore() - 180;
+				mapRefreshMillis = 400;
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				isNavigating = false;
+				destinationLocation = null;
+				for (Marker marker : nav_markers) {
+					m_eegeoMap.removeMarker(marker);
+				}
+				for (RouteView routeView : m_routeViews) {
+					routeView.removeFromMap();
+				}
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.show().show();
 	}
 
 	private void recalculatingTheRoute(List<Route> results) {
@@ -799,7 +957,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	private void displayShareSaveDialog() {
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-		alertDialogBuilder.setIcon(R.drawable.nav_locs);
+		alertDialogBuilder.setIcon(R.drawable.nav_bookmark);
 		alertDialogBuilder.setTitle("Location Pinned");
 		alertDialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
 			@Override
@@ -814,22 +972,23 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_save);
 				innerDialogBuilder.setTitle("Save this location");
 				innerDialogBuilder.setView(relativeLayout);
-				innerDialogBuilder.setPositiveButton("Save!", new DialogInterface.OnClickListener() {
+				innerDialogBuilder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(relativeLayout.getWindowToken(), 0);
 						String locName = ((EditText) relativeLayout.getChildAt(0)).getText().toString();
 						String locType = ((AutoCompleteTextView) relativeLayout.getChildAt(1)).getText().toString();
-						allLocations.add(new Location(locName, locType, userLocation.getLocation(),
+						Location newLocation = new Location(locName, locType, userLocation.getLocation(),
 								userLocation.getLocEpsLat(), userLocation.getLocEpsLong(),
-								userLocation.getFloor(), userLocation.getIndoorMapId()));
-						// TODO: also send to server..
+								userLocation.getFloor(), userLocation.getIndoorMapId());
+						allLocations.add(newLocation);
+						saveLocationToLocal(newLocation);
 						Toast.makeText(getActivity(), "Your Current Location is Saved Successfully", Toast.LENGTH_LONG).show();
 						dialog.dismiss();
 					}
 				});
-				innerDialogBuilder.setNegativeButton("Cancel!", new DialogInterface.OnClickListener() {
+				innerDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -853,11 +1012,38 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				Intent share = new Intent(Intent.ACTION_SEND);
 				share.setType("text/plain");
 				share.putExtra(Intent.EXTRA_TEXT, packLocationDataToSend(userLocation));
-				startActivity(Intent.createChooser(share, "Share My Location!"));
+				startActivityForResult(Intent.createChooser(share, "Share My Location!"), 1);
 				dialog.dismiss();
 			}
 		});
 		alertDialogBuilder.show().show();
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == 1) {
+			if(resultCode == Activity.RESULT_OK){
+				Toast.makeText(getActivity(), "Your Current Location is Shared Successfully", Toast.LENGTH_LONG).show();
+			}
+			if (resultCode == Activity.RESULT_CANCELED) {
+				Toast.makeText(getActivity(), "Failed to share your current location", Toast.LENGTH_LONG).show();
+			}
+		}
+	}
+
+	private void saveLocationToLocal(Location location) {
+		String content = String.format("%s,%s,%s,%s,%s,%s,%s,%s", location.getName(),
+				location.getType(), location.getLocation().latitude, location.getLocation().longitude,
+				location.getLocEpsLat(), location.getLocEpsLong(), location.getFloor(), location.getIndoorMapId());
+		try {
+			FileOutputStream outputStream = getActivity().getApplicationContext().openFileOutput("saved_locations.txt", Context.MODE_PRIVATE);
+			outputStream.write(content.getBytes());
+			outputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void displayCancelNavigationDialog() {
@@ -937,7 +1123,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			if (marker.getTitle() != "You Are Here!") {
 				Context context = MapNavigationFragment.this.getActivity();
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-				dialogBuilder.setIcon(android.R.drawable.ic_dialog_map);
+				dialogBuilder.setIcon(R.drawable.nav_map);
 				dialogBuilder.setTitle(String.format("Do you want to navigate to %s?", marker.getTitle()));
 				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 					@Override

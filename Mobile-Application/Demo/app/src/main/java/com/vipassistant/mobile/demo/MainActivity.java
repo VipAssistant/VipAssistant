@@ -7,15 +7,18 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
-import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationFragment;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
+
+import java.io.IOException;
+
+import static com.vipassistant.mobile.demo.ui.utils.Utils.readAndLoadWorldCitiesData;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.readSavedLocations;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +46,15 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         mapNavVM = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
+
+        /* Initialize Outdoor Locations once and for all and read saved locations if there is any */
+        try {
+            readAndLoadWorldCitiesData(this);
+            readSavedLocations(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         /* Dont let phone go sleep while the app is running */
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

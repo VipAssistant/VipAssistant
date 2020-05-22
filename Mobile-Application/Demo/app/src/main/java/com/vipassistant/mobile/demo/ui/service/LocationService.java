@@ -16,9 +16,12 @@ public class LocationService {
 	/* We keep Location Information in our custom Indoor Map in 1 container
 	 * namely in an ArrayList and perform all our queries with stream operations on that list */
 	private final List<Location> allLocations;
+	private List<Location> worldLocations;
 
-	public LocationService(ArrayList<Location> allLocations) {
+	public LocationService(List<Location> allLocations,
+						   List<Location> worldLocations) {
 		this.allLocations = allLocations;
+		this.worldLocations = worldLocations;
 	}
 
 	public List<Location> getAllLocations() {
@@ -26,8 +29,13 @@ public class LocationService {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public List<String> getAllLocationNames() {
+	public List<String> getAllIndoorLocationNames() {
 		return convertToLocationNames(allLocations);
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<String> getAllOutdoorLocationNames() {
+		return convertToLocationNames(worldLocations);
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
@@ -63,11 +71,24 @@ public class LocationService {
 	 * @return
 	 */
 	@RequiresApi(api = Build.VERSION_CODES.N)
-	public Optional<Location> findByName(String name) {
+	public Optional<Location> findByIndoorName(String name) {
 		return allLocations.stream()
 					.filter(loc -> loc.getName().equals(name))
 					.findFirst();
 	}
+
+	/**
+	 * Name is unique for each location inside the map
+	 * @param name
+	 * @return
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<Location> findByOutdoorName(String name) {
+		return worldLocations.stream()
+				.filter(loc -> loc.getName().equals(name))
+				.findFirst();
+	}
+
 
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public List<Location> findByType(String type) {

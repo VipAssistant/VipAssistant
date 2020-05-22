@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.constants;
+package com.vipassistant.mobile.demo.ui.utils;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -14,10 +14,10 @@ import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
+import java.io.*;
+import java.util.*;
+
+import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 
 public class Utils {
 	/**
@@ -266,5 +266,47 @@ public class Utils {
 		}
 
 		return points;
+	}
+
+	public static void readAndLoadWorldCitiesData(Context context) throws IOException {
+		String file = "worldcities.csv";
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(context.getAssets().open(file)))) {
+			String line = "";
+			while ((line = br.readLine()) != null) {
+				String[] lineContent = (line.split(","));
+				String name = lineContent[0].replace("\"", "");
+				String lat = lineContent[2].replace("\"", "");
+				String lon = lineContent[3].replace("\"", "");
+				allOutdoorLocations.add(new Location(name, "City", new LatLng(Double.parseDouble(lat), Double.parseDouble(lon))));
+			}
+		} catch (FileNotFoundException e) {
+			System.err.println("worldcities.csv is not found!");
+		}
+	}
+
+	public static void readSavedLocations(Context context) throws IOException {
+		try {
+			FileInputStream inputStream = context.getApplicationContext().openFileInput("saved_locations.txt");
+			Scanner scanner = new Scanner(inputStream).useDelimiter("\\A");
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				String[] lineContent = (line.split(","));
+				allLocations.add(new Location(lineContent[0], lineContent[1],
+						new LatLng(Double.parseDouble(lineContent[2]), Double.parseDouble(lineContent[3])),
+						Double.parseDouble(lineContent[4]), Double.parseDouble(lineContent[5]),
+						Integer.parseInt(lineContent[6]), lineContent[7]));
+			}
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Not found any saved locations, skipping...");
+		}
+	}
+
+	public static boolean checkShouldGo(LatLng latLng, int floor) {
+		for (LatLng notGoLatLng : latlngsToNotToGo) {
+			if (notGoLatLng.equals(latLng) && floor == 0)
+				return false;
+		}
+		return true;
 	}
 }

@@ -4,8 +4,7 @@ import com.eegeo.mapapi.geometry.LatLng;
 import com.eegeo.mapapi.geometry.WeightedLatLngAlt;
 import com.vipassistant.mobile.demo.ui.model.Location;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class Constants {
 
@@ -16,15 +15,21 @@ public class Constants {
 	public static final Location heatmapInitialLocation = new Location("BMB-5", "Classroom", new LatLng(39.891681, 32.783200), .000050, .000081, 6, demoIndoorMapId);
 	public static final String mapSceneLink = "https://wrld.mp/df1ba6a";
 	public static final String markerText = "You Are Here!";
-	public static final int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
+	public static int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
 	public static final double locationLatEps = 0.0001;
 	public static final double locationLongEps = 0.0001;
 	public static double cameraZoom = 20;
+	public static double outdoorSearchCameraZoom = 13.0826540246474;
 	public static double cameraTilt = 35;
 	public static double cameraTiltHeatmap = 0;
 	public static final double PERSON_WALKING_SPEED = 1.4;
 
-	/* Our Indoor Map's Location Container */
+	public static final Set<LatLng> latlngsToNotToGo = new HashSet<>(Arrays.asList(new LatLng(39.891772, 32.783201999999996),
+			new LatLng(39.891802, 32.78319900000001), new LatLng(39.89186, 32.783269)));
+
+	public static ArrayList<Location> allOutdoorLocations = new ArrayList<Location>();
+
+		/* Our Indoor Map's Location Container */
 	public static ArrayList<Location> allLocations = new ArrayList<Location>() {{
 		/* Basement */
 		add(new Location("Server Room", "Server Room", new LatLng(39.892068, 32.783152), .000014, .000058, 0, demoIndoorMapId));

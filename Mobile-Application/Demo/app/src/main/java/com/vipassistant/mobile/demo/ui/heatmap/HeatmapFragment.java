@@ -40,7 +40,6 @@ import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
 import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
-import com.eegeo.mapapi.widgets.RouteView;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Location;
@@ -50,8 +49,8 @@ import java.util.*;
 
 import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
-import static com.vipassistant.mobile.demo.ui.constants.Utils.buildLoadingDialog;
-import static com.vipassistant.mobile.demo.ui.constants.Utils.generateRandomData;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.buildLoadingDialog;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.generateRandomData;
 
 public class HeatmapFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
@@ -169,8 +168,8 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 							creatingHeatmapLoading.dismiss();
 						} else {
 							AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-							alertDialogBuilder.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
-							alertDialogBuilder.setTitle("Heatmap Message Carrier!");
+							alertDialogBuilder.setIcon(R.drawable.heatmap_closed);
+							alertDialogBuilder.setTitle("Heatmap Warning");
 							alertDialogBuilder.setMessage("Please Enter an Indoor Map to Display its Heatmap");
 							alertDialogBuilder.setPositiveButton("Ok...", new DialogInterface.OnClickListener() {
 								@Override

@@ -12,6 +12,12 @@ public class Location {
 	private Integer floor; // May be null if location is in outdoor
 	private String indoorMapId; // May be null if location is in outdoor
 
+	public Location(String name, String type, LatLng location) {
+		this.name = name;
+		this.type = type;
+		this.location = location;
+	}
+
 	public Location(String name, String type, LatLng location, Double locEpsLat, Double locEpsLong, Integer floor, String indoorMapId) {
 		this.name = name;
 		this.type = type;
