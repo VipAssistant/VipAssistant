@@ -50,8 +50,7 @@ import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
-import com.vipassistant.mobile.demo.ui.vipnavigate.VipNavigationFragment;
-import com.vipassistant.mobile.demo.ui.vipnavigate.VipNavigationViewModel;
+
 
 import java.io.FileOutputStream;
 import java.io.IOException;
