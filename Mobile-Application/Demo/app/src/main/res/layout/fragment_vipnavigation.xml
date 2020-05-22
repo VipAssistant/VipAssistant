@@ -13,45 +13,6 @@
             eegeo:camera_target_longitude="-122.401"
             eegeo:camera_zoom="16" />
 
-    <Button
-            android:id="@+id/searchButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/nav_search"
-            android:textColor="#fff"
-            android:layout_alignParentTop="true"/>
-
-    <Button
-            android:id="@+id/cancelNavButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/nav_cancel"
-            android:textColor="#fff"
-            android:layout_alignParentTop="true"
-            android:visibility="invisible"/>
-
-    <Button
-            android:id="@+id/findMeButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/nav_find_me_1"
-            android:textColor="#fff"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="10dp"
-            android:layout_alignParentEnd="true"/>
-
-    <Button
-            android:id="@+id/shareAndSaveButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/nav_locs"
-            android:textColor="#fff"
-            android:layout_margin="10dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"/>
-
     <LinearLayout
             android:id="@+id/nav_helper_1"
             android:layout_width="120dp"

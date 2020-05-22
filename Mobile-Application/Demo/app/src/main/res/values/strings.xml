@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VIPA</string>
+	<string name="app_name">VipAssistant</string>
 	<string name="navigation_drawer_open">Open navigation drawer</string>
 	<string name="navigation_drawer_close">Close navigation drawer</string>
 	<string name="nav_header_title">Vip Assistant Version 1.0.0</string>
@@ -12,8 +12,8 @@
 	<string name="menu_monitor">Calibrate and Monitor</string>
 	<string name="menu_corona_demo">Covid-19 Demo</string>
 	<string name="menu_map_nav">Navigate</string>
-<!--	<string name="menu_share">Share</string>-->
-<!--	<string name="menu_send">Send</string>-->
+	<!--	<string name="menu_share">Share</string>-->
+	<!--	<string name="menu_send">Send</string>-->
 
 	<!-- Voice Output Fragment -->
 
@@ -27,7 +27,8 @@
 		will be translated into text automatically!
 	</string>
 	<string name="voutput_welcome">In order to test Voice Outputting Module enter a text and
-		set voice pitch &amp; speed. Then you are all set! Just press GO. Your text will be translated into speech automatically!
+		set voice pitch &amp; speed. Then you are all set! Just press GO. Your text will be translated into speech
+		automatically!
 	</string>
 	<string name="start_scan">Start Scan</string>
 	<string name="blescanner_welcome">In order to test BLE Scanner Module press \'Start Scan\' button, then recognized
@@ -39,4 +40,21 @@
 	<string name="eegeo_api_key">9921c23436e704dc0ed380eafa5afb02</string>
 	<string name="nav_helper_icon">ICON</string>
 	<string name="vip_navigate">Vip Navigate</string>
+	<string name="title_activity_login">Sign in</string>
+	<string name="prompt_email">Email</string>
+	<string name="prompt_password">Password</string>
+	<string name="action_sign_in">Sign in or register</string>
+	<string name="action_sign_in_short">Sign in</string>
+	<string name="invalid_username">Not a valid username</string>
+	<string name="invalid_password">Password must be >5 characters</string>
+	<string name="login_failed">"Login failed"</string>
+	<string name="title_activity_start">StartActivity</string>
+	<!-- Strings used for fragments for navigation -->
+	<string name="first_fragment_label">First Fragment</string>
+	<string name="second_fragment_label">Second Fragment</string>
+	<string name="next">Next</string>
+	<string name="previous">Previous</string>
+
+	<string name="hello_first_fragment">Hello first fragment</string>
+	<string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 </resources>

@@ -1,9 +1,14 @@
 package com.vipassistant.mobile.demo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -12,19 +17,21 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import com.eegeo.mapapi.markers.MarkerOptions;
 import com.google.android.material.navigation.NavigationView;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 
 import java.io.IOException;
 
-import static com.vipassistant.mobile.demo.ui.utils.Utils.readAndLoadWorldCitiesData;
-import static com.vipassistant.mobile.demo.ui.utils.Utils.readSavedLocations;
+import static com.vipassistant.mobile.demo.ui.constants.Constants.mapRefreshMillis;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private MapNavigationViewModel mapNavVM;
     private Menu optionsMenu;
+    private Boolean vipModeOn = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +54,40 @@ public class MainActivity extends AppCompatActivity {
 
         mapNavVM = ViewModelProviders.of(this).get(MapNavigationViewModel.class);
 
-        /* Initialize Outdoor Locations once and for all and read saved locations if there is any */
-        try {
-            readAndLoadWorldCitiesData(this);
-            readSavedLocations(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
         /* Dont let phone go sleep while the app is running */
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setIcon(R.drawable.nav_directions);
+        dialogBuilder.setTitle("First things first");
+        dialogBuilder.setMessage("Please select the mode you want to use VipAssistant with.\n\n" +
+                "You can always switch back and forth between these modes.\n\n" +
+                "Beware: Clicking anywhere but non-visually impaired mode will result in selecting visually impaired mode.");
+        dialogBuilder.setPositiveButton("VIP mode", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
+//                myIntent.putExtra("key", value); //Optional parameters
+                MainActivity.this.startActivity(myIntent);
+                dialog.dismiss();
+            }
+        });
+        dialogBuilder.setNeutralButton("non-VIP Mode", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                vipModeOn = false;
+                dialog.dismiss();
+            }
+        });
+        dialogBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
+//                myIntent.putExtra("key", value); //Optional parameters
+                MainActivity.this.startActivity(myIntent);
+            }
+        });
+        dialogBuilder.show().show();
     }
 
     @Override
