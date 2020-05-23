@@ -9,9 +9,9 @@
             android:id="@+id/mapView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            eegeo:camera_target_latitude="37.7858"
-            eegeo:camera_target_longitude="-122.401"
-            eegeo:camera_zoom="16"/>
+            eegeo:camera_target_latitude="39.82870452217694"
+            eegeo:camera_target_longitude="33.17710430839251"
+            eegeo:camera_zoom="3.3189425509318964" />
 
     <Button
             android:id="@+id/heatmapOpenButton"

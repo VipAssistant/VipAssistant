@@ -5,11 +5,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.view.*;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
@@ -17,8 +24,15 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.utils.HomeArrayAdapter;
+
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Queue;
+
+import static com.vipassistant.mobile.demo.ui.constants.Constants.mapRefreshMillis;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private MapNavigationViewModel mapNavVM;
     private Menu optionsMenu;
     private Boolean vipModeOn = true;
+    private TextToSpeech mTTS;
+    private Handler handler = new Handler();
+    private Queue<String> voiceOutputQueue = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +68,34 @@ public class MainActivity extends AppCompatActivity {
         /* Dont let phone go sleep while the app is running */
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // todo: vo/vin below
+        mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = mTTS.setLanguage(Locale.ENGLISH);
+                    if (result == TextToSpeech.LANG_MISSING_DATA
+                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e("VoiceOutput - TTS", "Language not supported");
+                    } else {
+                        voiceOutputQueue.add("Do you want to use VipAssistant in Visually Impaired mode or in Non-Visually Impaired mode?");
+                        voiceOutputQueue.add("Clicking anywhere on the screen except Non-Visually Impaired mode button will result in selecting visually impaired mode.");
+                        voiceOutputQueue.add("You can always switch back and forth between these modes.");
+                        voiceOutput(voiceOutputQueue.remove());
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!voiceOutputQueue.isEmpty()) {
+                                    voiceOutput(voiceOutputQueue.remove());
+                                }
+                                handler.postDelayed(this, 5000);
+                            }
+                        }, 5000);
+                    }
+                } else {
+                    Log.e("VoiceOutput - TTS", "TTS Initialization failed");
+                }
+            }
+        });
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setIcon(R.drawable.nav_directions);
         dialogBuilder.setTitle("First things first");
@@ -83,6 +127,42 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         dialogBuilder.show().show();
+    }
+
+    /**
+     * Create a snackbar + also voice output given for given line
+     * @param outputString
+     */
+    private void voiceOutput(String outputString) {
+        View view = findViewById(android.R.id.content).getRootView();
+        displaySnackbar(view, outputString);
+        speak(outputString);
+    }
+
+    private void displaySnackbar(View view, String line) {
+        Snackbar snack = Snackbar.make(view, line, Snackbar.LENGTH_LONG);
+        snack.setDuration(5000);
+        TextView textView = (TextView) snack.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+        textView.setMaxLines(3);
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snack.getView().getLayoutParams();
+        params.setMargins(0,0,0, 100);
+        snack.getView().setLayoutParams(params);
+        snack.show();
+    }
+
+    private void speak(String line) {
+//        float pitch = (float) mSeekBarPitch.getProgress() / 50;
+//        if (pitch < 0.1) pitch = 0.1f;
+//        float speed = (float) mSeekBarSpeed.getProgress() / 50;
+//        if (speed < 0.1) speed = 0.1f;
+
+//        mTTS.setPitch(pitch);
+//        mTTS.setSpeechRate(speed);
+
+        /* QUEUE_ADD means new speeches are appended to the queue to be said after current
+         * also could've used QUEUE_FLUSH which means new speech cancels ongoing one */
+        mTTS.speak(line, TextToSpeech.QUEUE_ADD, null);
     }
 
     @Override
@@ -161,5 +241,14 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mTTS != null) {
+            mTTS.stop();
+            mTTS.shutdown();
+        }
+        super.onDestroy();
     }
 }
