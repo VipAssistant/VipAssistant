@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.telephony.SmsManager;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import com.eegeo.indoors.IndoorMapView;
@@ -80,14 +82,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		/* Dont let phone go sleep while the app is running */
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		/* Initialize Outdoor Locations once and for all and read saved locations if there is any */
-		try {
-			readAndLoadWorldCitiesData(this);
-			readSavedLocations(this);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		recalculatingRouteLoading = buildLoadingDialog(this, "Recalculating The Route...");
 		navigationRequestLoading = buildLoadingDialog(this, "Finding Shortest Possible Route For You...");
 		mapLoading = buildLoadingDialog(this, "Loading Map Data...");
@@ -126,6 +120,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 						// todo now ready vo + nasil kullanacagini soyleyen bi initial vo
 						mapLoading.dismiss();
 						initializeLocationAndSetCamera();
+						startVIPmessageBlinking();
 					}
 				});
 
@@ -133,6 +128,17 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 			}
 		});
+	}
+
+	private void startVIPmessageBlinking() {
+		LinearLayout bLayout = (LinearLayout) findViewById(R.id.blink_layout);
+
+		Animation anim = new AlphaAnimation(0.0f, 1.0f);
+		anim.setDuration(1000);
+		anim.setStartOffset(20);
+		anim.setRepeatMode(Animation.REVERSE);
+		anim.setRepeatCount(Animation.INFINITE);
+		bLayout.startAnimation(anim);
 	}
 
 	private void initializeLocationAndSetCamera() {

@@ -58,4 +58,5 @@
 	<string name="home_textt">With VipAssistant© 1.0.0 you can:</string>
 	<string name="home_text1">Welcome to VipAssistant© 1.0.0\n\nYou can experience all the features\nspecified in below</string>
 	<string name="home_text2">You can also access separate tutorials for these features from \'Help\' button on settings bar</string>
+	<string name="vip_screen_msg">VIP Mode Activated\n\nTouch Anywhere on the Screen to Interact with Voice</string>
 </resources>
