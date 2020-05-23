@@ -8,16 +8,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.*;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
@@ -26,15 +23,13 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
+import com.vipassistant.mobile.demo.ui.model.Directive;
 import com.vipassistant.mobile.demo.ui.utils.HomeArrayAdapter;
 
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
-
-import static com.vipassistant.mobile.demo.ui.constants.Constants.mapRefreshMillis;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private Boolean vipModeOn = true;
     private TextToSpeech mTTS;
     private Handler handler = new Handler();
-    private Queue<String> voiceOutputQueue = new LinkedList<>();
+    private Queue<Directive> voiceOutputQueue = new LinkedList<>();
+    private Integer voiceOutputHandlerRefreshDuration = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +75,10 @@ public class MainActivity extends AppCompatActivity {
                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e("VoiceOutput - TTS", "Language not supported");
                     } else {
-                        voiceOutputQueue.add("Do you want to use VipAssistant in Visually Impaired mode or in Non-Visually Impaired mode?");
-                        voiceOutputQueue.add("Clicking anywhere on the screen except Non-Visually Impaired mode button will result in selecting visually impaired mode.");
-                        voiceOutputQueue.add("You can always switch back and forth between these modes.");
+                        voiceOutputQueue.add(new Directive("Welcome to VipAssistant.", 1500));
+                        voiceOutputQueue.add(new Directive("Do you want to use VipAssistant in Visually Impaired mode or in Non-Visually Impaired mode?", 5000));
+                        voiceOutputQueue.add(new Directive("Clicking anywhere on the screen except Non-Visually Impaired mode button will result in selecting visually impaired mode.", 5500));
+                        voiceOutputQueue.add(new Directive("You can always switch back and forth between these modes.", 3000));
                         voiceOutput(voiceOutputQueue.remove());
                         handler.postDelayed(new Runnable() {
                             @Override
@@ -141,21 +138,22 @@ public class MainActivity extends AppCompatActivity {
      * Create a snackbar + also voice output given for given line
      * @param outputString
      */
-    private void voiceOutput(String outputString) {
+    private void voiceOutput(Directive outputDirective) {
+        voiceOutputHandlerRefreshDuration = outputDirective.getDurationInMillis();
         View view = findViewById(android.R.id.content).getRootView();
-        displaySnackbar(view, outputString);
-        speak(outputString);
+        displaySnackbar(view, outputDirective.getStringToOutput(), outputDirective.getDurationInMillis());
+        speak(outputDirective.getStringToOutput());
     }
 
-    private void displaySnackbar(View view, String line) {
+    private void displaySnackbar(View view, String line, int duration) {
         TSnackbar snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
         snackbar.setIconLeft(R.drawable.ic_record_voice_over_w_24dp, 32);
         View snackbarView = snackbar.getView();
         snackbarView.setBackgroundColor(Color.parseColor("#1a1b29"));
-        snackbar.setDuration(5000);
+        snackbar.setDuration(duration);
         TextView textView = (TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
         textView.setTextColor(Color.parseColor("#ffffff"));
-        textView.setMaxLines(3);
+        textView.setMaxLines(5);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         snackbar.show();
     }

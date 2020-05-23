@@ -87,7 +87,7 @@
     <LinearLayout
             android:id="@+id/mic_layout"
             android:layout_height="wrap_content"
-            android:background="#1a1b29"
+            android:background="@drawable/mic_layout_bg"
             android:visibility="invisible"
             android:layout_centerInParent="true"
             android:orientation="vertical"
@@ -97,12 +97,12 @@
                 android:id="@+id/mic_text1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
+                android:padding="10dp"
                 android:maxWidth="105dp"
                 android:textColor="#ffffff"
                 android:text="@string/by_vipassistant"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textAlignment="center"
                 android:layout_gravity="center_horizontal"/>
         <ImageView
@@ -113,7 +113,6 @@
                 android:src="@drawable/ic_mic_w_24dp"
                 android:scaleType="fitCenter"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
                 android:contentDescription="@string/mic"/>
 
         <TextView
@@ -123,7 +122,9 @@
                 android:padding="5dp"
                 android:maxWidth="105dp"
                 android:textColor="#ffffff"
-                android:textSize="12sp"
+                android:textSize="13sp"
+                android:layout_marginBottom="10dp"
+                android:text="Listening for your command..."
                 android:textAlignment="center"
                 android:layout_gravity="center_horizontal"/>
     </LinearLayout>

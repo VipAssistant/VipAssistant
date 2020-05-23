@@ -13,16 +13,13 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.*;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import com.androidadvance.topsnackbar.TSnackbar;
 import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
@@ -44,7 +41,6 @@ import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
-import com.google.android.material.snackbar.Snackbar;
 import com.vipassistant.mobile.demo.ui.model.Directive;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
@@ -54,7 +50,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
@@ -205,6 +200,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 					//			}
 					TextView micText2 = (TextView) findViewById(R.id.mic_text2);
 					micText2.setText(voiceResults.toString());
+					recognizer.stopListening();
+					recognizer.destroy();
 					processingCommandLoading.show();
 					matchVoiceCommand(voiceResults);
 				}
@@ -275,7 +272,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void matchVoiceCommand(ArrayList<String> res) {
 		boolean matched = false;
 		LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
-		for (String inp: res) {
+		for (String inp : res) {
 			inp = inp.toLowerCase();
 			if (inp.contains("help")) {
 				outputHelp();
@@ -327,9 +324,9 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		voiceOutputQueue.add(dir2);
 	}
 
-
 	/**
 	 * Create a snackbar + also voice output given for given line
+	 *
 	 * @param outputString
 	 */
 	private void voiceOutput(Directive outputDirective) {
@@ -449,8 +446,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			CameraAnimationOptions animationOptions = new CameraAnimationOptions.Builder()
 					.build();
 			m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
-		}
-		else {
+		} else {
 			initialLoadWait++;
 		}
 
@@ -742,8 +738,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void outputHelp() {
 		// todo vo list of commands available
 		List<Directive> helpDirectives = new ArrayList<Directive>() {{
-			add(new Directive("In this mode you can Navigate or cancel your navigation yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 11000));
-			add(new Directive("VipAssistant will guide you through the navigation", 3000));
+			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 11000));
+			add(new Directive("VipAssistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
 			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
 			add(new Directive("In addition you can save or share your current location.", 3500));
 			add(new Directive("To learn where you are right now give: 'Where am I' command", 3500));
