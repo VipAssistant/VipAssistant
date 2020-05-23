@@ -6,13 +6,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import com.androidadvance.topsnackbar.TSnackbar;
 import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
 import com.eegeo.mapapi.EegeoMap;
@@ -33,6 +37,8 @@ import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
+import com.google.android.material.snackbar.Snackbar;
+import com.vipassistant.mobile.demo.ui.model.Directive;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
@@ -55,7 +61,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private Marker outNavigationMarker;
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
-	private Handler handler = new Handler();
+	private Handler locationHandler = new Handler(), voiceOutputHandler = new Handler();
 	private Location userLocation, destinationLocation = null;
 	private Double userDirection = 180., finalNavBearing = 180.;
 	private StepInfo nextStepInfo = null;
@@ -70,9 +76,11 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private Double navRemainingDistance = null, navRemainingTime = null;
 	private ImageView navHelperUpNextIcon;
 	private int initialLoadWait = 0;
+	private TextToSpeech mTTS;
+	private Integer voiceOutputHandlerRefreshDuration = 1000;
+	private Queue<Directive> voiceOutputQueue = new LinkedList<>();
 
 	// todo: add voice out/in to specified places
-	// todo: switch to non-vip mode vin/vo
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,11 +90,40 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		/* Dont let phone go sleep while the app is running */
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+		mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+			@Override
+			public void onInit(int status) {
+				if (status == TextToSpeech.SUCCESS) {
+					int result = mTTS.setLanguage(Locale.ENGLISH);
+					if (result == TextToSpeech.LANG_MISSING_DATA
+							|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+						Log.e("VoiceOutput - TTS", "Language not supported");
+					} else {
+						voiceOutputQueue.add(new Directive("Welcome to VipAssistant's visually impaired mode, currently getting map information ready for you.", 5000));
+						voiceOutputQueue.add(new Directive("You can click anywhere on the screen to interact with the system via giving voice commands.", 5000));
+						voiceOutputQueue.add(new Directive("For example, click and say 'Help' to hear available commands.", 3000));
+						voiceOutput(voiceOutputQueue.remove());
+						voiceOutputHandler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								if (!voiceOutputQueue.isEmpty()) {
+									voiceOutput(voiceOutputQueue.remove());
+								}
+								voiceOutputHandler.postDelayed(this, voiceOutputHandlerRefreshDuration); // refreshing speak queue for every the specified length of directives second
+							}
+						}, voiceOutputHandlerRefreshDuration);
+					}
+				} else {
+					Log.e("VoiceOutput - TTS", "TTS Initialization failed");
+				}
+			}
+		});
+
+		mapLoading = buildLoadingDialog(this, "Loading Map Data...");
+		mapLoading.show();
+
 		recalculatingRouteLoading = buildLoadingDialog(this, "Recalculating The Route...");
 		navigationRequestLoading = buildLoadingDialog(this, "Finding Shortest Possible Route For You...");
-		mapLoading = buildLoadingDialog(this, "Loading Map Data...");
-		// todo getting ready vo
-		mapLoading.show();
 
 		/* Initialize Map */
 		EegeoApi.init(this, getString(R.string.eegeo_api_key));
@@ -117,7 +154,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				map.addInitialStreamingCompleteListener(new OnInitialStreamingCompleteListener() {
 					@Override
 					public void onInitialStreamingComplete() {
-						// todo now ready vo + nasil kullanacagini soyleyen bi initial vo
 						mapLoading.dismiss();
 						initializeLocationAndSetCamera();
 						startVIPmessageBlinking();
@@ -128,6 +164,36 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 			}
 		});
+	}
+
+	/**
+	 * Create a snackbar + also voice output given for given line
+	 * @param outputString
+	 */
+	private void voiceOutput(Directive outputDirective) {
+		voiceOutputHandlerRefreshDuration = outputDirective.getDurationInMillis();
+		View view = findViewById(android.R.id.content).getRootView();
+		displaySnackbar(view, outputDirective.getStringToOutput(), outputDirective.getDurationInMillis());
+		speak(outputDirective.getStringToOutput());
+	}
+
+	private void displaySnackbar(View view, String line, int duration) {
+		TSnackbar snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
+		snackbar.setIconLeft(R.drawable.ic_record_voice_over_w_24dp, 32);
+		View snackbarView = snackbar.getView();
+		snackbarView.setBackgroundColor(Color.parseColor("#1a1b29"));
+		snackbar.setDuration(duration);
+		TextView textView = (TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+		textView.setTextColor(Color.parseColor("#ffffff"));
+		textView.setMaxLines(3);
+		textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+		snackbar.show();
+	}
+
+	private void speak(String line) {
+		/* QUEUE_ADD means new speeches are appended to the queue to be said after current
+		 * also could've used QUEUE_FLUSH which means new speech cancels ongoing one */
+		mTTS.speak(line, TextToSpeech.QUEUE_ADD, null);
 	}
 
 	private void startVIPmessageBlinking() {
@@ -169,11 +235,11 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		m_eegeoMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationOptions);
 
 		/* Also now set-up Handler for periodic Map refreshing */
-		this.handler.postDelayed(new Runnable() {
+		this.locationHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				updateMapPeriodically();
-				handler.postDelayed(this, mapRefreshMillis);
+				locationHandler.postDelayed(this, mapRefreshMillis);
 			}
 		}, mapRefreshMillis);
 	}
@@ -229,7 +295,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 		if (isNavigating && locationQueue.size() == 1) {
 			String finishedNavigatingVoiceOutput = String.format("You've successfully arrived %s", destinationLocation.getName());
-			// todo arrival vo
+			voiceOutputQueue.add(new Directive(finishedNavigatingVoiceOutput, 2000));
 
 			userDirection = finalNavBearing;
 			isNavigating = false;
@@ -391,7 +457,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		}
 	}
 
-	public void cancelNavigation() {
+	private void cancelNavigation() {
 		String cancelledVoiceOutput = String.format("Cancelled your current navigation to %s", destinationLocation.getName());
 		// todo cancelled vo
 
@@ -416,11 +482,11 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		Toast.makeText(this, cancelledVoiceOutput, Toast.LENGTH_LONG).show();
 	}
 
-	public void whereAmI() {
+	private void whereAmI() {
 		// todo vo using the values in userLocation and userDirection
 	}
 
-	public void saveLocation() {
+	private void saveLocation() {
 		List<String> allLocationTypes = locationService.getAllLocationTypes();
 		// todo vo + vin for name and type of the location
 //		LinearLayout relativeLayout = buildEditTextAndAutoTextLayout(getContext(),
@@ -437,14 +503,14 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		Toast.makeText(this, "Your Current Location is Saved Successfully", Toast.LENGTH_LONG).show();
 	}
 
-	public void shareLocation() {
+	private void shareLocation() {
 		// todo vo + vin for who to send the location
 		SmsManager smsManager = SmsManager.getDefault();
 		smsManager.sendTextMessage("05428927877", null, packLocationDataToSend(userLocation), null, null);
 		// todo shared your location with ....
 	}
 
-	public void findMeA() {
+	private void findMeA() {
 		List<String> allLocationTypes = locationService.getAllLocationTypes();
 		// todo vo + vin for type of the location -- What do you want us to find for you?
 //		RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Type", allLocationTypes);
@@ -474,7 +540,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 //		}
 	}
 
-	public void searchLocation() {
+	private void searchLocation() {
 		List<String> allLocationNames = locationService.getAllIndoorLocationNames();
 		// todo vo + vin for name of the location -- Where do you want to go inside the building?
 //		RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
@@ -489,7 +555,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 //		}
 	}
 
-	public void reportMySurroundings() {
+	private void reportMySurroundings() {
 		List<Location> allNearbyLocations = locationService.findByFloorAndLocation(userLocation.getFloor(), userLocation.getLocation());
 		List<String> nearbyLocationNames = locationService.convertToLocationNames(allNearbyLocations);
 		String innerTitle = String.format("You are in floor %d of building %s", userLocation.getFloor(), demoBuildingName);
@@ -500,6 +566,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				userLocation.getName(), userLocation.getType(),
 				userLocation.getLocation().latitude, userLocation.getLocation().longitude);
 		// todo vo above
+	}
+
+	private void outputHelp() {
+		// todo vo list of commands available
 	}
 
 	private void saveLocationToLocal(Location location) {

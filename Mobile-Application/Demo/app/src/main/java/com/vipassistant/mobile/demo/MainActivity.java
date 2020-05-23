@@ -108,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
 //                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
+                voiceOutputQueue.clear();
+                mTTS.stop();
                 dialog.dismiss();
             }
         });
@@ -115,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 vipModeOn = false;
+                voiceOutputQueue.clear();
+                mTTS.stop();
                 dialog.dismiss();
             }
         });
@@ -124,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
 //                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
+                voiceOutputQueue.clear();
+                mTTS.stop();
             }
         });
         dialogBuilder.show().show();
@@ -146,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setMaxLines(3);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snack.getView().getLayoutParams();
-        params.setMargins(0,0,0, 100);
+        params.setMargins(0,0,0, 110);
         snack.getView().setLayoutParams(params);
         snack.show();
     }
