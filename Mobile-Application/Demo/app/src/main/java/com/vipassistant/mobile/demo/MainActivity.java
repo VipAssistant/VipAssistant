@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -23,6 +24,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
@@ -146,15 +148,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displaySnackbar(View view, String line) {
-        Snackbar snack = Snackbar.make(view, line, Snackbar.LENGTH_LONG);
-        snack.setDuration(5000);
-        TextView textView = (TextView) snack.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+        TSnackbar snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
+        snackbar.setIconLeft(R.drawable.ic_record_voice_over_w_24dp, 32);
+        View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(Color.parseColor("#1a1b29"));
+        snackbar.setDuration(5000);
+        TextView textView = (TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+        textView.setTextColor(Color.parseColor("#ffffff"));
         textView.setMaxLines(3);
         textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snack.getView().getLayoutParams();
-        params.setMargins(0,0,0, 110);
-        snack.getView().setLayoutParams(params);
-        snack.show();
+        snackbar.show();
     }
 
     private void speak(String line) {

@@ -1,21 +1,28 @@
 package com.vipassistant.mobile.demo;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.*;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import com.androidadvance.topsnackbar.TSnackbar;
 import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
@@ -47,17 +54,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
 public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 
+	private static final int RCS_INPUT = 1000;
 	private MapView m_mapView;
 	private EegeoMap m_eegeoMap = null;
 	private IndoorMapView m_interiorView = null;
 	private LocationService locationService;
 	private RoutingService routingService;
-	private ProgressDialog mapLoading, navigationRequestLoading, recalculatingRouteLoading;
+	private ProgressDialog mapLoading, navigationRequestLoading, processingCommandLoading;
 	private Marker outNavigationMarker;
 	private BlueSphere m_bluesphere = null;
 	private List<RouteView> m_routeViews = new ArrayList<RouteView>();
@@ -79,8 +88,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private TextToSpeech mTTS;
 	private Integer voiceOutputHandlerRefreshDuration = 1000;
 	private Queue<Directive> voiceOutputQueue = new LinkedList<>();
-
-	// todo: add voice out/in to specified places
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +129,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		mapLoading = buildLoadingDialog(this, "Loading Map Data...");
 		mapLoading.show();
 
-		recalculatingRouteLoading = buildLoadingDialog(this, "Recalculating The Route...");
+		processingCommandLoading = buildLoadingDialog(this, "Processing the Command...");
 		navigationRequestLoading = buildLoadingDialog(this, "Finding Shortest Possible Route For You...");
 
 		/* Initialize Map */
@@ -164,7 +171,162 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				m_interiorView = new IndoorMapView(m_mapView, uiContainer, m_eegeoMap);
 			}
 		});
+
+		RelativeLayout uiContainer = (RelativeLayout) findViewById(R.id.eegeo_ui_container);
+		uiContainer.setOnTouchListener(new View.OnTouchListener() {
+			@SuppressLint("ClickableViewAccessibility")
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				mTTS.stop();
+				listenForVoiceInput();
+				return false;
+			}
+		});
 	}
+
+	private void listenForVoiceInput() {
+		LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
+		micLayout.setVisibility(View.VISIBLE);
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+		SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(this.getApplicationContext());
+		RecognitionListener listener = new RecognitionListener() {
+			@Override
+			public void onResults(Bundle results) {
+				ArrayList<String> voiceResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+				if (voiceResults == null) {
+					System.out.println("No voice results");
+				} else {
+					// TODO: CHECK FOR DEDICATED INPUTS VIA BOOLEAN FIELDS IN CLASS
+					//			if (gettingblainput) {
+					//
+					//			} else {
+					//				matchVoiceCommand(res);
+					//			}
+					TextView micText2 = (TextView) findViewById(R.id.mic_text2);
+					micText2.setText(voiceResults.toString());
+					processingCommandLoading.show();
+					matchVoiceCommand(voiceResults);
+				}
+			}
+
+			@Override
+			public void onReadyForSpeech(Bundle params) {
+				System.out.println("Ready for speech");
+			}
+
+			/**
+			 *  ERROR_NETWORK_TIMEOUT = 1;
+			 *  ERROR_NETWORK = 2;
+			 *  ERROR_AUDIO = 3;
+			 *  ERROR_SERVER = 4;
+			 *  ERROR_CLIENT = 5;
+			 *  ERROR_SPEECH_TIMEOUT = 6;
+			 *  ERROR_NO_MATCH = 7;
+			 *  ERROR_RECOGNIZER_BUSY = 8;
+			 *  ERROR_INSUFFICIENT_PERMISSIONS = 9;
+			 *
+			 * @param error code is defined in SpeechRecognizer
+			 */
+			@Override
+			public void onError(int error) {
+				System.err.println("Error listening for speech: " + error);
+			}
+
+			@Override
+			public void onBeginningOfSpeech() {
+				System.out.println("Speech starting");
+			}
+
+			@Override
+			public void onBufferReceived(byte[] buffer) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onEndOfSpeech() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onEvent(int eventType, Bundle params) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onPartialResults(Bundle partialResults) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onRmsChanged(float rmsdB) {
+				// TODO Auto-generated method stub
+
+			}
+		};
+		recognizer.setRecognitionListener(listener);
+		recognizer.startListening(intent);
+	}
+
+	private void matchVoiceCommand(ArrayList<String> res) {
+		boolean matched = false;
+		LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
+		for (String inp: res) {
+			inp = inp.toLowerCase();
+			if (inp.contains("help")) {
+				outputHelp();
+				matched = true;
+				break;
+			} else if (inp.contains("where am i")) {
+				whereAmI();
+				matched = true;
+				break;
+			} else if (inp.contains("report my surroundings")) {
+				reportMySurroundings();
+				matched = true;
+				break;
+			} else if (inp.contains("search location")) {
+				searchLocation();
+				matched = true;
+				break;
+			} else if (inp.contains("find me a location")) {
+				findMeALocation();
+				matched = true;
+				break;
+			} else if (inp.contains("save current location")) {
+				saveLocation();
+				matched = true;
+				break;
+			} else if (inp.contains("share current location")) {
+				shareLocation();
+				matched = true;
+				break;
+			} else if (inp.contains("switch to non-vip mode")) {
+				switchToNormalMode();
+				matched = true;
+				break;
+			}
+		}
+		if (!matched) {
+			unknownCommandVoiceOutput();
+		}
+		processingCommandLoading.dismiss();
+		TextView micText2 = (TextView) findViewById(R.id.mic_text2);
+		micLayout.setVisibility(View.INVISIBLE);
+		micText2.setText("");
+	}
+
+	private void unknownCommandVoiceOutput() {
+		Directive dir1 = new Directive("Sorry I could not match your voice with any available commands", 3000);
+		Directive dir2 = new Directive("You can try to check available commands list by giving 'Help' command", 3500);
+		voiceOutputQueue.add(dir1);
+		voiceOutputQueue.add(dir2);
+	}
+
 
 	/**
 	 * Create a snackbar + also voice output given for given line
@@ -185,7 +347,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		snackbar.setDuration(duration);
 		TextView textView = (TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
 		textView.setTextColor(Color.parseColor("#ffffff"));
-		textView.setMaxLines(3);
+		textView.setMaxLines(5);
 		textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 		snackbar.show();
 	}
@@ -198,7 +360,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 	private void startVIPmessageBlinking() {
 		LinearLayout bLayout = (LinearLayout) findViewById(R.id.blink_layout);
-
 		Animation anim = new AlphaAnimation(0.0f, 1.0f);
 		anim.setDuration(1000);
 		anim.setStartOffset(20);
@@ -295,7 +456,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 		if (isNavigating && locationQueue.size() == 1) {
 			String finishedNavigatingVoiceOutput = String.format("You've successfully arrived %s", destinationLocation.getName());
-			voiceOutputQueue.add(new Directive(finishedNavigatingVoiceOutput, 2000));
+			Directive finishedNavigationDirective = new Directive(finishedNavigatingVoiceOutput, 2000);
+			voiceOutputQueue.add(finishedNavigationDirective);
 
 			userDirection = finalNavBearing;
 			isNavigating = false;
@@ -332,8 +494,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			}
 			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
 
-			String navigatingVoiceOutput = navHelperUpNextText.getText().toString();
-			// todo nav status vo
+			Directive directiveVoice = new Directive(navHelperUpNextText.getText().toString(), 2000);
+			voiceOutputQueue.add(directiveVoice);
 		}
 	}
 
@@ -356,8 +518,9 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
 		if (!response.succeeded()) {
-			// todo voiceout failing
-			Toast.makeText(this, "Failed to load mapscene", Toast.LENGTH_LONG).show();
+			Directive failedDirective = new Directive("Failed to load map data, system problem.", 2000);
+			voiceOutputQueue.add(failedDirective);
+			Toast.makeText(this, failedDirective.getStringToOutput(), Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -510,7 +673,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		// todo shared your location with ....
 	}
 
-	private void findMeA() {
+	private void findMeALocation() {
 		List<String> allLocationTypes = locationService.getAllLocationTypes();
 		// todo vo + vin for type of the location -- What do you want us to find for you?
 //		RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Type", allLocationTypes);
@@ -568,8 +731,31 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		// todo vo above
 	}
 
+	private void switchToNormalMode() {
+		// todo vo that you are switching to non-vip
+		voiceOutputQueue.clear();
+		mTTS.stop();
+		Intent myIntent = new Intent(VIPMainActivity.this, MainActivity.class);
+		VIPMainActivity.this.startActivity(myIntent);
+	}
+
 	private void outputHelp() {
 		// todo vo list of commands available
+		List<Directive> helpDirectives = new ArrayList<Directive>() {{
+			add(new Directive("In this mode you can Navigate or cancel your navigation yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 11000));
+			add(new Directive("VipAssistant will guide you through the navigation", 3000));
+			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
+			add(new Directive("In addition you can save or share your current location.", 3500));
+			add(new Directive("To learn where you are right now give: 'Where am I' command", 3500));
+			add(new Directive("To get a surroundings report give: 'Report my surroundings' command", 4000));
+			add(new Directive("To search for locations by their name give: 'Search location' command", 4000));
+			add(new Directive("To ask VipAssistant to find you a location give: 'Find me a location' command", 4500));
+			add(new Directive("To save your current location give: 'Save current location' command", 4000));
+			add(new Directive("To share your current location give: 'Share current location' command", 4000));
+			add(new Directive("To switch to non-VIP mode give: 'Switch to non-VIP mode' command", 3500));
+			add(new Directive("You can listen this helper by giving: 'Help' command again", 3500));
+		}};
+		voiceOutputQueue.addAll(helpDirectives);
 	}
 
 	private void saveLocationToLocal(Location location) {
