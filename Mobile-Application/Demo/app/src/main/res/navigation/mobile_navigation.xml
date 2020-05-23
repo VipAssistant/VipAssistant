@@ -18,12 +18,6 @@
             tools:layout="@layout/fragment_map_nav" />
 
     <fragment
-        android:id="@+id/nav_vipnavigation"
-        android:name="com.vipassistant.mobile.demo.ui.heatmap.HeatmapFragment"
-        android:label="@string/menu_heatmap"
-        tools:layout="@layout/fragment_vipnavigation" />
-
-    <fragment
             android:id="@+id/nav_heatmap"
             android:name="com.vipassistant.mobile.demo.ui.heatmap.HeatmapFragment"
             android:label="@string/menu_heatmap"
@@ -40,16 +34,4 @@
         android:name="com.vipassistant.mobile.demo.ui.blescanner.BLEScannerFragment"
         android:label="@string/menu_corona_demo"
         tools:layout="@layout/fragment_blescanner" />
-
-<!--    <fragment-->
-<!--        android:id="@+id/nav_share"-->
-<!--        android:name="com.vipassistant.mobile.demo.ui.share.ShareFragment"-->
-<!--        android:label="@string/menu_share"-->
-<!--        tools:layout="@layout/fragment_share" />-->
-
-<!--    <fragment-->
-<!--        android:id="@+id/nav_send"-->
-<!--        android:name="com.vipassistant.mobile.demo.ui.send.SendFragment"-->
-<!--        android:label="@string/menu_send"-->
-<!--        tools:layout="@layout/fragment_send" />-->
 </navigation>

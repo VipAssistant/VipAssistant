@@ -20,20 +20,20 @@ public class StartActivity extends AppCompatActivity {
 		EasySplashScreen config = new EasySplashScreen(StartActivity.this)
 				.withFullScreen()
 				.withTargetActivity(MainActivity.class)
-				.withSplashTimeOut(5000)
-				.withBackgroundColor(Color.parseColor("#1a1b29"))
+				.withSplashTimeOut(3000)
+				.withBackgroundColor(Color.parseColor("#192028"))
 				.withHeaderText("")
-				.withFooterText("Version 1.0.0")
+				.withFooterText("VipAssistant© Version 1.0.0")
 				.withBeforeLogoText("Welcome to")
 				.withAfterLogoText("Your Eyes in Buildings")
-				.withLogo(R.mipmap.ic_launcher_round);
+				.withLogo(R.drawable.ic_logo1_transparent);
 		config.getHeaderTextView().setTextColor(Color.WHITE);
 		config.getFooterTextView().setTextColor(Color.WHITE);
-		config.getFooterTextView().setPadding(0,0,0,10);
+		config.getFooterTextView().setPadding(0,0,0,20);
 		config.getBeforeLogoTextView().setTextColor(Color.WHITE);
 		config.getBeforeLogoTextView().setPadding(0,0,0,50);
 		config.getAfterLogoTextView().setTextColor(Color.WHITE);
-		config.getAfterLogoTextView().setPadding(0,50,0,0);
+		config.getAfterLogoTextView().setPadding(0,60,0,0);
 		View easySplashScreen = config.create();
 		setContentView(easySplashScreen);
 

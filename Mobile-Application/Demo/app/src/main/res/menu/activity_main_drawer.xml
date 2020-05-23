@@ -19,16 +19,12 @@
                         android:icon="@drawable/ic_near_me_black_24dp_opaque"
                         android:title="@string/menu_map_nav" />
                 <item
-                        android:id="@+id/nav_vipnavigation"
-                        android:icon="@drawable/ic_near_me_black_24dp_opaque"
-                        android:title="@string/vip_navigate" />
-                <item
                         android:id="@+id/nav_heatmap"
-                        android:icon="@drawable/ic_map_black_24dp"
+                        android:icon="@drawable/ic_whatshot_black_24dp"
                         android:title="@string/menu_heatmap" />
                 <item
                         android:id="@+id/nav_monitor"
-                        android:icon="@drawable/ic_bluetooth_searching_black"
+                        android:icon="@drawable/ic_graphic_eq_black_24dp"
                         android:title="@string/menu_monitor" />
                 <item
                         android:id="@+id/nav_corona_demo"

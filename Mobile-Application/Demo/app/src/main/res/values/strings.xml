@@ -1,19 +1,16 @@
 <resources>
-	<string name="app_name">VipAssistant</string>
+	<string name="app_name">VIPA</string>
 	<string name="navigation_drawer_open">Open navigation drawer</string>
 	<string name="navigation_drawer_close">Close navigation drawer</string>
-	<string name="nav_header_title">Vip Assistant Version 1.0.0</string>
 	<string name="nav_header_subtitle">vipassistant.portal3@gmail.com</string>
 	<string name="nav_header_desc">Navigation header</string>
 	<string name="action_settings">Settings</string>
 
 	<string name="menu_home">Home</string>
-	<string name="menu_heatmap">See Heatmap</string>
+	<string name="menu_map_nav">Navigate</string>
+	<string name="menu_heatmap">Heatmap</string>
 	<string name="menu_monitor">Calibrate and Monitor</string>
 	<string name="menu_corona_demo">Covid-19 Demo</string>
-	<string name="menu_map_nav">Navigate</string>
-	<!--	<string name="menu_share">Share</string>-->
-	<!--	<string name="menu_send">Send</string>-->
 
 	<!-- Voice Output Fragment -->
 
@@ -57,4 +54,8 @@
 
 	<string name="hello_first_fragment">Hello first fragment</string>
 	<string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+	<string name="home_text">Welcome to VipAssistant© 1.0.0</string>
+	<string name="home_textt">With VipAssistant© 1.0.0 you can:</string>
+	<string name="home_text1">Welcome to VipAssistant© 1.0.0\n\nYou can experience all the features\nspecified in below</string>
+	<string name="home_text2">You can also access separate tutorials for these features from \'Help\' button on settings bar</string>
 </resources>

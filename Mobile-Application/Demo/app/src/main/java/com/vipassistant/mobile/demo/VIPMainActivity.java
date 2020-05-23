@@ -1,28 +1,15 @@
 package com.vipassistant.mobile.demo;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
 import com.eegeo.mapapi.EegeoMap;
@@ -36,8 +23,6 @@ import com.eegeo.mapapi.map.OnInitialStreamingCompleteListener;
 import com.eegeo.mapapi.map.OnMapReadyCallback;
 import com.eegeo.mapapi.markers.Marker;
 import com.eegeo.mapapi.markers.MarkerOptions;
-import com.eegeo.mapapi.markers.OnMarkerClickListener;
-import com.eegeo.mapapi.precaching.OnPrecacheOperationCompletedListener;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
@@ -45,21 +30,16 @@ import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
-import com.google.android.material.navigation.NavigationView;
-import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
-
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
-import static com.vipassistant.mobile.demo.ui.utils.Utils.buildLoadingDialog;
 
 public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener {
 
@@ -89,6 +69,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private int initialLoadWait = 0;
 
 	// todo: add voice out/in to specified places
+	// todo: switch to non-vip mode vin/vo
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
