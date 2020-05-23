@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 import com.eegeo.indoors.IndoorMapView;
 import com.eegeo.mapapi.EegeoApi;
@@ -40,7 +42,10 @@ import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestResponse;
 import com.eegeo.mapapi.services.mapscene.MapsceneService;
 import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
+import com.vipassistant.mobile.demo.MainActivity;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.VIPMainActivity;
+import com.vipassistant.mobile.demo.ui.home.HomeFragment;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
@@ -232,6 +237,34 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 				return false;
 			}
 		});
+
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+		dialogBuilder.setIcon(R.drawable.nav_heat);
+		dialogBuilder.setTitle("Welcome to Heatmap Displayer");
+		dialogBuilder.setMessage("To be able to display heatmap of the building you are currently in," +
+				" you need to accept sharing your heatmap data with VipAssistant community and make sure your Internet connection is on.");
+		dialogBuilder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		dialogBuilder.setNeutralButton("Reject", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+//				((MainActivity) getActivity()).redirectToHome(); todo not works
+			}
+		});
+		dialogBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				dialog.dismiss();
+//				((MainActivity) getActivity()).redirectToHome(); todo not works
+			}
+		});
+		dialogBuilder.show().show();
+
 		return root;
 	}
 

@@ -83,6 +83,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private TextToSpeech mTTS;
 	private Integer voiceOutputHandlerRefreshDuration = 1000;
 	private Queue<Directive> voiceOutputQueue = new LinkedList<>();
+	private TSnackbar snackbar = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +173,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			@SuppressLint("ClickableViewAccessibility")
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+				snackbar.dismiss();
 				mTTS.stop();
 				listenForVoiceInput();
 				return false;
@@ -337,7 +339,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	}
 
 	private void displaySnackbar(View view, String line, int duration) {
-		TSnackbar snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
+		snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
 		snackbar.setIconLeft(R.drawable.ic_record_voice_over_w_24dp, 32);
 		View snackbarView = snackbar.getView();
 		snackbarView.setBackgroundColor(Color.parseColor("#1a1b29"));

@@ -103,7 +103,7 @@ public class Constants {
 		add(new Location("Second Floor Hall", "Hall", new LatLng(39.891818, 32.783219), .000047, .000090, 4, demoIndoorMapId));
 		add(new Location("Second Floor Crossover to B Block", "Crossover", new LatLng(39.891843, 32.783413), .000015, .000077, 4, demoIndoorMapId));
 		add(new Location("Second Floor B Block Entrance", "B Block Entrance", new LatLng(39.891823, 32.783558), .000053, .000062, 4, demoIndoorMapId));
-		add(new Location("Second Floor Resting Room", "Resting Room", new LatLng(39.891780, 32.783290), .000033, .000038, 4, demoIndoorMapId));
+		add(new Location("Resting Room", "Resting Room", new LatLng(39.891780, 32.783290), .000033, .000038, 4, demoIndoorMapId));
 		add(new Location("Second Floor Front Upstairs", "Stairs", new LatLng(39.891784, 32.783203), .000008, .000015, 4, demoIndoorMapId));
 		add(new Location("Second Floor Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 4, demoIndoorMapId));
 

@@ -16,6 +16,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -23,6 +25,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.vipassistant.mobile.demo.ui.home.HomeFragment;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
 import com.vipassistant.mobile.demo.ui.model.Directive;
 import com.vipassistant.mobile.demo.ui.utils.HomeArrayAdapter;
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Queue<Directive> voiceOutputQueue = new LinkedList<>();
     private Integer voiceOutputHandlerRefreshDuration = 1000;
+    private TSnackbar snackbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e("VoiceOutput - TTS", "Language not supported");
                     } else {
-                        voiceOutputQueue.add(new Directive("Welcome to VipAssistant.", 1500));
+                        voiceOutputQueue.add(new Directive("Welcome to VipAssistant.", 1200));
                         voiceOutputQueue.add(new Directive("Do you want to use VipAssistant in Visually Impaired mode or in Non-Visually Impaired mode?", 5000));
                         voiceOutputQueue.add(new Directive("Clicking anywhere on the screen except Non-Visually Impaired mode button will result in selecting visually impaired mode.", 5500));
                         voiceOutputQueue.add(new Directive("You can always switch back and forth between these modes.", 3000));
@@ -86,9 +90,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (!voiceOutputQueue.isEmpty()) {
                                     voiceOutput(voiceOutputQueue.remove());
                                 }
-                                handler.postDelayed(this, 5000);
+                                handler.postDelayed(this, voiceOutputHandlerRefreshDuration);
                             }
-                        }, 5000);
+                        }, voiceOutputHandlerRefreshDuration);
                     }
                 } else {
                     Log.e("VoiceOutput - TTS", "TTS Initialization failed");
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
 //                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
                 voiceOutputQueue.clear();
+                snackbar.dismiss();
                 mTTS.stop();
                 dialog.dismiss();
             }
@@ -116,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 vipModeOn = false;
+                snackbar.dismiss();
                 voiceOutputQueue.clear();
                 mTTS.stop();
                 dialog.dismiss();
@@ -127,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
 //                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
+                snackbar.dismiss();
                 voiceOutputQueue.clear();
                 mTTS.stop();
             }
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displaySnackbar(View view, String line, int duration) {
-        TSnackbar snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
+        snackbar = TSnackbar.make(view, line, TSnackbar.LENGTH_LONG);
         snackbar.setIconLeft(R.drawable.ic_record_voice_over_w_24dp, 32);
         View snackbarView = snackbar.getView();
         snackbarView.setBackgroundColor(Color.parseColor("#1a1b29"));
@@ -192,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mapNavVM.getCachingActivated()) {
                     mapNavVM.setCachingToastActivated(false);
                     String newDisplayTitle = "Display Caching Logs: Off";
-                    optionsMenu.getItem(1).setTitle(newDisplayTitle);
+                    optionsMenu.getItem(2).setTitle(newDisplayTitle);
                 }
                 mapNavVM.setCachingActivated(!mapNavVM.getCachingActivated());
                 String newTitle = item.getTitle().equals("Caching: On") ? "Caching: Off" : "Caching: On";
@@ -212,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void showHelp() {
+    public void showHelp() { // todo: not works
         String[] textString = {"Navigate Yourself to Anywhere Inside Buildings!", "Discover the World!",
                 "Save and Share Your Location!", "Display Realtime Building Heatmaps!", "Monitor the State of Your App!",
                 "Toggle Map Caching!", "Switch to VIP Mode!", "Display Location Calculation Demo!"};
@@ -241,6 +248,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         dialogBuilder.show().show();
+    }
+
+    public void redirectToHome() { // todo: not works
+        Fragment fragment = new HomeFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
     }
 
     @Override
