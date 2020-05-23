@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
@@ -221,6 +222,9 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		}
 
 		if (isNavigating && locationQueue.size() == 1) {
+			String finishedNavigatingVoiceOutput = String.format("You've successfully arrived %s", destinationLocation.getName());
+			// todo arrival vo
+
 			userDirection = finalNavBearing;
 			isNavigating = false;
 			destinationLocation = null;
@@ -236,8 +240,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			}
 			navigationHelper1.setVisibility(View.INVISIBLE);
 			navigationHelper2.setVisibility(View.INVISIBLE);
-			// todo finished vo
-			Toast.makeText(this, "You've successfully arrived your destination!", Toast.LENGTH_LONG).show();
+
+			Toast.makeText(this, finishedNavigatingVoiceOutput, Toast.LENGTH_LONG).show();
 		} else if (isNavigating) {
 			/* Update Navigation Helper and etc. */
 			navRemainingDistance = navRemainingDistance - PERSON_WALKING_SPEED >= 0 ? navRemainingDistance - PERSON_WALKING_SPEED : 0;
@@ -251,10 +255,12 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT RIGHT") &&
 						!upNext.equals("UP NEXT:\nELEVATOR ON STRAIGHT") &&
 						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
-						upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext;
+						upNext + String.format(" in %.2f meters", nextStepInfo.getStepDistance()) : upNext;
 				navHelperUpNextText.setText(upNext);
 			}
 			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+
+			String navigatingVoiceOutput = navHelperUpNextText.getText().toString();
 			// todo nav status vo
 		}
 	}
@@ -278,7 +284,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
 		if (!response.succeeded()) {
-			// todo voiceout
+			// todo voiceout failing
 			Toast.makeText(this, "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
 	}
@@ -374,12 +380,15 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 					upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
 			navHelperUpNextText.setText(upNext);
 		} else {
-			// todo voiceout
+			// todo voiceout failing
 			Toast.makeText(this, "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
 		}
 	}
 
 	public void cancelNavigation() {
+		String cancelledVoiceOutput = String.format("Cancelled your current navigation to %s", destinationLocation.getName());
+		// todo cancelled vo
+
 		/* Refresh location queue */
 		locationQueue = new LinkedList<>(Arrays.asList(userLocation));
 		navDirectionQueue = new LinkedList<>();
@@ -397,8 +406,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		}
 		navigationHelper1.setVisibility(View.INVISIBLE);
 		navigationHelper2.setVisibility(View.INVISIBLE);
-		// todo cancelled vo
-		Toast.makeText(this, "Cancelled your current navigation", Toast.LENGTH_LONG).show();
+
+		Toast.makeText(this, cancelledVoiceOutput, Toast.LENGTH_LONG).show();
 	}
 
 	public void whereAmI() {
@@ -423,11 +432,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	}
 
 	public void shareLocation() {
-		Intent share = new Intent(Intent.ACTION_SEND);
-		share.setType("text/plain");
-		share.putExtra(Intent.EXTRA_TEXT, packLocationDataToSend(userLocation));
-		startActivity(Intent.createChooser(share, "Share My Location!"));
-		// todo creates intent...?
+		// todo vo + vin for who to send the location
+		SmsManager smsManager = SmsManager.getDefault();
+		smsManager.sendTextMessage("05428927877", null, packLocationDataToSend(userLocation), null, null);
+		// todo shared your location with ....
 	}
 
 	public void findMeA() {
