@@ -106,7 +106,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 							|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
 						Log.e("VoiceOutput - TTS", "Language not supported");
 					} else {
-						voiceOutputQueue.add(new Directive("Welcome to VipAssistant's visually impaired mode, currently getting map information ready for you.", 5000));
+						voiceOutputQueue.add(new Directive("Welcome to Vip Assistant's visually impaired mode, currently getting map information ready for you.", 5000));
 						voiceOutputQueue.add(new Directive("You can click anywhere on the screen to interact with the system via giving voice commands.", 5000));
 						voiceOutputQueue.add(new Directive("For example, click and say 'Help' to hear available commands.", 3000));
 						voiceOutput(voiceOutputQueue.remove());
@@ -764,14 +764,14 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void outputHelp() {
 		// todo vo list of commands available
 		List<Directive> helpDirectives = new ArrayList<Directive>() {{
-			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 9000));
-			add(new Directive("VipAssistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
+			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting Vip Assistant find you a nearby location that you specified.", 9000));
+			add(new Directive("Vip Assistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
 			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
 			add(new Directive("In addition you can save or share your current location.", 3500));
 			add(new Directive("To learn where you are right now give: 'Where am I' command", 3500));
 			add(new Directive("To get a surroundings report give: 'Report my surroundings' command", 4000));
 			add(new Directive("To search for locations by their name give: 'Search location' command", 4000));
-			add(new Directive("To ask VipAssistant to find you a location give: 'Find me a location' command", 4500));
+			add(new Directive("To ask Vip Assistant to find you a location give: 'Find me a location' command", 4500));
 			add(new Directive("To save your current location give: 'Save current location' command", 4000));
 			add(new Directive("To share your current location give: 'Share current location' command", 4000));
 			add(new Directive("To switch to non-VIP mode give: 'Switch to non-VIP mode' command", 3500));

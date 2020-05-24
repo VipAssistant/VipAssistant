@@ -91,7 +91,6 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 		creatingHeatmapLoading = buildLoadingDialog(getActivity(), "Creating Great Heatmaps for you...");
 		refreshingHeatmapLoading = buildLoadingDialog(getActivity(), "Loading Map Data...");
 
-
 		/* Initialize Map */
 		EegeoApi.init(getActivity(), getString(R.string.eegeo_api_key));
 		m_mapView = (MapView) root.findViewById(R.id.mapView);
@@ -225,6 +224,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 			}
 		});
 
+		// TODO: INTERNET OLMAZSA DO NOT PERMIT
 		RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 		uiContainer.setOnTouchListener(new View.OnTouchListener() {
 			@SuppressLint("ClickableViewAccessibility")
@@ -240,7 +240,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 		dialogBuilder.setIcon(R.drawable.nav_heat);
-		dialogBuilder.setTitle("Welcome to Heatmap Displayer");
+		dialogBuilder.setTitle("Welcome to Heatmap Module");
 		dialogBuilder.setMessage("To be able to display heatmap of the building you are currently in," +
 				" you need to accept sharing your heatmap data with VipAssistant community and make sure your Internet connection is on.");
 		dialogBuilder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
@@ -253,14 +253,16 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
-//				((MainActivity) getActivity()).redirectToHome(); todo not works
+				mapLoading.dismiss();
+				((MainActivity) getActivity()).redirectToHome();
 			}
 		});
 		dialogBuilder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				dialog.dismiss();
-//				((MainActivity) getActivity()).redirectToHome(); todo not works
+				mapLoading.dismiss();
+				((MainActivity) getActivity()).redirectToHome();
 			}
 		});
 		dialogBuilder.show().show();

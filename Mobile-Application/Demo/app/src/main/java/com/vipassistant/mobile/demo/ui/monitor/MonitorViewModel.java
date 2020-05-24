@@ -1,14 +1,14 @@
-package com.vipassistant.mobile.demo.ui.voiceinput;
+package com.vipassistant.mobile.demo.ui.monitor;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class VoiceInputViewModel extends ViewModel {
+public class MonitorViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public VoiceInputViewModel() {
+    public MonitorViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("This is Voice Input fragment");
     }

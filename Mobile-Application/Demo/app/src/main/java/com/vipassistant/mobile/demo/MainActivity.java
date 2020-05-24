@@ -10,10 +10,9 @@ import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.*;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuItemImpl;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -38,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private MapNavigationViewModel mapNavVM;
+    private NavController navController;
     private Menu optionsMenu;
     private Boolean vipModeOn = true;
     private TextToSpeech mTTS;
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private Queue<Directive> voiceOutputQueue = new LinkedList<>();
     private Integer voiceOutputHandlerRefreshDuration = 1000;
     private TSnackbar snackbar = null;
+    private boolean socialDistancingActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_heatmap, R.id.nav_monitor,
-                R.id.nav_corona_demo, R.id.nav_map_nav)
+                R.id.nav_corona_demo, R.id.nav_map_nav, R.id.nav_corona_demo)
                 .setDrawerLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
@@ -79,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e("VoiceOutput - TTS", "Language not supported");
                     } else {
-                        voiceOutputQueue.add(new Directive("Welcome to VipAssistant.", 1200));
-                        voiceOutputQueue.add(new Directive("Do you want to use VipAssistant in Visually Impaired mode or in Non-Visually Impaired mode?", 5000));
+                        voiceOutputQueue.add(new Directive("Welcome to Vip Assistant.", 1200));
+                        voiceOutputQueue.add(new Directive("Do you want to use Vip Assistant in Visually Impaired mode or in Non-Visually Impaired mode?", 5000));
                         voiceOutputQueue.add(new Directive("Clicking anywhere on the screen except Non-Visually Impaired mode button will result in selecting visually impaired mode.", 5500));
                         voiceOutputQueue.add(new Directive("You can always switch back and forth between these modes.", 3000));
                         voiceOutput(voiceOutputQueue.remove());
@@ -139,6 +140,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         dialogBuilder.show().show();
+
+        RelativeLayout covidRl = (RelativeLayout) navigationView.getMenu().getItem(2).getSubMenu().getItem(0).getActionView();
+        Switch covidMode = (Switch) covidRl.getChildAt(0);
+        covidMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                    dialogBuilder.setIcon(R.drawable.covid_dialog);
+                    dialogBuilder.setTitle("Activated Social Distancing Mode"); // TODO: DEMOSU!
+                    dialogBuilder.setMessage("From now on your location will be shared with VipAssistant social distancing community in realtime to let us create a 1.5 meter safe radius for you inside buildings." +
+                            " Please make sure you have an active internet connection." +
+                            "\n\nYou will be notified through voice notifications whenever a situation that violates your social distance radius occurs." +
+                            "\n\nIn the meantime, we also recommend checking heatmaps of the locations that you're planning to navigate earlier in order to see the population intensities in there.");
+                    dialogBuilder.setPositiveButton("OK...", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            socialDistancingActive = true;
+                            dialog.dismiss();
+                        }
+                    });
+                    dialogBuilder.show().show();
+                } else {
+                    socialDistancingActive = false;
+                    Toast.makeText(MainActivity.this, "Deactivated Social Distancing Mode", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+//        MenuItemImpl navigateItem = (MenuItemImpl) navigationView.getMenu().getItem(1).getSubMenu().getItem(0);
+//        navigateItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                return false;
+//            }
+//        });
     }
 
     /**
@@ -250,10 +286,8 @@ public class MainActivity extends AppCompatActivity {
         dialogBuilder.show().show();
     }
 
-    public void redirectToHome() { // todo: not works
-        Fragment fragment = new HomeFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+    public void redirectToHome() {
+        navController.navigate(R.id.nav_home);
     }
 
     @Override

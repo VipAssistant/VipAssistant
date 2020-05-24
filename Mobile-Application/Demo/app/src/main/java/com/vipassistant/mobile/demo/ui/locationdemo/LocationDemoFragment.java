@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.mapnavigation;
+package com.vipassistant.mobile.demo.ui.locationdemo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -8,12 +8,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -31,6 +34,9 @@ import com.eegeo.mapapi.map.OnMapReadyCallback;
 import com.eegeo.mapapi.markers.Marker;
 import com.eegeo.mapapi.markers.MarkerOptions;
 import com.eegeo.mapapi.markers.OnMarkerClickListener;
+import com.eegeo.mapapi.positioner.OnPositionerChangedListener;
+import com.eegeo.mapapi.positioner.Positioner;
+import com.eegeo.mapapi.positioner.PositionerOptions;
 import com.eegeo.mapapi.precaching.OnPrecacheOperationCompletedListener;
 import com.eegeo.mapapi.precaching.PrecacheOperationResult;
 import com.eegeo.mapapi.services.mapscene.MapsceneRequestOptions;
@@ -40,12 +46,12 @@ import com.eegeo.mapapi.services.mapscene.OnMapsceneRequestCompletedListener;
 import com.eegeo.mapapi.services.routing.*;
 import com.eegeo.mapapi.widgets.RouteView;
 import com.eegeo.mapapi.widgets.RouteViewOptions;
+import com.eegeo.ui.util.ViewAnchor;
 import com.vipassistant.mobile.demo.R;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.service.LocationService;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -54,9 +60,9 @@ import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
-public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
+public class LocationDemoFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
 	private View root;
-	private MapNavigationViewModel mapNavigationViewModel;
+	private LocationDemoViewModel locationDemoViewModel;
 	private LocationService locationService;
 	private RoutingService routingService;
 	private MapView m_mapView;
@@ -96,11 +102,12 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	* Then in the app, first go to the Z-103 and first demo happens, then try to go to the Room A-306
 	* which will trigger the second and the third demos. */
 	private Boolean incorrectDemo1Activated = false, incorrectDemo2Activated = false, incorrectDemo3Activated = false;
+	private OnPositionerChangedListener m_positionerChangedListener = null;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mapNavigationViewModel = ViewModelProviders.of(getActivity()).get(MapNavigationViewModel.class);
+		locationDemoViewModel = ViewModelProviders.of(getActivity()).get(LocationDemoViewModel.class);
 		root = inflater.inflate(R.layout.fragment_map_nav, container, false);
 		recalculatingRouteLoading = buildLoadingDialog(getActivity(), "Recalculating The Route...");
 		navigationRequestLoading = buildLoadingDialog(getActivity(), "Finding Shortest Possible Route For You...");
@@ -138,6 +145,22 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 					@Override
 					public void onInitialStreamingComplete() {
 						mapLoading.dismiss();
+
+						// TODO: BELOW to 402 and 403 5 adet? + innerclass make farkli farkli renk
+						ImageView imageView = new ImageView(getActivity());
+						imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+						imageView.setImageResource(R.drawable.demo_ble);
+						m_mapView.addView(imageView);
+						imageView.setVisibility(View.INVISIBLE);
+
+						m_positionerChangedListener = new ViewAnchorAdapter(imageView, 0.5f, 0.5f);
+						m_eegeoMap.addPositionerChangedListener(m_positionerChangedListener);
+
+						m_eegeoMap.addPositioner(new PositionerOptions()
+								.indoor(demoIndoorMapId, 1)
+								.position(new LatLng(39.891758, 32.783235))
+						);
+
 						initializeLocation();
 					}
 				});
@@ -178,7 +201,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				});
 			}
 		});
-		// TODO: INTERNET OLMAZSA DO NOT PERMIT
+
 		RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 		uiContainer.setOnTouchListener(new View.OnTouchListener() {
 			@SuppressLint("ClickableViewAccessibility")
@@ -283,7 +306,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	 * updates geoloc nav helper etc?
 	 */
 	private void updateMapPeriodically() {
-		if (mapNavigationViewModel.getCachingActivated() && cachingTimeout >= 3) {
+		if (locationDemoViewModel.getCachingActivated() && cachingTimeout >= 3) {
 			cacheCurrentCameraLocation(m_eegeoMap.getCameraPosition().target);
 			cachingTimeout = 0;
 		}
@@ -1104,7 +1127,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	@Override
 	public void onPrecacheOperationCompleted(PrecacheOperationResult precacheOperationResult) {
-		if (mapNavigationViewModel.getCachingToastActivated()) {
+		if (locationDemoViewModel.getCachingToastActivated()) {
 			String toastMessage;
 			if (precacheOperationResult.succeeded()) {
 				toastMessage = String.format("Successfully cached a radius of 3km around (%.2f, %.2f).\n" +
@@ -1118,10 +1141,35 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		}
 	}
 
+	private class ViewAnchorAdapter implements OnPositionerChangedListener {
+
+		private View m_view;
+		private PointF m_anchorUV;
+
+		ViewAnchorAdapter(@NonNull View view, float u, float v)
+		{
+			m_view = view;
+			m_anchorUV = new PointF(u, v);
+		}
+
+		@UiThread
+		public void onPositionerChanged(Positioner positioner) {
+			if(positioner.isScreenPointProjectionDefined()) {
+				m_view.setVisibility(View.VISIBLE);
+				Point screenPoint = positioner.getScreenPointOrNull();
+				if(screenPoint != null)
+					ViewAnchor.positionView(m_view, screenPoint, m_anchorUV);
+			}
+			else {
+				m_view.setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
 	private class MarkerClickListenerImpl implements OnMarkerClickListener {
 		public void onMarkerClick(Marker marker) {
 			if (marker.getTitle() != "You Are Here!") {
-				Context context = MapNavigationFragment.this.getActivity();
+				Context context = LocationDemoFragment.this.getActivity();
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 				dialogBuilder.setIcon(R.drawable.nav_map);
 				dialogBuilder.setTitle(String.format("Do you want to navigate to %s?", marker.getTitle()));

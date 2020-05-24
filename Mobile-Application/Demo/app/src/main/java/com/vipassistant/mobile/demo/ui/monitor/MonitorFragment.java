@@ -1,4 +1,4 @@
-package com.vipassistant.mobile.demo.ui.voiceinput;
+package com.vipassistant.mobile.demo.ui.monitor;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,17 +20,17 @@ import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
-public class VoiceInputFragment extends Fragment {
+public class MonitorFragment extends Fragment {
 
-    private VoiceInputViewModel voiceInputViewModel;
+    private MonitorViewModel monitorViewModel;
     private static final int RCS_INPUT = 1000;
     TextView vinput2;
     ImageButton mVoiceBtn;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
-        voiceInputViewModel = ViewModelProviders.of(this).get(VoiceInputViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_vinput, container, false);
+        monitorViewModel = ViewModelProviders.of(this).get(MonitorViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_monitor, container, false);
 
         vinput2 = root.findViewById(R.id.vinput2);
         mVoiceBtn = root.findViewById(R.id.voiceBtn);

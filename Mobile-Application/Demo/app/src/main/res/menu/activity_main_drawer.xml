@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+      xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
     <item android:title="@string/home">
@@ -33,5 +33,13 @@
             </group>
         </menu>
     </item>
-
+    <item android:title="@string/additional_settings">
+        <menu>
+            <item
+                    android:id="@+id/covid_switch"
+                    android:title="Covid-19 Social Distancing Mode"
+                    app:showAsAction="always"
+                    app:actionLayout="@layout/switch_item"/>
+        </menu>
+    </item>
 </menu>

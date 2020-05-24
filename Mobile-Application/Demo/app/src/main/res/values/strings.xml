@@ -9,8 +9,8 @@
 	<string name="menu_home">Home</string>
 	<string name="menu_map_nav">Navigate</string>
 	<string name="menu_heatmap">Heatmap</string>
-	<string name="menu_monitor">Calibrate and Monitor</string>
-	<string name="menu_corona_demo">Covid-19 Demo</string>
+	<string name="menu_monitor">Monitor</string>
+	<string name="menu_corona_demo">Location Demo</string>
 
 	<!-- Voice Output Fragment -->
 
@@ -61,4 +61,5 @@
 	<string name="vip_screen_msg">VIP Mode Activated\n\nTouch Anywhere on the Screen to Interact with Voice</string>
 	<string name="mic">mic</string>
 	<string name="by_vipassistant">By VipAssistant</string>
+	<string name="additional_settings">Additional Settings</string>
 </resources>
