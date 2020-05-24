@@ -84,6 +84,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private Integer voiceOutputHandlerRefreshDuration = 1000;
 	private Queue<Directive> voiceOutputQueue = new LinkedList<>();
 	private TSnackbar snackbar = null;
+	private Boolean listeningCommand = false;
+	private Intent voiceIntent;
+	private SpeechRecognizer voiceRecognizer;
+	private RecognitionListener voiceListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -173,9 +177,24 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			@SuppressLint("ClickableViewAccessibility")
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				snackbar.dismiss();
-				mTTS.stop();
-				listenForVoiceInput();
+				if (!listeningCommand) {
+					listeningCommand = true;
+					if (!isNavigating) { // TODO: eger navige etmiyorsa voice queue sunu sil
+						mTTS.speak(null, TextToSpeech.QUEUE_FLUSH, null);
+						voiceOutputHandlerRefreshDuration = 1000;
+						voiceOutputQueue.clear();
+					}
+					snackbar.dismiss();
+					mTTS.stop();
+					listenForVoiceInput();
+				} else {
+					LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
+					listeningCommand = false;
+					processingCommandLoading.dismiss();
+					voiceRecognizer.stopListening();
+					voiceRecognizer.destroy();
+					micLayout.setVisibility(View.INVISIBLE);
+				}
 				return false;
 			}
 		});
@@ -184,10 +203,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void listenForVoiceInput() {
 		LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
 		micLayout.setVisibility(View.VISIBLE);
-		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
-		SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(this.getApplicationContext());
-		RecognitionListener listener = new RecognitionListener() {
+		voiceIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+		voiceRecognizer = SpeechRecognizer.createSpeechRecognizer(this.getApplicationContext());
+		voiceListener = new RecognitionListener() {
 			@Override
 			public void onResults(Bundle results) {
 				ArrayList<String> voiceResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -200,10 +219,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 					//			} else {
 					//				matchVoiceCommand(res);
 					//			}
-					TextView micText2 = (TextView) findViewById(R.id.mic_text2);
-					micText2.setText(voiceResults.toString());
-					recognizer.stopListening();
-					recognizer.destroy();
+					voiceRecognizer.stopListening();
+					voiceRecognizer.destroy();
 					processingCommandLoading.show();
 					matchVoiceCommand(voiceResults);
 				}
@@ -239,36 +256,36 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 			@Override
 			public void onBufferReceived(byte[] buffer) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 
 			@Override
 			public void onEndOfSpeech() {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 
 			@Override
 			public void onEvent(int eventType, Bundle params) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 
 			@Override
 			public void onPartialResults(Bundle partialResults) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 
 			@Override
 			public void onRmsChanged(float rmsdB) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 		};
-		recognizer.setRecognitionListener(listener);
-		recognizer.startListening(intent);
+		voiceRecognizer.setRecognitionListener(voiceListener);
+		voiceRecognizer.startListening(voiceIntent);
 	}
 
 	private void matchVoiceCommand(ArrayList<String> res) {
@@ -277,34 +294,42 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		for (String inp : res) {
 			inp = inp.toLowerCase();
 			if (inp.contains("help")) {
+				Toast.makeText(this, "Received 'Help' Command, Processing...", Toast.LENGTH_LONG).show();
 				outputHelp();
 				matched = true;
 				break;
 			} else if (inp.contains("where am i")) {
+				Toast.makeText(this, "Received 'Where Am I' Command, Processing...", Toast.LENGTH_LONG).show();
 				whereAmI();
 				matched = true;
 				break;
 			} else if (inp.contains("report my surroundings")) {
+				Toast.makeText(this, "Received 'Report My Surroundings' Command, Processing...", Toast.LENGTH_LONG).show();
 				reportMySurroundings();
 				matched = true;
 				break;
 			} else if (inp.contains("search location")) {
+				Toast.makeText(this, "Received 'Search Location' Command, Processing...", Toast.LENGTH_LONG).show();
 				searchLocation();
 				matched = true;
 				break;
 			} else if (inp.contains("find me a location")) {
+				Toast.makeText(this, "Received 'Find Me a Location' Command, Processing...", Toast.LENGTH_LONG).show();
 				findMeALocation();
 				matched = true;
 				break;
 			} else if (inp.contains("save current location")) {
+				Toast.makeText(this, "Received 'Save Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
 				saveLocation();
 				matched = true;
 				break;
 			} else if (inp.contains("share current location")) {
+				Toast.makeText(this, "Received 'Share Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
 				shareLocation();
 				matched = true;
 				break;
 			} else if (inp.contains("switch to non-vip mode")) {
+				Toast.makeText(this, "Received 'Switch to non-VIP Mode' Command, Processing...", Toast.LENGTH_LONG).show();
 				switchToNormalMode();
 				matched = true;
 				break;
@@ -314,9 +339,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			unknownCommandVoiceOutput();
 		}
 		processingCommandLoading.dismiss();
-		TextView micText2 = (TextView) findViewById(R.id.mic_text2);
 		micLayout.setVisibility(View.INVISIBLE);
-		micText2.setText("");
+		listeningCommand = false;
 	}
 
 	private void unknownCommandVoiceOutput() {
@@ -740,7 +764,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void outputHelp() {
 		// todo vo list of commands available
 		List<Directive> helpDirectives = new ArrayList<Directive>() {{
-			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 11000));
+			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting VipAssistant find you a nearby location that you specified.", 9000));
 			add(new Directive("VipAssistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
 			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
 			add(new Directive("In addition you can save or share your current location.", 3500));

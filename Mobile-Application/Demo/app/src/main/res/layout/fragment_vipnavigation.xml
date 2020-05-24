@@ -93,19 +93,8 @@
             android:orientation="vertical"
             android:minWidth="200dp"
             android:layout_width="wrap_content">
-        <TextView
-                android:id="@+id/mic_text1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:maxWidth="105dp"
-                android:textColor="#ffffff"
-                android:text="@string/by_vipassistant"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:textAlignment="center"
-                android:layout_gravity="center_horizontal"/>
         <ImageView
+                android:layout_marginTop="15dp"
                 android:id="@+id/mic_pic"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
