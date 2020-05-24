@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
@@ -147,13 +148,28 @@ public class LocationDemoFragment extends Fragment implements OnMapsceneRequestC
 						mapLoading.dismiss();
 
 						// TODO: BELOW to 402 and 403 5 adet? + innerclass make farkli farkli renk
-						ImageView imageView = new ImageView(getActivity());
-						imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-						imageView.setImageResource(R.drawable.demo_ble);
-						m_mapView.addView(imageView);
-						imageView.setVisibility(View.INVISIBLE);
+						LinearLayout beaconLL = new LinearLayout(getActivity());
+						beaconLL.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+						beaconLL.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.nav_helper_bg));
+						beaconLL.setOrientation(LinearLayout.HORIZONTAL);
 
-						m_positionerChangedListener = new ViewAnchorAdapter(imageView, 0.5f, 0.5f);
+						ImageView beaconIV = new ImageView(getActivity());
+						beaconIV.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+						beaconIV.setImageResource(R.drawable.demo_ble);
+						beaconLL.addView(beaconIV);
+
+						TextView beaconTV = new TextView(getActivity());
+						beaconTV.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+						beaconTV.setText("Beacon-1\nRSSI:60 dBm\n(39.8917, 32.7832)");
+						beaconTV.setTextColor(Color.WHITE);
+						beaconTV.setTypeface(null, Typeface.BOLD);
+						beaconTV.setTextSize(8);
+						beaconLL.addView(beaconTV);
+
+						beaconLL.setVisibility(View.INVISIBLE);
+						m_mapView.addView(beaconLL);
+
+						m_positionerChangedListener = new ViewAnchorAdapter(beaconLL, 0.5f, 0.5f);
 						m_eegeoMap.addPositionerChangedListener(m_positionerChangedListener);
 
 						m_eegeoMap.addPositioner(new PositionerOptions()
