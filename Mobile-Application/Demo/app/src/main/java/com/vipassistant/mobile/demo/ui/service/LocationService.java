@@ -73,8 +73,21 @@ public class LocationService {
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public Optional<Location> findByIndoorName(String name) {
 		return allLocations.stream()
-					.filter(loc -> loc.getName().equals(name))
+					.filter(loc -> loc.getName().equalsIgnoreCase(name))
 					.findFirst();
+	}
+
+	/**
+	 * Name is unique for each location inside the map
+	 * @param name
+	 * @return
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public Optional<String> findByIndoorNameVoice(String name) {
+		return allLocations.stream()
+				.map(loc -> loc.getName().toLowerCase())
+				.filter(loc -> loc.contains(name))
+				.findFirst();
 	}
 
 	/**
@@ -89,12 +102,23 @@ public class LocationService {
 				.findFirst();
 	}
 
-
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	public List<Location> findByType(String type) {
 		return allLocations.stream()
 					.filter(loc -> loc.getType().equals(type))
 					.collect(Collectors.toList());
+	}
+
+	/**
+	 * Name is unique for each location inside the map
+	 * @param name
+	 * @return
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public List<Location> findByTypeVoice(String name) {
+		return allLocations.stream()
+				.filter(loc -> loc.getType().toLowerCase().contains(name))
+				.collect(Collectors.toList());
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.N)

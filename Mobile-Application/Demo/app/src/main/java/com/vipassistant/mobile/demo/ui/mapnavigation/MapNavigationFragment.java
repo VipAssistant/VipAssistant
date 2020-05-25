@@ -14,6 +14,7 @@ import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -55,6 +56,8 @@ import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.*;
 
 public class MapNavigationFragment extends Fragment implements OnMapsceneRequestCompletedListener, OnRoutingQueryCompletedListener, OnPrecacheOperationCompletedListener {
+
+	private static final int SHARE_RESULT = 1000;
 	private View root;
 	private MapNavigationViewModel mapNavigationViewModel;
 	private LocationService locationService;
@@ -178,7 +181,6 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				});
 			}
 		});
-		// TODO: INTERNET OLMAZSA DO NOT PERMIT
 		RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 		uiContainer.setOnTouchListener(new View.OnTouchListener() {
 			@SuppressLint("ClickableViewAccessibility")
@@ -186,7 +188,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getAction() != ACTION_BUTTON_PRESS) {
 					findMeBtn.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.nav_find_me_1));
-					findMePressed = 0; // TODO CHECK
+					findMePressed = 0;
 				}
 				return false;
 			}
@@ -499,11 +501,11 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 									for (Location loc : queryResult) {
 										Double tempDistance = calculateEuclideanDistance(userLocation, loc);
 										if (minDistance > tempDistance) {
-											if (!(userLocation.getFloor() != loc.getFloor() && userLocation.getFloor() == closest.getFloor())) {
+											if (Math.abs(userLocation.getFloor() - loc.getFloor()) <= Math.abs(userLocation.getFloor() - closest.getFloor())) {
 												closest = loc;
 												minDistance = tempDistance;
 											}
-										} else if (userLocation.getFloor() == loc.getFloor() && userLocation.getFloor() != closest.getFloor()) {
+										} else if (Math.abs(userLocation.getFloor() - loc.getFloor()) < Math.abs(userLocation.getFloor() - closest.getFloor())) {
 											closest = loc;
 											minDistance = tempDistance;
 										}
@@ -628,7 +630,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				String innerMessage = String.format("Name of the location you're in: %s\n" +
 								"Type of the location you're in: %s\n" +
 								"Your Geolocation is: (%f, %f)\n\n" +
-								"Below is a list locations that are adjacent to you:",
+								"Below is a list locations that are located nearby you:",
 						userLocation.getName(), userLocation.getType(),
 						userLocation.getLocation().latitude, userLocation.getLocation().longitude);
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_mylocation);
@@ -666,12 +668,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
-		if (response.succeeded()) {
-//			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-//			alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
-//			alertDialogBuilder.setTitle("Welcome non-VIP Navigation Module!");
-//			alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
-		} else {
+		if (!response.succeeded()) {
 			Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
 	}
@@ -775,7 +772,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		String eta = getETAString(navRouteDuration);
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 		dialogBuilder.setIcon(R.drawable.nav_directions);
-		dialogBuilder.setTitle("Successfully Found Shortest Route!");
+		dialogBuilder.setTitle(String.format("Successfully Found Shortest Route for %s!", destinationLocation.getName()));
 		dialogBuilder.setMessage(String.format("Shortest route to destination point is displayed on the background, you can preview it.\n\n" +
 				"Distance: %.2f meters\n" +
 				"Duration: %.2f seconds\n" +
@@ -1012,7 +1009,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				Intent share = new Intent(Intent.ACTION_SEND);
 				share.setType("text/plain");
 				share.putExtra(Intent.EXTRA_TEXT, packLocationDataToSend(userLocation));
-				startActivityForResult(Intent.createChooser(share, "Share My Location!"), 1);
+				startActivityForResult(Intent.createChooser(share, "Share My Location!"), SHARE_RESULT);
 				dialog.dismiss();
 			}
 		});
@@ -1020,9 +1017,8 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	}
 
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
 		if (requestCode == 1) {
 			if(resultCode == Activity.RESULT_OK){
 				Toast.makeText(getActivity(), "Your Current Location is Shared Successfully", Toast.LENGTH_LONG).show();
@@ -1032,6 +1028,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			}
 		}
 	}
+
 
 	private void saveLocationToLocal(Location location) {
 		String content = String.format("%s,%s,%s,%s,%s,%s,%s,%s", location.getName(),

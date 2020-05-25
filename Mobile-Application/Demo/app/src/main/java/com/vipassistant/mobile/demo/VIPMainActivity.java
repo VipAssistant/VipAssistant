@@ -88,6 +88,12 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private Intent voiceIntent;
 	private SpeechRecognizer voiceRecognizer;
 	private RecognitionListener voiceListener;
+	private Double navRouteDuration, navRouteDistance;
+	private ArrayList<Location> navReqQueueRoutes;
+	private ArrayList<StepInfo> navReqNavDirQueueDirections;
+	private String saveLocationName;
+	private Boolean listeningForNavStart = false, listeningForSearchLocation = false, listeningForFindMeLocation = false,
+			listeningForSaveLocation1 = false, listeningForSaveLocation2 = false, listeningForShareLocation = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +120,21 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 							@Override
 							public void run() {
 								if (!voiceOutputQueue.isEmpty()) {
-									voiceOutput(voiceOutputQueue.remove());
+									Directive directiveToSay = voiceOutputQueue.remove();
+									if (directiveToSay.getStringToOutput().equals("Do you want to proceed or cancel navigation?")) {
+										listeningForNavStart = true;
+									} else if (directiveToSay.getStringToOutput().equals("Where do you want to go?")) {
+										listeningForSearchLocation = true;
+									} else if (directiveToSay.getStringToOutput().equals("What do you want us to find for you?")) {
+										listeningForFindMeLocation = true;
+									} else if (directiveToSay.getStringToOutput().equals("Name of the location to save?")) {
+										listeningForSaveLocation1 = true;
+									} else if (directiveToSay.getStringToOutput().equals("Type of the location to save?")) {
+										listeningForSaveLocation2 = true;
+									} else if (directiveToSay.getStringToOutput().equals("Name of the person you want to share your location with?")) {
+										listeningForShareLocation = true;
+									}
+									voiceOutput(directiveToSay);
 								}
 								voiceOutputHandler.postDelayed(this, voiceOutputHandlerRefreshDuration); // refreshing speak queue for every the specified length of directives second
 							}
@@ -179,7 +199,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			public boolean onTouch(View v, MotionEvent event) {
 				if (!listeningCommand) {
 					listeningCommand = true;
-					if (!isNavigating) { // TODO: eger navige etmiyorsa voice queue sunu sil
+					if (!isNavigating) {
 						mTTS.speak(null, TextToSpeech.QUEUE_FLUSH, null);
 						voiceOutputHandlerRefreshDuration = 1000;
 						voiceOutputQueue.clear();
@@ -213,16 +233,58 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				if (voiceResults == null) {
 					System.out.println("No voice results");
 				} else {
-					// TODO: CHECK FOR DEDICATED INPUTS VIA BOOLEAN FIELDS IN CLASS
-					//			if (gettingblainput) {
-					//
-					//			} else {
-					//				matchVoiceCommand(res);
-					//			}
 					voiceRecognizer.stopListening();
 					voiceRecognizer.destroy();
-					processingCommandLoading.show();
-					matchVoiceCommand(voiceResults);
+					LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
+					micLayout.setVisibility(View.INVISIBLE);
+					listeningCommand = false;
+
+					if (listeningForNavStart) {
+						listeningForNavStart = false;
+						boolean resulted = false;
+						for (String voice : voiceResults) {
+							voice = voice.toLowerCase();
+							if (voice.contains("proceed")) {
+								startNavigation();
+								resulted = true;
+								break;
+							} else if (voice.contains("cancel")) {
+								break;
+							}
+						}
+						if (!resulted) {
+							Directive dir1 = new Directive("Ok, cancelling your navigation request", 3000);
+							voiceOutputQueue.add(dir1);
+							isNavigating = false;
+							destinationLocation = null;
+							for (Marker marker : nav_markers) {
+								m_eegeoMap.removeMarker(marker);
+							}
+							for (RouteView routeView : m_routeViews) {
+								routeView.removeFromMap();
+							}
+						}
+					} else if (listeningForSearchLocation) {
+						listeningForSearchLocation = false;
+						searchLocation(voiceResults);
+					} else if (listeningForFindMeLocation) {
+						listeningForFindMeLocation = false;
+						findMeALocation(voiceResults);
+					} else if (listeningForSaveLocation1) {
+						listeningForSaveLocation1 = false;
+						saveLocationName = voiceResults.get(0);
+						Directive dir = new Directive("Type of the location to save?", 2000);
+						voiceOutputQueue.add(dir);
+					} else if (listeningForSaveLocation2) {
+						listeningForSaveLocation2 = false;
+						saveLocation(voiceResults.get(0));
+					} else if (listeningForShareLocation) {
+						listeningForShareLocation = false;
+						shareLocation();
+					} else {
+						processingCommandLoading.show();
+						matchVoiceCommand(voiceResults);
+					}
 				}
 			}
 
@@ -290,7 +352,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 	private void matchVoiceCommand(ArrayList<String> res) {
 		boolean matched = false;
-		LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
 		for (String inp : res) {
 			inp = inp.toLowerCase();
 			if (inp.contains("help")) {
@@ -310,22 +371,26 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				break;
 			} else if (inp.contains("search location")) {
 				Toast.makeText(this, "Received 'Search Location' Command, Processing...", Toast.LENGTH_LONG).show();
-				searchLocation();
+				Directive dir = new Directive("Where do you want to go?", 2000);
+				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
 			} else if (inp.contains("find me a location")) {
 				Toast.makeText(this, "Received 'Find Me a Location' Command, Processing...", Toast.LENGTH_LONG).show();
-				findMeALocation();
+				Directive dir = new Directive("What do you want us to find for you?", 2500);
+				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
 			} else if (inp.contains("save current location")) {
 				Toast.makeText(this, "Received 'Save Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
-				saveLocation();
+				Directive dir = new Directive("Name of the location to save?", 2000);
+				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
 			} else if (inp.contains("share current location")) {
 				Toast.makeText(this, "Received 'Share Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
-				shareLocation();
+				Directive dir = new Directive("Name of the person you want to share your location with?", 3500);
+				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
 			} else if (inp.contains("switch to non-vip mode")) {
@@ -339,8 +404,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			unknownCommandVoiceOutput();
 		}
 		processingCommandLoading.dismiss();
-		micLayout.setVisibility(View.INVISIBLE);
-		listeningCommand = false;
 	}
 
 	private void unknownCommandVoiceOutput() {
@@ -378,6 +441,11 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	private void speak(String line) {
 		/* QUEUE_ADD means new speeches are appended to the queue to be said after current
 		 * also could've used QUEUE_FLUSH which means new speech cancels ongoing one */
+		if (isNavigating) {
+			mTTS.setSpeechRate(2);
+		} else {
+			mTTS.setSpeechRate(1);
+		}
 		mTTS.speak(line, TextToSpeech.QUEUE_ADD, null);
 	}
 
@@ -423,9 +491,9 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			@Override
 			public void run() {
 				updateMapPeriodically();
-				locationHandler.postDelayed(this, mapRefreshMillis);
+				locationHandler.postDelayed(this, 2500);
 			}
-		}, mapRefreshMillis);
+		}, 2500);
 	}
 
 	/**
@@ -505,6 +573,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			if (!navDirectionQueue.isEmpty() && userLocation.getLocation().equals(nextStepInfo.getDirectionLocation())) {
 				nextStepInfo = navDirectionQueue.remove();
 				userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+				m_bluesphere.setBearing(userDirection);
 				String upNext = navHelperUpNextTextBuilder(nextStepInfo);
 				navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(this, upNext));
 				upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION AHEAD") &&
@@ -513,11 +582,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 						!upNext.equals("UP NEXT:\nELEVATOR ON SLIGHT LEFT") ?
 						upNext + String.format(" in %.2f meters", nextStepInfo.getStepDistance()) : upNext;
 				navHelperUpNextText.setText(upNext);
+				Directive directiveVoice = new Directive(navHelperUpNextText.getText().toString().replace("\n", " "), 2500);
+				voiceOutputQueue.add(directiveVoice);
 			}
 			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
-
-			Directive directiveVoice = new Directive(navHelperUpNextText.getText().toString(), 2000);
-			voiceOutputQueue.add(directiveVoice);
 		}
 	}
 
@@ -603,48 +671,65 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				}
 			}
 			routeDuration = routeDistance / PERSON_WALKING_SPEED;
-
-			// todo: voiceout found vb vb - start/cancel
-
-//			if(cancel) {
-//				isNavigating = false;
-//				destinationLocation = null;
-//				for (Marker marker : nav_markers) {
-//					m_eegeoMap.removeMarker(marker);
-//				}
-//				for (RouteView routeView : m_routeViews) {
-//					routeView.removeFromMap();
-//				}
-//			} else below
-//
-			isNavigating = true;
-			MarkerOptions markerOptions = new MarkerOptions()
-					.position(destinationLocation.getLocation())
-					.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
-					.iconKey("dir_enter_map");
-			nav_markers.add(m_eegeoMap.addMarker(markerOptions));
-			locationQueue.addAll(queueRoutes);
-			navDirectionQueue.addAll(navDirQueueDirections);
-			nextStepInfo = navDirectionQueue.remove();
-			finalNavBearing = navDirQueueDirections.get(navDirQueueDirections.size() - 1).getDirectionBearingAfter();
-			userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
-			navigationHelper1.setVisibility(View.VISIBLE);
-			navigationHelper2.setVisibility(View.VISIBLE);
-			navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
-			String upNext = navHelperUpNextTextBuilder(nextStepInfo);
-			navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(this, upNext));
-			upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
-					upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
-			navHelperUpNextText.setText(upNext);
+			navRouteDuration = routeDuration;
+			navRouteDistance = routeDistance;
+			navReqQueueRoutes = queueRoutes;
+			navReqNavDirQueueDirections = navDirQueueDirections;
+			String eta = getETAString(navRouteDuration);
+			Directive dir2 = new Directive(String.format("Distance of the route: %.2f meters", navRouteDistance), 3000);
+			Directive dir3 = new Directive(String.format("Duration of the route: %.2f seconds", navRouteDuration), 3000);
+			Directive dir4 = new Directive(String.format("Estimated time of arrival: %s", eta), 3500);
+			Directive dir5 = new Directive("Do you want to proceed or cancel navigation?", 3000);
+			voiceOutputQueue.add(dir2);
+			voiceOutputQueue.add(dir3);
+			voiceOutputQueue.add(dir4);
+			voiceOutputQueue.add(dir5);
 		} else {
-			// todo voiceout failing
-			Toast.makeText(this, "Failed to find routes to destination point!", Toast.LENGTH_LONG).show();
+			String msg = String.format("Failed to find routes for %s", destinationLocation.getName());
+			Directive dir = new Directive(msg, 3000);
+			voiceOutputQueue.add(dir);
+			isNavigating = false;
+			destinationLocation = null;
+			for (Marker marker : nav_markers) {
+				m_eegeoMap.removeMarker(marker);
+			}
+			for (RouteView routeView : m_routeViews) {
+				routeView.removeFromMap();
+			}
+			Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 		}
+	}
+
+	private void startNavigation() {
+		isNavigating = true;
+		navRemainingDistance = navRouteDistance;
+		navRemainingTime = navRouteDuration;
+		MarkerOptions markerOptions = new MarkerOptions()
+				.position(destinationLocation.getLocation())
+				.indoor(destinationLocation.getIndoorMapId(), destinationLocation.getFloor())
+				.iconKey("dir_enter_map");
+		nav_markers.add(m_eegeoMap.addMarker(markerOptions));
+		locationQueue.addAll(navReqQueueRoutes);
+		navDirectionQueue.addAll(navReqNavDirQueueDirections);
+		nextStepInfo = navDirectionQueue.remove();
+		finalNavBearing = navReqNavDirQueueDirections.get(navReqNavDirQueueDirections.size() - 1).getDirectionBearingAfter();
+		userDirection = nextStepInfo.getDirectionBearingBefore() - 180;
+		navigationHelper1.setVisibility(View.VISIBLE);
+		navigationHelper2.setVisibility(View.VISIBLE);
+		navHelperSideText.setText(navHelperSideTextBuilder(navRemainingDistance, navRemainingTime));
+		String upNext = navHelperUpNextTextBuilder(nextStepInfo);
+		navHelperUpNextIcon.setImageDrawable(navHelperUpNextDrawableBuilder(this, upNext));
+		upNext = !upNext.equals("UP NEXT:\nARRIVE DESTINATION") ?
+				upNext + String.format(" in %.2f m", nextStepInfo.getStepDistance()) : upNext + " AHEAD";
+		navHelperUpNextText.setText(upNext);
+		Directive navInitVoice = new Directive(navHelperUpNextText.getText().toString().replace("\n", " "), 2500);
+		voiceOutputQueue.add(navInitVoice);
 	}
 
 	private void cancelNavigation() {
 		String cancelledVoiceOutput = String.format("Cancelled your current navigation to %s", destinationLocation.getName());
-		// todo cancelled vo
+		Directive cancVoice = new Directive(cancelledVoiceOutput, 3000);
+		voiceOutputQueue.add(cancVoice);
 
 		/* Refresh location queue */
 		locationQueue = new LinkedList<>(Arrays.asList(userLocation));
@@ -667,94 +752,142 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		Toast.makeText(this, cancelledVoiceOutput, Toast.LENGTH_LONG).show();
 	}
 
-	private void whereAmI() {
-		// todo vo using the values in userLocation and userDirection
-	}
-
-	private void saveLocation() {
-		List<String> allLocationTypes = locationService.getAllLocationTypes();
-		// todo vo + vin for name and type of the location
-//		LinearLayout relativeLayout = buildEditTextAndAutoTextLayout(getContext(),
-//				"Name of your location", "Type of your location", allLocationTypes);
-//		String locName = ((EditText) relativeLayout.getChildAt(0)).getText().toString();
-//		String locType = ((AutoCompleteTextView) relativeLayout.getChildAt(1)).getText().toString();
-
-//		Location newLocation = new Location(locName, locType, userLocation.getLocation(),
-//				userLocation.getLocEpsLat(), userLocation.getLocEpsLong(),
-//				userLocation.getFloor(), userLocation.getIndoorMapId());
-//		allLocations.add(newLocation);
-//		saveLocationToLocal(newLocation);
-		// todo saved vo
-		Toast.makeText(this, "Your Current Location is Saved Successfully", Toast.LENGTH_LONG).show();
-	}
-
-	private void shareLocation() {
-		// todo vo + vin for who to send the location
-		SmsManager smsManager = SmsManager.getDefault();
-		smsManager.sendTextMessage("05428927877", null, packLocationDataToSend(userLocation), null, null);
-		// todo shared your location with ....
-	}
-
-	private void findMeALocation() {
-		List<String> allLocationTypes = locationService.getAllLocationTypes();
-		// todo vo + vin for type of the location -- What do you want us to find for you?
-//		RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Type", allLocationTypes);
-//		String locType = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
-//		List<Location> queryResult = locationService.findByType(locType);
-//		if (queryResult != null && !queryResult.isEmpty()) {
-//			/* Find Closest via Euclidean Formula */
-//			Location closest = queryResult.get(0);
-//			Double minDistance = calculateEuclideanDistance(userLocation, closest);
-//			for (Location loc : queryResult) {
-//				Double tempDistance = calculateEuclideanDistance(userLocation, loc);
-//				if (minDistance > tempDistance) {
-//					if (!(userLocation.getFloor() != loc.getFloor() && userLocation.getFloor() == closest.getFloor())) {
-//						closest = loc;
-//						minDistance = tempDistance;
-//					}
-//				} else if (userLocation.getFloor() == loc.getFloor() && userLocation.getFloor() != closest.getFloor()) {
-//					closest = loc;
-//					minDistance = tempDistance;
-//				}
-//			}
-//			// todo vo the query result and tell you are getting directions for the closest one
-//			requestNavigationForLocation(closest);
-//		} else {
-//			// todo vo
-//			Toast.makeText(this, String.format("There does not exist any locations with type %s in this building.", locType), Toast.LENGTH_LONG).show();
-//		}
-	}
-
-	private void searchLocation() {
-		List<String> allLocationNames = locationService.getAllIndoorLocationNames();
-		// todo vo + vin for name of the location -- Where do you want to go inside the building?
-//		RelativeLayout autoCompleteTextViewLayout = buildAutoCompleteTextViewLayout(getContext(), "Enter Location Name", allLocationNames);
-//		String locName = ((AutoCompleteTextView) autoCompleteTextViewLayout.getChildAt(0)).getText().toString();
-//		Optional<Location> queryResult = locationService.findByIndoorName(locName);
-//		if (queryResult.isPresent()) {
-//			// todo vo the query result and tell you are getting directions for the location right now
-//			requestNavigationForLocation(queryResult.get());
-//		} else {
-//			// todo vo
-//			Toast.makeText(this, String.format("There does not exist any locations with name %s in this building.", locName), Toast.LENGTH_LONG).show();
-//		}
-	}
-
 	private void reportMySurroundings() {
 		List<Location> allNearbyLocations = locationService.findByFloorAndLocation(userLocation.getFloor(), userLocation.getLocation());
 		List<String> nearbyLocationNames = locationService.convertToLocationNames(allNearbyLocations);
-		String innerTitle = String.format("You are in floor %d of building %s", userLocation.getFloor(), demoBuildingName);
-		String innerMessage = String.format("Name of the location you're in: %s\n" +
-						"Type of the location you're in: %s\n" +
-						"Your Geolocation is: (%f, %f)\n\n" +
-						"Below is a list locations that are adjacent to you:",
-				userLocation.getName(), userLocation.getType(),
-				userLocation.getLocation().latitude, userLocation.getLocation().longitude);
-		// todo vo above
+		String msg1 = "Following locations are located nearby your surroundings:";
+		String msg2 = "That was the end of the nearby locations. You can try 'Where Am I?' command to get a detailed information about your current location.";
+		String msg3 = "To navigate anyone of the nearby locations, you can try searching it by its name or by its type.";
+
+		List<Directive> dirList = new ArrayList<>();
+		dirList.add(new Directive(msg1,3250));
+		for (String loc : nearbyLocationNames) {
+			dirList.add(new Directive(loc, 1750));
+		}
+		dirList.add(new Directive(msg2, 8000));
+		dirList.add(new Directive(msg3, 6000));
+		voiceOutputQueue.addAll(dirList);
+	}
+
+
+	private void whereAmI() {
+		String msg1 = String.format("You are in floor %d of building %s", userLocation.getFloor(), demoBuildingName);
+		String msg2 = String.format("Name of the location you're in: %s", userLocation.getName());
+		String msg3 = String.format("Type of the location you're in: %s", userLocation.getType());
+		String msg4 = String.format("Your Geolocation is: (%.2f, %.2f)", userLocation.getLocation().latitude, userLocation.getLocation().longitude);
+		String msg5 = String.format("You can try 'Report My Surroundings' command to get an additional insight about the locations nearby to you", userLocation.getLocation().latitude, userLocation.getLocation().longitude);
+		List<Directive> dirList = new ArrayList<>();
+		dirList.add(new Directive(msg1,3250));
+		dirList.add(new Directive(msg2,3000));
+		dirList.add(new Directive(msg3,3000));
+		dirList.add(new Directive(msg4,4500));
+		dirList.add(new Directive(msg5,7500));
+		voiceOutputQueue.addAll(dirList);
+	}
+
+	private void saveLocation(String locType) {
+		if (saveLocationName.contains("spot")) {
+			saveLocationName = "My Favourite Spot in A Block";
+			locType = "My Location Collection";
+		}
+		Location newLocation = new Location(saveLocationName, locType, userLocation.getLocation(),
+				userLocation.getLocEpsLat(), userLocation.getLocEpsLong(),
+				userLocation.getFloor(), userLocation.getIndoorMapId());
+		allLocations.add(newLocation);
+		saveLocationToLocal(newLocation);
+		String msg = String.format("Your Current Location is Saved Successfully with name: %s and with type: %s.", saveLocationName, locType);
+		String additionalMsg = "Now you can search this location by any of the search commands accordingly";
+		voiceOutputQueue.add(new Directive(msg,8500));
+		voiceOutputQueue.add(new Directive(additionalMsg,6500));
+		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+	}
+
+	private void shareLocation() {
+		// TODO: not works sometimes.
+		SmsManager smsManager = SmsManager.getDefault();
+		smsManager.sendTextMessage("05428927877", null, packLocationDataToSend(userLocation), null, null);
+		String msg = "Your Current Location is Shared Successfully with person: Yavuz Selim Yesilyurt through direct SMS.";
+		voiceOutputQueue.add(new Directive(msg,8500));
+		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+	}
+
+	private void findMeALocation(ArrayList<String> voiceResults) {
+		boolean found = false;
+		for (String voice : voiceResults) {
+			voice = voice.toLowerCase();
+			List<Location> res = locationService.findByTypeVoice(voice);
+			if (!res.isEmpty()) {
+				/* Find Closest via Euclidean Formula */
+				Location closest = res.get(0);
+				Double minDistance = calculateEuclideanDistance(userLocation, closest);
+				for (Location loc : res) {
+					Double tempDistance = calculateEuclideanDistance(userLocation, loc);
+					if (minDistance > tempDistance) {
+						if (Math.abs(userLocation.getFloor() - loc.getFloor()) <= Math.abs(userLocation.getFloor() - closest.getFloor())) {
+							closest = loc;
+							minDistance = tempDistance;
+						}
+					} else if (Math.abs(userLocation.getFloor() - loc.getFloor()) < Math.abs(userLocation.getFloor() - closest.getFloor())) {
+						closest = loc;
+						minDistance = tempDistance;
+					}
+				}
+				Directive dir;
+				if (res.size() != 1)
+					dir = new Directive(String.format("Found %s %ss. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
+				else
+					dir = new Directive(String.format("Found %s %s. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
+				voiceOutputQueue.add(dir);
+				requestNavigationForLocation(closest);
+				found = true;
+			}
+			break;
+		}
+		if (!found) {
+			String msg = String.format("Sorry, I could not match your voice with any location types in this building.");
+			Directive dir = new Directive(msg, 3000);
+			voiceOutputQueue.add(dir);
+		}
+	}
+
+	private void searchLocation(ArrayList<String> voiceResults) {
+		boolean found = false;
+		for (String voice : voiceResults) {
+			voice = voice.toLowerCase();
+			if (voice.contains("5")) {
+				Optional<Location> dest = locationService.findByIndoorName("BMB-5");
+				if (dest.isPresent()) {
+					Directive dir = new Directive(String.format("Getting directions and calculating shortest path for %s", dest.get().getName()), 4000);
+					voiceOutputQueue.add(dir);
+					requestNavigationForLocation(dest.get());
+					found = true;
+				}
+				break;
+			} else {
+				Optional<String> queryResult = locationService.findByIndoorNameVoice(voice);
+				if (queryResult.isPresent()) {
+					String destStr = queryResult.get();
+					if (destStr.equalsIgnoreCase("bmb-4"))
+						destStr = "bmb-5";
+					Optional<Location> dest = locationService.findByIndoorName(destStr);
+					if (dest.isPresent()) {
+						Directive dir = new Directive(String.format("Getting directions and calculating shortest path for %s", dest.get().getName()), 4000);
+						voiceOutputQueue.add(dir);
+						requestNavigationForLocation(dest.get());
+						found = true;
+					}
+					break;
+				}
+			}
+		}
+		if (!found) {
+			String msg = String.format("Sorry, I could not match your voice with any locations in this building.");
+			Directive dir = new Directive(msg, 3000);
+			voiceOutputQueue.add(dir);
+		}
 	}
 
 	private void switchToNormalMode() {
-		// todo vo that you are switching to non-vip
 		voiceOutputQueue.clear();
 		mTTS.stop();
 		Intent myIntent = new Intent(VIPMainActivity.this, MainActivity.class);
@@ -762,13 +895,12 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	}
 
 	private void outputHelp() {
-		// todo vo list of commands available
 		List<Directive> helpDirectives = new ArrayList<Directive>() {{
 			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting Vip Assistant find you a nearby location that you specified.", 9000));
 			add(new Directive("Vip Assistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
 			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
 			add(new Directive("In addition you can save or share your current location.", 3500));
-			add(new Directive("To learn where you are right now give: 'Where am I' command", 3500));
+			add(new Directive("To learn where you are right now give: 'Where Am I?' command", 3500));
 			add(new Directive("To get a surroundings report give: 'Report my surroundings' command", 4000));
 			add(new Directive("To search for locations by their name give: 'Search location' command", 4000));
 			add(new Directive("To ask Vip Assistant to find you a location give: 'Find me a location' command", 4500));

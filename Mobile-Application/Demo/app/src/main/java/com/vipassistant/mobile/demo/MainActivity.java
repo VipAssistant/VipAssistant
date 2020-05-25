@@ -168,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // TODO
 //        MenuItemImpl navigateItem = (MenuItemImpl) navigationView.getMenu().getItem(1).getSubMenu().getItem(0);
 //        navigateItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 //            @Override

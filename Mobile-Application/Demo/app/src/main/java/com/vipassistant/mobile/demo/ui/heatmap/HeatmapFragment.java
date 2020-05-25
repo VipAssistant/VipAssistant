@@ -224,7 +224,6 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 			}
 		});
 
-		// TODO: INTERNET OLMAZSA DO NOT PERMIT
 		RelativeLayout uiContainer = (RelativeLayout) root.findViewById(R.id.eegeo_ui_container);
 		uiContainer.setOnTouchListener(new View.OnTouchListener() {
 			@SuppressLint("ClickableViewAccessibility")
@@ -420,12 +419,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 
 	@Override
 	public void onMapsceneRequestCompleted(MapsceneRequestResponse response) {
-		if (response.succeeded()) {
-//			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity()); TODO
-//			alertDialogBuilder.setIcon(android.R.drawable.ic_menu_search);
-//			alertDialogBuilder.setTitle("Welcome non-VIP Navigation Module!");
-//			alertDialogBuilder.setPositiveButton("Find Me A ...!", new DialogInterface.OnClickListener() {
-		} else {
+		if (!response.succeeded()) {
 			Toast.makeText(getActivity(), "Failed to load mapscene", Toast.LENGTH_LONG).show();
 		}
 	}
