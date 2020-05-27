@@ -98,7 +98,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	/* For demo of the recalculating the route feature first set below three to true.
 	* Then in the app, first go to the Z-103 and first demo happens, then try to go to the Room A-306
 	* which will trigger the second and the third demos. */
-	private Boolean incorrectDemo1Activated = false, incorrectDemo2Activated = false, incorrectDemo3Activated = false;
+	private Boolean incorrectDemo1Activated = true, incorrectDemo2Activated = true, incorrectDemo3Activated = true;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
@@ -443,7 +443,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
 		alertDialogBuilder.setIcon(R.drawable.nav_search_interface);
 		alertDialogBuilder.setTitle("Search in Map");
-		alertDialogBuilder.setMessage("You can query our platform in 3 different ways");
+		alertDialogBuilder.setMessage("You have different options for searching");
 		alertDialogBuilder.setPositiveButton("Find me a '...' inside " + demoBuildingName, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -533,7 +533,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				dialog.dismiss();
 			}
 		});
-		String freeMapSearchTitle = m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("") ? "Search by name in World Map" : "Search by name in " + demoBuildingName;
+		String freeMapSearchTitle = m_eegeoMap.getCameraPosition().targetIndoorMapId.equals("") ? "Discover the World" : "Search inside " + demoBuildingName;
 		alertDialogBuilder.setNegativeButton(freeMapSearchTitle, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -651,19 +651,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 				dialog.dismiss();
 			}
 		});
-
-		AlertDialog dialog = alertDialogBuilder.show();
-
-		/*	Push dialog buttons to the left */
-		Button btn1 = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-		Button btn2 = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-		Button btn3 = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-		LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) btn1.getLayoutParams();
-		layoutParams.gravity = Gravity.LEFT;
-		btn1.setLayoutParams(layoutParams);
-		btn2.setLayoutParams(layoutParams);
-		btn3.setLayoutParams(layoutParams);
-		dialog.show();
+		alertDialogBuilder.show().show();
 	}
 
 	@Override
@@ -937,7 +925,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 			return queueRoutes;
 		} else if (incorrectDemo2Activated) {
 			// a-306
-			queueRoutes.subList(35, queueRoutes.size()).clear();
+			queueRoutes.subList(30, queueRoutes.size()).clear();
 			queueRoutes.add(new Location("Inc Demo-2 path", "path", new LatLng(39.891836, 32.783302), .000011, .000011, 6, demoIndoorMapId));
 			queueRoutes.add(new Location("Inc Demo-2 stop", "stop", new LatLng(39.891843, 32.783386), .000011, .000011, 6, demoIndoorMapId));
 			return queueRoutes;

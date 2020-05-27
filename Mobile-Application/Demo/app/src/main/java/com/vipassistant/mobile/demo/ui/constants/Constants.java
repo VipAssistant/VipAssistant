@@ -2,11 +2,9 @@ package com.vipassistant.mobile.demo.ui.constants;
 
 import com.eegeo.mapapi.geometry.LatLng;
 import com.vipassistant.mobile.demo.ui.model.Location;
+import com.vipassistant.mobile.demo.ui.model.StepInfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Constants {
 
@@ -15,14 +13,20 @@ public class Constants {
 	public static final String demoBuildingName = "METU-CENG Block A";
 	public static final Location navigateInitialLocation = new Location("Entrance", "Building Entrance", new LatLng(39.891753, 32.783191), .000030, .000007, 1, demoIndoorMapId);
 	public static final Location heatmapInitialLocation = new Location("BMB-5", "Classroom", new LatLng(39.891681, 32.783200), .000050, .000081, 6, demoIndoorMapId);
+	public static final Location locationDemoInitialLocation1 = new Location("Room A-408", "Staff Room", new LatLng(39.891923, 32.783159), .000014, .000040, 8, demoIndoorMapId);
+	public static final Location locationDemoInitialLocation2 = new Location("Corridor", "Corridor", new LatLng(39.891967, 32.783209), .000014, .000040, 8, demoIndoorMapId);
+	public static final ArrayList<Integer> demoFirstRssi = new ArrayList<Integer>(){{add(-61); add(-63); add(-66); add(-74); add(-90);}};
 	public static final String mapSceneLink = "https://wrld.mp/df1ba6a";
 	public static final String markerText = "You Are Here!";
 	public static int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
+	public static int demoRefreshMillis = 2000;
 	public static final double locationLatEps = 0.0001;
 	public static final double locationLongEps = 0.0001;
 	public static double cameraZoom = 20;
+	public static double demoCameraZoom = 25;
 	public static double outdoorSearchCameraZoom = 13.0826540246474;
 	public static double cameraTilt = 35;
+	public static double demoCameraTilt = 15;
 	public static double cameraTiltHeatmap = 0;
 	public static final double PERSON_WALKING_SPEED = 1.4;
 
@@ -158,5 +162,230 @@ public class Constants {
 		add(new Location("Fourth Floor Hall", "Hall", new LatLng(39.891818, 32.783219), .000047, .000090, 8, demoIndoorMapId));
 		add(new Location("Room A-401", "Staff Room", new LatLng(39.891780, 32.783296), .000035, .000047, 8, demoIndoorMapId));
 		add(new Location("Fourth Floor Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 8, demoIndoorMapId));
+	}};
+
+	public static ArrayList<Location> demoLocations408 = new ArrayList<Location>() {{
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891916, 32.783154), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891932, 32.783149), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891933, 32.783130), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891933, 32.783128), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891915, 32.783126), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891904, 32.783128), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891908, 32.783125), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891913, 32.783139), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891911, 32.783162), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891923, 32.783165), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891920, 32.783182), .000005, .000023, 8, demoIndoorMapId));
+		// location search
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891934, 32.783185), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891921, 32.783188), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891922, 32.783186), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891923, 32.783186), .000005, .000023, 8, demoIndoorMapId));
+
+		// navigation
+		add(new Location("Room-408", "Room Interior", new LatLng(39.891937, 32.783203), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Corridor", new LatLng(39.891948, 32.783217), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Demo Saved Location", "Corridor", new LatLng(39.891966, 32.783207), .000005, .000023, 8, demoIndoorMapId));
+
+		// stop
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783213), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891968, 32.783209), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783204), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891961, 32.783207), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783204), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783213), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783204), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783213), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783213), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783204), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891961, 32.783207), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891968, 32.783209), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891963, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+		// todo and goes on...
+	}};
+
+	public static ArrayList<Location> demoLocations407 = new ArrayList<Location>() {{
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783213), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783206), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783204), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783207), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891969, 32.783209), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891967, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891984, 32.783202), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891998, 32.783205), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.892003, 32.783186), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891994, 32.783176), .000005, .000023, 8, demoIndoorMapId));
+
+		// extra
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891994, 32.783179), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891995, 32.783173), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891986, 32.783173), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891995, 32.783173), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891986, 32.783173), .000005, .000023, 8, demoIndoorMapId));
+		add(new Location("Demo Saved Location", "Demo", new LatLng(39.891994, 32.783179), .000005, .000023, 8, demoIndoorMapId));
+	}};
+
+	public static ArrayList<ArrayList<Integer>> demo1RSSI = new ArrayList<ArrayList<Integer>>() {{
+		add(new ArrayList<Integer>(){{add(-63); add(-62); add(-65); add(-73); add(-90);}});
+		add(new ArrayList<Integer>(){{add(-59); add(-60); add(-68); add(-78); add(-90);}}); // yaklastir oraya dogru
+		add(new ArrayList<Integer>(){{add(-57); add(-60); add(-67); add(-76); add(-90);}});
+
+		add(new ArrayList<Integer>(){{add(-56); add(-61); add(-69); add(-77); add(-90);}});
+
+		add(new ArrayList<Integer>(){{add(-60); add(-59); add(-64); add(-74); add(-90);}}); // gg
+		add(new ArrayList<Integer>(){{add(-62); add(-56); add(-63); add(-73); add(-90);}}); // gg
+
+		add(new ArrayList<Integer>(){{add(-64); add(-55); add(-65); add(-76); add(-90);}}); // gg
+
+		add(new ArrayList<Integer>(){{add(-65); add(-59); add(-62); add(-74); add(-90);}});
+		add(new ArrayList<Integer>(){{add(-64); add(-61); add(-60); add(-73); add(-90);}});
+
+		add(new ArrayList<Integer>(){{add(-65); add(-64); add(-57); add(-71); add(-90);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-66); add(-56); add(-70); add(-85);}});
+		// location search
+		add(new ArrayList<Integer>(){{add(-68); add(-65); add(-55); add(-69); add(-84);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-65); add(-56); add(-70); add(-86);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-64); add(-57); add(-69); add(-85);}});
+		add(new ArrayList<Integer>(){{add(-68); add(-65); add(-56); add(-68); add(-84);}});
+
+		// navigation
+		add(new ArrayList<Integer>(){{add(-69); add(-70); add(-59); add(-66); add(-75);}});
+		add(new ArrayList<Integer>(){{add(-75); add(-77); add(-62); add(-61); add(-74);}});
+
+		add(new ArrayList<Integer>(){{add(-83); add(-85); add(-66); add(-58); add(-63);}});
+
+		// stop
+		add(new ArrayList<Integer>(){{add(-83); add(-85); add(-66); add(-56); add(-63);}});
+
+		add(new ArrayList<Integer>(){{add(-88); add(-90); add(-68); add(-57); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-67); add(-55); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-88); add(-90); add(-68); add(-57); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-55); add(-58);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-57); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-66); add(-56); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-57); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-55); add(-58);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-68); add(-56); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-68); add(-57); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-56); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-68); add(-56); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-57); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-55); add(-58);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-67); add(-55); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-57); add(-59);}});
+		// todo and goes on...
+	}};
+
+	public static ArrayList<ArrayList<Integer>> demo2RSSI = new ArrayList<ArrayList<Integer>>() {{
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-59); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-68); add(-58); add(-59);}});
+
+		// location search
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-67); add(-59); add(-59);}});
+		add(new ArrayList<Integer>(){{add(-90); add(-90); add(-66); add(-58); add(-61);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-67); add(-60); add(-60);}});
+		add(new ArrayList<Integer>(){{add(-89); add(-90); add(-68); add(-61); add(-60);}});
+
+		add(new ArrayList<Integer>(){{add(-82); add(-84); add(-66); add(-63); add(-57);}});
+		add(new ArrayList<Integer>(){{add(-75); add(-78); add(-62); add(-67); add(-55);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-70); add(-57); add(-70); add(-58);}});
+		add(new ArrayList<Integer>(){{add(-64); add(-64); add(-56); add(-75); add(-62);}});
+
+		add(new ArrayList<Integer>(){{add(-69); add(-67); add(-56); add(-76); add(-65);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-68); add(-58); add(-75); add(-64);}});
+		add(new ArrayList<Integer>(){{add(-68); add(-66); add(-57); add(-77); add(-63);}});
+		add(new ArrayList<Integer>(){{add(-67); add(-68); add(-58); add(-75); add(-64);}});
+		add(new ArrayList<Integer>(){{add(-69); add(-67); add(-56); add(-76); add(-65);}});
+		add(new ArrayList<Integer>(){{add(-69); add(-67); add(-56); add(-76); add(-65);}});
+	}};
+
+	public static ArrayList<StepInfo> demo1StepQueue = new ArrayList<StepInfo>() {{
+		add(new StepInfo("depart",
+				"",
+				new LatLng(39.891934, 32.783186),
+				0.,
+				81.,
+				2.2,
+				1.6));
+		add(new StepInfo("turn",
+				"left",
+				new LatLng(39.89200300000001, 32.783203),
+				81.,
+				355.,
+				4.1,
+				5.4));
+		add(new StepInfo("continue",
+				"left",
+				new LatLng(39.89200300000001, 32.783203),
+				354.,
+				261.,
+				2.2,
+				1.5));
+		add(new StepInfo("continue",
+				"left",
+				new LatLng(39.89200300000001, 32.783203),
+				354.,
+				261.,
+				2.2,
+				1.5));
+	}};
+
+	public static ArrayList<StepInfo> demo2StepQueue = new ArrayList<StepInfo>() {{
+		add(new StepInfo("depart",
+				"",
+				new LatLng(39.891967, 32.783207999999995),
+				0.,
+				354.,
+				2.9,
+				4.));
+		add(new StepInfo("turn",
+				"left",
+				new LatLng(39.89200300000001, 32.783203),
+				261.,
+				354.,
+				1.5,
+				2.2));
+		add(new StepInfo("arrive",
+				"",
+				new LatLng(39.89200300000001, 32.783203),
+				261.,
+				0.,
+				0.5,
+				0.5));
+		add(new StepInfo("arrive",
+				"",
+				new LatLng(39.89200300000001, 32.783203),
+				261.,
+				0.,
+				0.,
+				0.));
+		add(new StepInfo("arrive",
+				"",
+				new LatLng(39.89200300000001, 32.783203),
+				261.,
+				0.,
+				0.,
+				0.));
 	}};
 }

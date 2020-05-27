@@ -7,12 +7,12 @@
 		  android:orderInCategory="100"
 		  app:showAsAction="never"/>
 	<item android:id="@+id/caching_toggle"
-		  android:title="Caching: Off"
+		  android:title="Pre-Caching: Off"
 		  android:icon="@drawable/ic_cached_white_24dp"
 		  android:orderInCategory="100"
 		  app:showAsAction="never"/>
 	<item android:id="@+id/show_caching_messages_toggle"
-		  android:title="Display Caching Logs: Off"
+		  android:title="Display Pre-Caching Logs: Off"
 		  android:orderInCategory="100"
 		  android:icon="@drawable/ic_cached_white_24dp"
 		  app:showAsAction="never"/>

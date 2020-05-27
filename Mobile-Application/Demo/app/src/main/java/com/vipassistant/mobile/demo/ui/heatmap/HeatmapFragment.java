@@ -342,7 +342,7 @@ public class HeatmapFragment extends Fragment implements OnMapsceneRequestComple
 			showHeatmapClicked++;
 		}
 
-		if (heatmapShown && heatmapRefreshCounter >= 15) {
+		if (heatmapShown && heatmapRefreshCounter >= 3) {
 			refreshingHeatmapLoading.show();
 			prepareHeatmaps(m_eegeoMap.getCameraPosition().targetIndoorMapFloorId);
 			heatmapRefreshCounter = 0;

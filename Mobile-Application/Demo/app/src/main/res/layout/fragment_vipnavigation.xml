@@ -112,6 +112,7 @@
                 android:maxWidth="105dp"
                 android:textColor="#ffffff"
                 android:textSize="13sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="10dp"
                 android:text="Listening for the command..."
                 android:textAlignment="center"

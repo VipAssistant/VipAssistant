@@ -1,16 +1,19 @@
 package com.vipassistant.mobile.demo.ui.monitor;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
@@ -19,58 +22,81 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
+import static com.vipassistant.mobile.demo.ui.constants.Constants.mapRefreshMillis;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.buildLoadingDialog;
 
 public class MonitorFragment extends Fragment {
 
     private MonitorViewModel monitorViewModel;
-    private static final int RCS_INPUT = 1000;
-    TextView vinput2;
-    ImageButton mVoiceBtn;
+    private final Handler refresher = new Handler();
+    private TextView beaconStatusText;
+    private ImageView beaconStatusIcon;
+    private Button beaconStatusReportBtn;
+    private final String allGoodText = "You get signals from all the beacons in this building, which means you are good to go!";
+    private final String problemText = "Oops! You get signals only from %s out of 5 beacons in this building, you can send a status report to VipAssistant Support team to let them know about this issue.";
+    private ProgressDialog sendingReportLoading;
+    private int sendingStatusReport = -1;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
         monitorViewModel = ViewModelProviders.of(this).get(MonitorViewModel.class);
         View root = inflater.inflate(R.layout.fragment_monitor, container, false);
 
-        vinput2 = root.findViewById(R.id.vinput2);
-        mVoiceBtn = root.findViewById(R.id.voiceBtn);
+        beaconStatusIcon = (ImageView) root.findViewById(R.id.beacon_status_icon);
+        beaconStatusText = (TextView) root.findViewById(R.id.beacon_status_text);
+        beaconStatusReportBtn = (Button) root.findViewById(R.id.beacon_status_report_button);
+        sendingReportLoading = buildLoadingDialog(getActivity(), "Sending Status Report...");
 
-        // adding a onclick listener
-        mVoiceBtn.setOnClickListener(new View.OnClickListener() {
+        /* Also now set-up Handler for periodic Map refreshing */
+        this.refresher.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateMonitorFragmentPeriodically();
+                refresher.postDelayed(this, mapRefreshMillis);
+            }
+        }, mapRefreshMillis);
+
+        beaconStatusReportBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listen();
+                displayMonitorReportDialog();
             }
         });
         return root;
     }
 
-    private void listen() {
-
-        // vIntent will show text in dialog
-        Intent vIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        vIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH); // TODO: we can use Locale.getDefault() for Turkish
-        vIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening...");
-
-        try {
-            startActivityForResult(vIntent, RCS_INPUT);
-        } catch (Exception e){
-            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+    private void updateMonitorFragmentPeriodically() {
+        /* TODO: Update graph */
+        if (sendingStatusReport > 0) {
+            sendingStatusReport--;
+        } else if (sendingStatusReport == 0) {
+            sendingReportLoading.dismiss();
+            sendingStatusReport--;
         }
+//        if (all the beacons are ok) {
+//            beaconStatusText.setText(allGoodText);
+//            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_done_all_w_24dp));
+//            beaconStatusReportBtn.setVisibility(View.INVISIBLE);
+//        } else {
+//            String message = String.format(problemText, numberOfBeaconsThatIsOk);
+//            beaconStatusText.setText(message);
+//            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_sync_problem_w_24dp));
+//            beaconStatusReportBtn.setVisibility(View.VISIBLE);
+//        }
     }
 
-    // Now we will receive voice input and process it
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // if there is an successful and non-empty voice input
-        if(requestCode == RCS_INPUT && resultCode == RESULT_OK && data!=null){
-            // array of words are extracted from voice recognizer intent
-            ArrayList<String> res = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
-            // show them in text view
-            vinput2.setText(String.format("You said %s", res.get(0)));
-        }
+    private void displayMonitorReportDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder.setIcon(R.drawable.mon_dialog);
+        dialogBuilder.setTitle("Thank you for letting us now");
+        dialogBuilder.setMessage("VipAssistant Support Team is going to review this issue and take actions for the problematic beacons immediately.");
+        dialogBuilder.setPositiveButton("You're Welcome", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                sendingStatusReport = 3;
+                sendingReportLoading.show();
+                dialog.dismiss();
+            }
+        });
     }
 }

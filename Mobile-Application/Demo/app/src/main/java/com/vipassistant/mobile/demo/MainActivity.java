@@ -203,14 +203,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void speak(String line) {
-//        float pitch = (float) mSeekBarPitch.getProgress() / 50;
-//        if (pitch < 0.1) pitch = 0.1f;
-//        float speed = (float) mSeekBarSpeed.getProgress() / 50;
-//        if (speed < 0.1) speed = 0.1f;
-
-//        mTTS.setPitch(pitch);
-//        mTTS.setSpeechRate(speed);
-
         /* QUEUE_ADD means new speeches are appended to the queue to be said after current
          * also could've used QUEUE_FLUSH which means new speech cancels ongoing one */
         mTTS.speak(line, TextToSpeech.QUEUE_ADD, null);
@@ -235,17 +227,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.caching_toggle:
                 if (mapNavVM.getCachingActivated()) {
                     mapNavVM.setCachingToastActivated(false);
-                    String newDisplayTitle = "Display Caching Logs: Off";
+                    String newDisplayTitle = "Display Pre-Caching Logs: Off";
                     optionsMenu.getItem(2).setTitle(newDisplayTitle);
                 }
                 mapNavVM.setCachingActivated(!mapNavVM.getCachingActivated());
-                String newTitle = item.getTitle().equals("Caching: On") ? "Caching: Off" : "Caching: On";
+                String newTitle = item.getTitle().equals("Pre-Caching: On") ? "Pre-Caching: Off" : "Pre-Caching: On";
                 item.setTitle(newTitle);
                 return true;
             case R.id.show_caching_messages_toggle:
                 mapNavVM.setCachingToastActivated(!mapNavVM.getCachingToastActivated());
-                String newDisplayTitle = item.getTitle().equals("Display Caching Logs: On") ?
-                        "Display Caching Logs: Off" : "Display Caching Logs: On";
+                String newDisplayTitle = item.getTitle().equals("Display Pre-Caching Logs: On") ?
+                        "Display Pre-Caching Logs: Off" : "Display Pre-Caching Logs: On";
                 item.setTitle(newDisplayTitle);
                 return true;
             case R.id.show_help:
@@ -259,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
     public void showHelp() { // todo: not works
         String[] textString = {"Navigate Yourself to Anywhere Inside Buildings!", "Discover the World!",
                 "Save and Share Your Location!", "Display Realtime Building Heatmaps!", "Monitor the State of Your App!",
-                "Toggle Map Caching!", "Switch to VIP Mode!", "Display Location Calculation Demo!"};
+                "Toggle Map Pre-Caching!", "Switch to VIP Mode!", "Display Location Calculation Demo!"};
 
         int[] drawableIds = {R.drawable.ic_near_me_white_24dp, R.drawable.ic_public_w_24dp, R.drawable.ic_location_on_w_24dp,
                 R.drawable.ic_whatshot_w_24dp, R.drawable.ic_graphic_eq_w_24dp, R.drawable.ic_cached_white_24dp,

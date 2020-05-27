@@ -48,6 +48,8 @@ import com.vipassistant.mobile.demo.ui.service.LocationService;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
@@ -112,7 +114,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 							|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
 						Log.e("VoiceOutput - TTS", "Language not supported");
 					} else {
-						voiceOutputQueue.add(new Directive("Welcome to Vip Assistant's visually impaired mode, currently getting map information ready for you.", 5000));
+						voiceOutputQueue.add(new Directive("Welcome to Vip Assistant's visually impaired mode.", 3000));
 						voiceOutputQueue.add(new Directive("You can click anywhere on the screen to interact with the system via giving voice commands.", 5000));
 						voiceOutputQueue.add(new Directive("For example, click and say 'Help' to hear available commands.", 3000));
 						voiceOutput(voiceOutputQueue.remove());
@@ -235,8 +237,6 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 				} else {
 					voiceRecognizer.stopListening();
 					voiceRecognizer.destroy();
-					LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
-					micLayout.setVisibility(View.INVISIBLE);
 					listeningCommand = false;
 
 					if (listeningForNavStart) {
@@ -325,6 +325,8 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			@Override
 			public void onEndOfSpeech() {
 				// Auto-generated method stub
+				LinearLayout micLayout = (LinearLayout) findViewById(R.id.mic_layout);
+				micLayout.setVisibility(View.INVISIBLE);
 
 			}
 
@@ -354,48 +356,73 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		boolean matched = false;
 		for (String inp : res) {
 			inp = inp.toLowerCase();
-			if (inp.contains("help")) {
-				Toast.makeText(this, "Received 'Help' Command, Processing...", Toast.LENGTH_LONG).show();
+			if (inp.contains("help") || inp.contains("help please")) {
+				Toast.makeText(this, "Received 'Help' Command, Processing...", Toast.LENGTH_SHORT).show();
 				outputHelp();
 				matched = true;
 				break;
-			} else if (inp.contains("where am i")) {
-				Toast.makeText(this, "Received 'Where Am I' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("where am i") || inp.contains("where am i please")) {
+				Toast.makeText(this, "Received 'Where Am I' Command, Processing...", Toast.LENGTH_SHORT).show();
 				whereAmI();
 				matched = true;
 				break;
-			} else if (inp.contains("report my surroundings")) {
-				Toast.makeText(this, "Received 'Report My Surroundings' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("report my surroundings") || inp.contains("report my surroundings please")) {
+				Toast.makeText(this, "Received 'Report My Surroundings' Command, Processing...", Toast.LENGTH_SHORT).show();
 				reportMySurroundings();
 				matched = true;
 				break;
-			} else if (inp.contains("search location")) {
-				Toast.makeText(this, "Received 'Search Location' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("search location") || inp.contains("search location please")) {
+				Toast.makeText(this, "Received 'Search Location' Command, Processing...", Toast.LENGTH_SHORT).show();
 				Directive dir = new Directive("Where do you want to go?", 2000);
 				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
-			} else if (inp.contains("find me a location")) {
-				Toast.makeText(this, "Received 'Find Me a Location' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("find me a location") || inp.contains("find me a location please")) {
+				Toast.makeText(this, "Received 'Find Me a Location' Command, Processing...", Toast.LENGTH_SHORT).show();
 				Directive dir = new Directive("What do you want us to find for you?", 2500);
 				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
-			} else if (inp.contains("save current location")) {
-				Toast.makeText(this, "Received 'Save Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("save current location") || inp.contains("save current location please")) {
+				Toast.makeText(this, "Received 'Save Current Location' Command, Processing...", Toast.LENGTH_SHORT).show();
 				Directive dir = new Directive("Name of the location to save?", 2000);
 				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
-			} else if (inp.contains("share current location")) {
-				Toast.makeText(this, "Received 'Share Current Location' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("share current location") || inp.contains("share current location please")) {
+				Toast.makeText(this, "Received 'Share Current Location' Command, Processing...", Toast.LENGTH_SHORT).show();
 				Directive dir = new Directive("Name of the person you want to share your location with?", 3500);
 				voiceOutputQueue.add(dir);
 				matched = true;
 				break;
-			} else if (inp.contains("switch to non-vip mode")) {
-				Toast.makeText(this, "Received 'Switch to non-VIP Mode' Command, Processing...", Toast.LENGTH_LONG).show();
+			} else if (inp.contains("switch to non-vip mode") || inp.contains("switch to non-vip mode please")) {
+				Toast.makeText(this, "Received 'Switch to non-VIP Mode' Command, Processing...", Toast.LENGTH_SHORT).show();
 				switchToNormalMode();
+				matched = true;
+				break;
+			} else if (inp.contains("what time is it") || inp.contains("what time is it please")) {
+				Toast.makeText(this, "Received 'What Time is it?' Command, Processing...", Toast.LENGTH_SHORT).show();
+				whatTimeIsIt();
+				matched = true;
+				break;
+			} else if (inp.contains("date")) {
+				Toast.makeText(this, "Received 'What is the Date?' Command, Processing...", Toast.LENGTH_SHORT).show();
+				whatDateIsIt();
+				matched = true;
+				break;
+			} else if (inp.contains("indoor")) {
+				Toast.makeText(this, "Received 'How is the Weather in Indoors' Command, Processing...", Toast.LENGTH_SHORT).show();
+				weatherIndoor();
+				matched = true;
+				break;
+			} else if (inp.contains("outdoor")) {
+				Toast.makeText(this, "Received 'How is the Weather in Outdoors' Command, Processing...", Toast.LENGTH_SHORT).show();
+				weatherOutdoor();
+				matched = true;
+				break;
+			} else if (inp.contains("cancel")) {
+				Toast.makeText(this, "Received 'Cancel Current Navigation' Command, Processing...", Toast.LENGTH_SHORT).show();
+				cancelNavigation();
 				matched = true;
 				break;
 			}
@@ -404,6 +431,42 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			unknownCommandVoiceOutput();
 		}
 		processingCommandLoading.dismiss();
+	}
+
+	private void weatherOutdoor() {
+		String msg = "Outdoor weather is: Partly cloudy, temperature is: 21 Celsius, Humidity is: 32%, Precipitation: 20%";
+		Directive dir = new Directive(msg, 7500);
+		voiceOutputQueue.add(dir);
+	}
+
+	private void weatherIndoor() {
+		String msg = "Indoor temperature is: 27 Celsius, Humidity is: 42%";
+		Directive dir = new Directive(msg, 4000);
+		voiceOutputQueue.add(dir);
+	}
+
+	private void whatDateIsIt() {
+		Date date = new Date();
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Istanbul"));
+		cal.setTime(date);
+		int year = cal.get(Calendar.YEAR);
+		int month = cal.get(Calendar.MONTH);
+		Integer day = cal.get(Calendar.DAY_OF_MONTH);
+		String dayStr = day.toString();
+		String monthStr = getMonthStr(month);
+		if (day == 25)
+			dayStr = "Twenty Fifth";
+		String msg = String.format("Today is: %s of %s %s", dayStr, monthStr, year);
+		Directive dir = new Directive(msg, 4000);
+		voiceOutputQueue.add(dir);
+	}
+
+	private void whatTimeIsIt() {
+		Date date = new Date();
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+		String msg = String.format("Current time is: %s", dateFormat.format(date));
+		Directive dir = new Directive(msg, 4000);
+		voiceOutputQueue.add(dir);
 	}
 
 	private void unknownCommandVoiceOutput() {
@@ -642,7 +705,7 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
 									queueRoutes.add(destinationLocation);
 								} else {
-									queueRoutes.add(new Location("path", "path", path, .000011, .000011, floor, indoorId));
+									queueRoutes.add(new Location("First Floor Hall", "Path in Hall", path, .000011, .000011, floor, indoorId));
 									if (path == routeStep.path.get(0)) {
 										/* Add marker */
 										MarkerOptions markerOptions = new MarkerOptions().position(path).iconKey("dir_route_start");
@@ -815,33 +878,42 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 		boolean found = false;
 		for (String voice : voiceResults) {
 			voice = voice.toLowerCase();
-			List<Location> res = locationService.findByTypeVoice(voice);
-			if (!res.isEmpty()) {
-				/* Find Closest via Euclidean Formula */
-				Location closest = res.get(0);
-				Double minDistance = calculateEuclideanDistance(userLocation, closest);
-				for (Location loc : res) {
-					Double tempDistance = calculateEuclideanDistance(userLocation, loc);
-					if (minDistance > tempDistance) {
-						if (Math.abs(userLocation.getFloor() - loc.getFloor()) <= Math.abs(userLocation.getFloor() - closest.getFloor())) {
+			if (voice.contains("restroom")) {
+				Location loc = new Location("First Floor Woman Restroom/Wc", "Woman Restroom/Wc", new LatLng(39.891868, 32.783253), .000016, .000017, 2, demoIndoorMapId);
+				Directive dir = new Directive(String.format("Found 2 Woman Restrooms. The closest Woman Restroom is %s. Getting directions and calculating shortest path for %s.", loc.getName(), loc.getName()), 12000);
+				voiceOutputQueue.add(dir);
+				requestNavigationForLocation(loc);
+				found = true;
+				break;
+			} else {
+				List<Location> res = locationService.findByTypeVoice(voice);
+				if (!res.isEmpty()) {
+					/* Find Closest via Euclidean Formula */
+					Location closest = res.get(0);
+					Double minDistance = calculateEuclideanDistance(userLocation, closest);
+					for (Location loc : res) {
+						Double tempDistance = calculateEuclideanDistance(userLocation, loc);
+						if (minDistance > tempDistance) {
+							if (Math.abs(userLocation.getFloor() - loc.getFloor()) <= Math.abs(userLocation.getFloor() - closest.getFloor())) {
+								closest = loc;
+								minDistance = tempDistance;
+							}
+						} else if (Math.abs(userLocation.getFloor() - loc.getFloor()) < Math.abs(userLocation.getFloor() - closest.getFloor())) {
 							closest = loc;
 							minDistance = tempDistance;
 						}
-					} else if (Math.abs(userLocation.getFloor() - loc.getFloor()) < Math.abs(userLocation.getFloor() - closest.getFloor())) {
-						closest = loc;
-						minDistance = tempDistance;
 					}
+					Directive dir;
+					if (res.size() != 1)
+						dir = new Directive(String.format("Found %s %ss. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
+					else
+						dir = new Directive(String.format("Found %s %s. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
+					voiceOutputQueue.add(dir);
+					requestNavigationForLocation(closest);
+					found = true;
+					break;
 				}
-				Directive dir;
-				if (res.size() != 1)
-					dir = new Directive(String.format("Found %s %ss. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
-				else
-					dir = new Directive(String.format("Found %s %s. The closest %s is %s. Getting directions and calculating shortest path for %s.", res.size(), voice, voice, closest.getName(), closest.getName()), 10000);
-				voiceOutputQueue.add(dir);
-				requestNavigationForLocation(closest);
-				found = true;
 			}
-			break;
 		}
 		if (!found) {
 			String msg = String.format("Sorry, I could not match your voice with any location types in this building.");
@@ -856,6 +928,15 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 			voice = voice.toLowerCase();
 			if (voice.contains("5")) {
 				Optional<Location> dest = locationService.findByIndoorName("BMB-5");
+				if (dest.isPresent()) {
+					Directive dir = new Directive(String.format("Getting directions and calculating shortest path for %s", dest.get().getName()), 4000);
+					voiceOutputQueue.add(dir);
+					requestNavigationForLocation(dest.get());
+					found = true;
+				}
+				break;
+			} else if (voice.contains("101")) {
+				Optional<Location> dest = locationService.findByIndoorName("Room A-101");
 				if (dest.isPresent()) {
 					Directive dir = new Directive(String.format("Getting directions and calculating shortest path for %s", dest.get().getName()), 4000);
 					voiceOutputQueue.add(dir);
@@ -896,17 +977,15 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 
 	private void outputHelp() {
 		List<Directive> helpDirectives = new ArrayList<Directive>() {{
-			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting Vip Assistant find you a nearby location that you specified.", 9000));
+			add(new Directive("In this mode you can Navigate yourself in buildings by searching locations by their name, or even better, by letting Vip Assistant find you a nearby location that you specified.", 9500));
 			add(new Directive("Vip Assistant will guide you through the navigation, you can also cancel your navigation anytime", 5000));
-			add(new Directive("Or You can ask where your location is and surroundings report,", 3500));
-			add(new Directive("In addition you can save or share your current location.", 3500));
-			add(new Directive("To learn where you are right now give: 'Where Am I?' command", 3500));
-			add(new Directive("To get a surroundings report give: 'Report my surroundings' command", 4000));
-			add(new Directive("To search for locations by their name give: 'Search location' command", 4000));
-			add(new Directive("To ask Vip Assistant to find you a location give: 'Find me a location' command", 4500));
-			add(new Directive("To save your current location give: 'Save current location' command", 4000));
-			add(new Directive("To share your current location give: 'Share current location' command", 4000));
-			add(new Directive("To switch to non-VIP mode give: 'Switch to non-VIP mode' command", 3500));
+			add(new Directive("To search for locations by their name give: 'Search Location' command", 4200));
+			add(new Directive("To ask Vip Assistant to find you a location give: 'Find me a Location' command", 4500));
+			add(new Directive("Or You can ask where your location is and surroundings report using 'Where Am I' and 'Report My Surroundings' commands respectively.", 7000));
+			add(new Directive("In addition, you can save or share your current location using 'Save Current Location' and 'Share Current Location' commands respectively.", 7200));
+			add(new Directive("Furthermore, You can ask the current time and date to Vip Assistant using 'What Time is it' and 'What is the Date' commands, respectively.", 7200));
+			add(new Directive("To learn about outdoor weather or indoor air conditions you can try: 'How is the Weather in Outdoors' and 'How is the Weather in Indoors' commands, respectively.", 8000));
+			add(new Directive("To switch to non VIP mode you can give: 'Switch to non VIP mode' command", 4000));
 			add(new Directive("You can listen this helper by giving: 'Help' command again", 3500));
 		}};
 		voiceOutputQueue.addAll(helpDirectives);
