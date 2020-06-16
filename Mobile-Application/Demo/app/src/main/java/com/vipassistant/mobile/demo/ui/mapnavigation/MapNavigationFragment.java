@@ -98,7 +98,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 	/* For demo of the recalculating the route feature first set below three to true.
 	* Then in the app, first go to the Z-103 and first demo happens, then try to go to the Room A-306
 	* which will trigger the second and the third demos. */
-	private Boolean incorrectDemo1Activated = true, incorrectDemo2Activated = true, incorrectDemo3Activated = true;
+	private Boolean incorrectDemo1Activated = false, incorrectDemo2Activated = false, incorrectDemo3Activated = false;
 
 	public View onCreateView(@NonNull LayoutInflater inflater,
 							 ViewGroup container, Bundle savedInstanceState) {
