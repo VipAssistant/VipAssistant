@@ -26,10 +26,6 @@
                         android:id="@+id/nav_monitor"
                         android:icon="@drawable/ic_graphic_eq_black_24dp"
                         android:title="@string/menu_monitor" />
-                <item
-                        android:id="@+id/nav_corona_demo"
-                        android:icon="@drawable/ic_navigation_black_24dp"
-                        android:title="@string/menu_corona_demo" />
             </group>
         </menu>
     </item>

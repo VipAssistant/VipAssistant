@@ -73,7 +73,7 @@ public class MonitorFragment extends Fragment {
             sendingReportLoading.dismiss();
             sendingStatusReport--;
         }
-//        if (all the beacons are ok) {
+//        if (allBeaconsAreOK) {
 //            beaconStatusText.setText(allGoodText);
 //            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_done_all_w_24dp));
 //            beaconStatusReportBtn.setVisibility(View.INVISIBLE);
