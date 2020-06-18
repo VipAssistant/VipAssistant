@@ -23,7 +23,6 @@
                     android:layout_height="fill_parent"
                     android:layout_width="90dp"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_done_all_w_24dp"
                     android:padding="15dip"
                     android:contentDescription="@string/nav_helper_icon"/>
 
@@ -33,7 +32,6 @@
                     android:layout_height="fill_parent"
                     android:padding="5dp"
                     android:textColor="#ffffff"
-                    android:text="Oops! You get signals from only %s out of 5 beacons in this building.\n\n You can send a status report to VipAssistant Support team to let them know about this issue."
                     android:textSize="15sp"
                     android:textAlignment="center"
                     android:gravity="center"
