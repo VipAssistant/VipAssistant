@@ -1,6 +1,7 @@
 package com.vipassistant.mobile.demo.ui.constants;
 
 import com.eegeo.mapapi.geometry.LatLng;
+import com.vipassistant.mobile.demo.ui.model.Beacon;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 
@@ -162,5 +163,13 @@ public class Constants {
 		add(new Location("Fourth Floor Hall", "Hall", new LatLng(39.891818, 32.783219), .000047, .000090, 8, demoIndoorMapId));
 		add(new Location("Room A-401", "Staff Room", new LatLng(39.891780, 32.783296), .000035, .000047, 8, demoIndoorMapId));
 		add(new Location("Fourth Floor Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 8, demoIndoorMapId));
+	}};
+
+	public static final List<Beacon> beaconList = new ArrayList<Beacon>() {{
+		add(new Beacon(null, "fcfb2778-8b74-4ff9-81b2-615a9001ee15", new Location("Server Room", "Server Room", new LatLng(39.892068, 32.783152), .000014, .000058, 0, demoIndoorMapId)));
+		add(new Beacon(null, "f2f63962-8bdc-4e9f-a37a-fe323e9930ae", new Location("Digital Lab", "Lab", new LatLng(39.891962, 32.783152), .000088, .000038, 0, demoIndoorMapId)));
+		add(new Beacon(null, "e2a9b361-29cb-4b05-a7f8-9dc275150a60", new Location("Stationary", "Stationary", new LatLng(39.891855, 32.783169), .000018, .000035, 0, demoIndoorMapId)));
+		add(new Beacon(null, "3b455670-698c-4f0b-9d7a-128af96c4d68", new Location("Study Room", "Study Room", new LatLng(39.891780, 32.783290), .000033, .000038, 0, demoIndoorMapId)));
+		add(new Beacon(null, "43978a80-79e4-44ef-8804-71a14dad4a6b", new Location("Basement Hallway", "Hallway", new LatLng(39.891941, 32.783212), .000110, .000011, 0, demoIndoorMapId)));
 	}};
 }

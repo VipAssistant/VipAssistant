@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import com.eegeo.mapapi.geometry.LatLng;
 import com.eegeo.mapapi.geometry.WeightedLatLngAlt;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.ui.model.Beacon;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
 import com.vipassistant.mobile.demo.ui.utils.AutoCompleteArrayAdapter;
@@ -310,6 +311,13 @@ public class Utils {
 		return true;
 	}
 
+	public static void updateBeaconRSSI(Beacon beacon) {
+		Random rand = new Random();
+		int max = 45, min = 10;
+		Integer rssi = (rand.nextInt(max + 1 - min) + min) - 100;
+		beacon.setRssiValue(rssi);
+	}
+
 	public static String getMonthStr(int month) {
 		switch (month) {
 			case 0:
@@ -337,7 +345,7 @@ public class Utils {
 			case 11:
 				return "December";
 			default:
-				return "May";
+				return "Unknown Month";
 		}
 	}
 }

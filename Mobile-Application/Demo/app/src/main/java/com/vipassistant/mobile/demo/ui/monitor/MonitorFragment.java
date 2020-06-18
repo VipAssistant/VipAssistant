@@ -17,13 +17,17 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.ui.constants.Constants;
+import com.vipassistant.mobile.demo.ui.model.Beacon;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
-import static com.vipassistant.mobile.demo.ui.constants.Constants.mapRefreshMillis;
+import static com.vipassistant.mobile.demo.ui.constants.Constants.*;
 import static com.vipassistant.mobile.demo.ui.utils.Utils.buildLoadingDialog;
+import static com.vipassistant.mobile.demo.ui.utils.Utils.updateBeaconRSSI;
 
 public class MonitorFragment extends Fragment {
 
@@ -33,9 +37,10 @@ public class MonitorFragment extends Fragment {
     private ImageView beaconStatusIcon;
     private Button beaconStatusReportBtn;
     private final String allGoodText = "You get signals from all the beacons in this building, which means you are good to go!";
-    private final String problemText = "Oops! You get signals only from %s out of 5 beacons in this building, you can send a status report to VipAssistant Support team to let them know about this issue.";
+    private final String problemText = "Oops! You get signals only from %s out of %s beacons in this building, you can send a status report to VipAssistant Support team to let them know about this issue.";
     private ProgressDialog sendingReportLoading;
     private int sendingStatusReport = -1;
+    private int brokenBeaconCount = 0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
@@ -65,24 +70,37 @@ public class MonitorFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Graph is refreshed per sec
+     */
     private void updateMonitorFragmentPeriodically() {
-        /* TODO: Update graph */
+        updateBeaconGraphData();
         if (sendingStatusReport > 0) {
             sendingStatusReport--;
         } else if (sendingStatusReport == 0) {
             sendingReportLoading.dismiss();
             sendingStatusReport--;
         }
-//        if (allBeaconsAreOK) {
-//            beaconStatusText.setText(allGoodText);
-//            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_done_all_w_24dp));
-//            beaconStatusReportBtn.setVisibility(View.INVISIBLE);
-//        } else {
-//            String message = String.format(problemText, numberOfBeaconsThatIsOk);
-//            beaconStatusText.setText(message);
-//            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_sync_problem_w_24dp));
-//            beaconStatusReportBtn.setVisibility(View.VISIBLE);
-//        }
+        if (brokenBeaconCount == 0) {
+            beaconStatusText.setText(allGoodText);
+            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_done_all_w_24dp));
+            beaconStatusReportBtn.setVisibility(View.INVISIBLE);
+        } else {
+            String message = String.format(problemText, brokenBeaconCount, beaconList.size());
+            beaconStatusText.setText(message);
+            beaconStatusIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_sync_problem_w_24dp));
+            beaconStatusReportBtn.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateBeaconGraphData() {
+        brokenBeaconCount = 0;
+        for (Beacon beacon : beaconList) {
+            updateBeaconRSSI(beacon);
+            if (beacon.getRssiValue() <= -90) {
+                brokenBeaconCount++;
+            }
+        }
     }
 
     private void displayMonitorReportDialog() {
