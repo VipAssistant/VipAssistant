@@ -4,6 +4,7 @@ import com.eegeo.mapapi.geometry.LatLng;
 import com.vipassistant.mobile.demo.ui.model.Beacon;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
+import com.vipassistant.mobile.demo.ui.model.User;
 
 import java.util.*;
 
@@ -31,9 +32,20 @@ public class Constants {
 	public static double cameraTiltHeatmap = 0;
 	public static final double PERSON_WALKING_SPEED = 1.4;
 
+	public static User userCookie = null;
+
 	/* API-related Constants */
-	public static final String BACKEND_BASE_URL = "http://144.122.71.144:8083/coronakillerbackend-group18/api";
+	public static final String BACKEND_BASE_URL = "https://vipassistant.ceng.metu.edu.tr:8080/api";
 	public static final String HASH_SALT = "$2a$10$3j3gfVtuynuvE6FIVvygdu"; /* A Random BCrypt Salt value generated with BCrypt.gensalt(10) */
+
+	/* Request Message Constants */
+	public static final String CLIENT_ERROR = "Oops! Something went wrong on client";
+	public static final String COOKIE_NOTFOUND = "Oops! Seems like game cookie that has your login credentials is not found.\nPlease try to logout and then login.";
+	public static final String HTTP_400 = "Oops! Request failed - BAD REQUEST";
+	public static final String HTTP_401 = "Invalid username or password - UNAUTHORIZED";
+	public static final String HTTP_404 = "Oops! Requested data is not found on the server.";
+	public static final String HTTP_CONN_ERROR = "Oops! Seems like you can't access the server.\nPlease check your internet connection and try again.";
+	public static final String HTTP_500 = "Oops! Something went wrong on server";
 
 	/* Outdoor Location (cities) Container (gets loaded on startup) */
 	public static ArrayList<Location> allOutdoorLocations = new ArrayList<Location>();
