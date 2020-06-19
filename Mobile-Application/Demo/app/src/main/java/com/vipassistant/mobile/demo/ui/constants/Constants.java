@@ -19,7 +19,7 @@ public class Constants {
 	public static final ArrayList<Integer> demoFirstRssi = new ArrayList<Integer>(){{add(-61); add(-63); add(-66); add(-74); add(-90);}};
 	public static final String mapSceneLink = "https://wrld.mp/d5ffdc5";
 	public static final String markerText = "You Are Here!";
-	public static int mapRefreshMillis = 1000; /* TODO Refresh map per sec */
+	public static int mapRefreshMillis = 1000;
 	public static int demoRefreshMillis = 2000;
 	public static final double locationLatEps = 0.0001;
 	public static final double locationLongEps = 0.0001;
@@ -31,12 +31,14 @@ public class Constants {
 	public static double cameraTiltHeatmap = 0;
 	public static final double PERSON_WALKING_SPEED = 1.4;
 
-	public static final Set<LatLng> latlngsToNotToGo = new HashSet<>(Arrays.asList(new LatLng(39.891772, 32.783201999999996),
-			new LatLng(39.891802, 32.78319900000001), new LatLng(39.89186, 32.783269)));
+	/* API-related Constants */
+	public static final String BACKEND_BASE_URL = "http://144.122.71.144:8083/coronakillerbackend-group18/api";
+	public static final String HASH_SALT = "$2a$10$3j3gfVtuynuvE6FIVvygdu"; /* A Random BCrypt Salt value generated with BCrypt.gensalt(10) */
 
+	/* Outdoor Location (cities) Container (gets loaded on startup) */
 	public static ArrayList<Location> allOutdoorLocations = new ArrayList<Location>();
 
-		/* Our Indoor Map's Location Container */
+	/* Demo Indoor Map's Location Container */
 	public static ArrayList<Location> allLocations = new ArrayList<Location>() {{
 		/* Basement */
 		add(new Location("Server Room", "Server Room", new LatLng(39.892068, 32.783152), .000014, .000058, 0, demoIndoorMapId));
@@ -165,11 +167,20 @@ public class Constants {
 		add(new Location("Fourth Floor Front Downstairs", "Stairs", new LatLng(39.891782, 32.783171), .000008, .000015, 8, demoIndoorMapId));
 	}};
 
-	public static final List<Beacon> beaconList = new ArrayList<Beacon>() {{
+	/* Beacon Container */
+	public static List<Beacon> beaconList = new ArrayList<Beacon>() {{
 		add(new Beacon(null, "fcfb2778-8b74-4ff9-81b2-615a9001ee15", new Location("Server Room", "Server Room", new LatLng(39.892068, 32.783152), .000014, .000058, 0, demoIndoorMapId)));
 		add(new Beacon(null, "f2f63962-8bdc-4e9f-a37a-fe323e9930ae", new Location("Digital Lab", "Lab", new LatLng(39.891962, 32.783152), .000088, .000038, 0, demoIndoorMapId)));
 		add(new Beacon(null, "e2a9b361-29cb-4b05-a7f8-9dc275150a60", new Location("Stationary", "Stationary", new LatLng(39.891855, 32.783169), .000018, .000035, 0, demoIndoorMapId)));
 		add(new Beacon(null, "3b455670-698c-4f0b-9d7a-128af96c4d68", new Location("Study Room", "Study Room", new LatLng(39.891780, 32.783290), .000033, .000038, 0, demoIndoorMapId)));
 		add(new Beacon(null, "43978a80-79e4-44ef-8804-71a14dad4a6b", new Location("Basement Hallway", "Hallway", new LatLng(39.891941, 32.783212), .000110, .000011, 0, demoIndoorMapId)));
 	}};
+
+	public static final Set<LatLng> criticalLatLngs = new HashSet<>(
+			Arrays.asList(
+					new LatLng(39.891772, 32.783201999999996),
+					new LatLng(39.891802, 32.78319900000001),
+					new LatLng(39.89186, 32.783269)
+			)
+	);
 }
