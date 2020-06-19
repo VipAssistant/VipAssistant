@@ -48,12 +48,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		/* Swagger Doc and User Registration requests shouldn't be authenticated at all */
-		web.ignoring().antMatchers("/v2/api-docs",
-				"/configuration/ui",
-				"/swagger-resources/**",
-				"/configuration/security",
-				"/swagger-ui.html",
-				"/webjars/**",
-				"/api/players/register");
+		web.ignoring().antMatchers("/api/users/register");
 	}
 }
