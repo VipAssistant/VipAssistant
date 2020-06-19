@@ -866,10 +866,10 @@ public class VIPMainActivity extends AppCompatActivity implements OnMapsceneRequ
 	}
 
 	private void shareLocation() {
-		// TODO: not works sometimes.
 		SmsManager smsManager = SmsManager.getDefault();
-		smsManager.sendTextMessage("05428927877", null, packLocationDataToSend(userLocation), null, null);
-		String msg = "Your Current Location is Shared Successfully with person: Yavuz Selim Yesilyurt through direct SMS.";
+		String person = "person";
+		smsManager.sendTextMessage("", null, packLocationDataToSend(userLocation), null, null);
+		String msg = String.format("Your Current Location is Shared Successfully with person: %s through direct SMS.", person);
 		voiceOutputQueue.add(new Directive(msg,8500));
 		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
 	}
