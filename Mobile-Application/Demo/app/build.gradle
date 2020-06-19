@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'androidx.navigation.safeargs'
 
 android {
     compileSdkVersion 29
@@ -33,6 +34,14 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     implementation 'com.wrld:wrld-android-sdk:0.0.1215@aar'
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'com.androidadvance:topsnackbar:1.1.1'
+    implementation 'gr.pantrif:easy-android-splash-screen:0.0.1'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.8'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.8'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.6'
+    implementation "org.mindrot:jbcrypt:0.4"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

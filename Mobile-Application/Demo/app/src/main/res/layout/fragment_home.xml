@@ -1,36 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" >
- 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/fragment_home"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    <TextView
-            android:id="@+id/blescanner1"
-            android:layout_width="300dp"
+            <ImageView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="This is Vip Assistant Demo Application\n\nIn this Demo you can find and work on the following modules:\n\n✓ Voice Directive Outputting Module\n\n✓ Voice Command Inputting Module\n\n✓ BLE Devices Scanner Module"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:textColor="#FFF"
-            android:background="@drawable/text_style"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:src="@drawable/ic_logo2"
+            android:contentDescription="@string/nav_header_desc"
+            android:id="@+id/vipaImg"/>
+            <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="110dp"
+            android:layout_marginHorizontal="30dp"
+            android:layout_centerHorizontal="true"
             android:textAlignment="center"
-            android:padding="15dp"
-            android:layout_gravity="center" app:layout_constraintHorizontal_bias="0.495"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:text="@string/home_text"
+            android:id="@+id/textView1" />
+            <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="160dp"
+            android:layout_marginHorizontal="30dp"
+            android:layout_centerHorizontal="true"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="@string/home_textt"
+            android:id="@+id/textView2" />
+            <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:layout_marginTop="200dp"
+            android:layout_marginHorizontal="60dp"
+            android:id="@+id/menuList" />
+</RelativeLayout>

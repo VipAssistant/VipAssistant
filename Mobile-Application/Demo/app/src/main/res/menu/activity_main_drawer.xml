@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+      xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
     <item android:title="@string/home">
@@ -19,32 +19,23 @@
                         android:icon="@drawable/ic_near_me_black_24dp_opaque"
                         android:title="@string/menu_map_nav" />
                 <item
-                        android:id="@+id/nav_voutput"
-                        android:icon="@drawable/ic_hearing_black"
-                        android:title="@string/menu_voutput" />
+                        android:id="@+id/nav_heatmap"
+                        android:icon="@drawable/ic_whatshot_black_24dp"
+                        android:title="@string/menu_heatmap" />
                 <item
-                        android:id="@+id/nav_vinput"
-                        android:icon="@drawable/ic_mic_black"
-                        android:title="@string/menu_vinput" />
-                <item
-                        android:id="@+id/nav_blescanner"
-                        android:icon="@drawable/ic_bluetooth_searching_black"
-                        android:title="@string/menu_blescanner" />
+                        android:id="@+id/nav_monitor"
+                        android:icon="@drawable/ic_graphic_eq_black_24dp"
+                        android:title="@string/menu_monitor" />
             </group>
         </menu>
     </item>
-
-    <!--    <item android:title="Communicate">-->
-<!--        <menu>-->
-<!--            <item-->
-<!--                android:id="@+id/nav_share"-->
-<!--                android:icon="@drawable/ic_menu_share"-->
-<!--                android:title="@string/menu_share" />-->
-<!--            <item-->
-<!--                android:id="@+id/nav_send"-->
-<!--                android:icon="@drawable/ic_menu_send"-->
-<!--                android:title="@string/menu_send" />-->
-<!--        </menu>-->
-<!--    </item>-->
-
+    <item android:title="@string/additional_settings">
+        <menu>
+            <item
+                    android:id="@+id/covid_switch"
+                    android:title="Covid-19 Social Distancing Mode"
+                    app:showAsAction="always"
+                    app:actionLayout="@layout/switch_item"/>
+        </menu>
+    </item>
 </menu>
