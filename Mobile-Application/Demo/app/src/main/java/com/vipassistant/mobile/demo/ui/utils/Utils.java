@@ -263,7 +263,7 @@ public class Utils {
 		for (int i = 0; i < peopleCount; ++i) {
 			double lat = random.nextDouble() * (ne.latitude - sw.latitude) + sw.latitude;
 			double lng = random.nextDouble() * (ne.longitude - sw.longitude) + sw.longitude;
-			points.add(new WeightedLatLngAlt(lat, lng, random.nextInt(12))); // TODO: intensity value!!!
+			points.add(new WeightedLatLngAlt(lat, lng, random.nextInt(12)));
 		}
 
 		return points;
@@ -304,7 +304,7 @@ public class Utils {
 	}
 
 	public static boolean checkShouldGo(LatLng latLng, int floor) {
-		for (LatLng notGoLatLng : latlngsToNotToGo) {
+		for (LatLng notGoLatLng : criticalLatLngs) {
 			if (notGoLatLng.equals(latLng) && floor == 0)
 				return false;
 		}

@@ -58,8 +58,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_heatmap, R.id.nav_monitor,
-                R.id.nav_corona_demo, R.id.nav_map_nav, R.id.nav_corona_demo)
+                R.id.nav_home, R.id.nav_heatmap, R.id.nav_monitor, R.id.nav_map_nav)
                 .setDrawerLayout(drawer)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -110,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
-//                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
                 voiceOutputQueue.clear();
                 snackbar.dismiss();
@@ -132,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancel(DialogInterface dialog) {
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
-//                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
                 snackbar.dismiss();
                 voiceOutputQueue.clear();
@@ -148,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isChecked) {
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
                     dialogBuilder.setIcon(R.drawable.covid_dialog);
-                    dialogBuilder.setTitle("Activated Social Distancing Mode"); // TODO: DEMOSU!
+                    dialogBuilder.setTitle("Activated Social Distancing Mode");
                     dialogBuilder.setMessage("From now on your location will be shared with VipAssistant social distancing community in realtime to let us create a 1.5 meter safe radius for you inside buildings." +
                             " Please make sure you have an active internet connection." +
                             "\n\nYou will be notified through voice notifications whenever a situation that violates your social distance radius occurs." +
@@ -167,15 +164,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        // TODO
-//        MenuItemImpl navigateItem = (MenuItemImpl) navigationView.getMenu().getItem(1).getSubMenu().getItem(0);
-//        navigateItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                return false;
-//            }
-//        });
     }
 
     /**
@@ -221,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.switch_vip:
                 Intent myIntent = new Intent(MainActivity.this, VIPMainActivity.class);
-//                myIntent.putExtra("key", value); //Optional parameters
                 MainActivity.this.startActivity(myIntent);
                 return true;
             case R.id.caching_toggle:
@@ -248,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void showHelp() { // todo: not works
+    public void showHelp() {
         String[] textString = {"Navigate Yourself to Anywhere Inside Buildings!", "Discover the World!",
                 "Save and Share Your Location!", "Display Realtime Building Heatmaps!", "Monitor the State of Your App!",
                 "Toggle Map Pre-Caching!", "Switch to VIP Mode!", "Display Location Calculation Demo!"};
