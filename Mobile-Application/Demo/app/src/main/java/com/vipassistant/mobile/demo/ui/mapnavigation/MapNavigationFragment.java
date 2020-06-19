@@ -635,7 +635,7 @@ public class MapNavigationFragment extends Fragment implements OnMapsceneRequest
 						userLocation.getLocation().latitude, userLocation.getLocation().longitude);
 				innerDialogBuilder.setIcon(android.R.drawable.ic_menu_mylocation);
 				innerDialogBuilder.setTitle(innerTitle);
-				innerDialogBuilder.setMessage(innerMessage); // todo style
+				innerDialogBuilder.setMessage(innerMessage);
 				ArrayAdapter<String> locNamesAdapter = new ArrayAdapter<String>(getContext(),
 						android.R.layout.simple_spinner_item, nearbyLocationNames);
 				ListView listView = new ListView(getContext());
