@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import static com.vipassistant.web.backend.constant.APIConstants.*;
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/users", headers = "Accept=application/json")
@@ -42,7 +44,7 @@ public class UserController {
 		} else {
 			log.warn("BAD REQUEST on login - missing Authorization Header in the request.");
 			return ResponseEntity.badRequest().body(new ResponseDTO(null,
-					"Missing Authorization Header in the request.", APIConstants.RESPONSE_FAIL));
+					"Missing Authorization Header in the request.", RESPONSE_FAIL));
 		}
 	}
 
