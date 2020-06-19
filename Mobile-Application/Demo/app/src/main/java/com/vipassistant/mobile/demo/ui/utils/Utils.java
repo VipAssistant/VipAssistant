@@ -4,12 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.*;
 import androidx.core.content.ContextCompat;
 import com.eegeo.mapapi.geometry.LatLng;
 import com.eegeo.mapapi.geometry.WeightedLatLngAlt;
 import com.vipassistant.mobile.demo.R;
+import com.vipassistant.mobile.demo.ui.constants.Constants;
 import com.vipassistant.mobile.demo.ui.model.Beacon;
 import com.vipassistant.mobile.demo.ui.model.Location;
 import com.vipassistant.mobile.demo.ui.model.StepInfo;
@@ -346,6 +348,30 @@ public class Utils {
 				return "December";
 			default:
 				return "Unknown Month";
+		}
+	}
+
+	/**
+	 * A static helper method for generic determination of String to respond
+	 * to caller method that is calling the request method
+	 *
+	 * @param httpCode
+	 * @return String
+	 */
+	public static String resolveHttpCodeResponse(Integer httpCode) {
+		switch (httpCode) {
+			case 400:
+				return Constants.HTTP_400;
+			case 401:
+				return Constants.HTTP_401;
+			case 404:
+				return Constants.HTTP_404;
+			case 500:
+				return Constants.HTTP_500;
+			default: {
+				Log.w(String.valueOf(Log.WARN), String.format("Got HTTP %s from login request", httpCode));
+				return "Oops! Something went wrong - " + httpCode;
+			}
 		}
 	}
 }
