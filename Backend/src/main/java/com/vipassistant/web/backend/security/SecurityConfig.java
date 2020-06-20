@@ -34,7 +34,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable()
+		http
+				.csrf()
+				.disable()
+				/* Configure Spring Security to require only HTTPS requests */
+				.requiresChannel()
+				.anyRequest()
+				.requiresSecure()
+				.and()
 				/* Authenticate all other requests except ignored ones */
 				.authorizeRequests()
 				.anyRequest()
@@ -42,7 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 				.httpBasic()
 				.and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 
 	@Override
