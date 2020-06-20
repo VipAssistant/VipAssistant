@@ -9,6 +9,10 @@ import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for Redirecting HTTP requests
+ * that is coming to Tomcat to HTTPS
+ */
 @Configuration
 public class ServerConfig {
 
@@ -29,6 +33,10 @@ public class ServerConfig {
 		return tomcat;
 	}
 
+	/**
+	 *
+	 * @return
+	 */
 	private Connector getHttpConnector() {
 		Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
 		connector.setScheme("http");

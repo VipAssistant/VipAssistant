@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.anyRequest()
 				.authenticated()
 				.and()
+				/* And apply authentication using HTTP BASIC */
 				.httpBasic()
 				.and()
 				.sessionManagement()

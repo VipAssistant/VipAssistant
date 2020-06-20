@@ -23,6 +23,10 @@ public class UuidConfig {
 	@Autowired
 	private BeaconRepository beaconRepository;
 
+	/**
+	 * Method that is responsible for periodic (per 10 seconds)
+	 * refresh of beacon UUIDs generated with the constant random seed UUID_SEED
+	 */
 	@Transactional
 	@Scheduled(fixedRate = 10000)
 	public void refreshUUIDs() {

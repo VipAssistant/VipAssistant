@@ -1,4 +1,4 @@
-package com.vipassistant.web.backend.model;
+package com.vipassistant.web.backend.dto;
 
 import lombok.*;
 

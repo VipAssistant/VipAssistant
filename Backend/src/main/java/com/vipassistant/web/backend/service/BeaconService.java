@@ -1,5 +1,6 @@
 package com.vipassistant.web.backend.service;
 
+import com.vipassistant.web.backend.constant.APIConstants;
 import com.vipassistant.web.backend.dto.BeaconDTO;
 import com.vipassistant.web.backend.dto.ResponseDTO;
 import com.vipassistant.web.backend.dto.UserDTO;
@@ -85,7 +86,7 @@ public class BeaconService {
 	 * @return Pair<HttpStatus, ResponseDTO>
 	 */
 	public Pair<HttpStatus, ResponseDTO> getUuidSeedValue() {
-		return null;
+		return Pair.of(HttpStatus.OK, new ResponseDTO(APIConstants.UUID_SEED, null, RESPONSE_SUCCESS));
 	}
 }
 
