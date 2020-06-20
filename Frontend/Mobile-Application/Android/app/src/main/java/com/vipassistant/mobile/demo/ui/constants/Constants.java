@@ -35,7 +35,7 @@ public class Constants {
 	public static User userCookie = null;
 
 	/* API-related Constants */
-	public static final String BACKEND_BASE_URL = "https://vipassistant.ceng.metu.edu.tr:8080/api";
+	public static final String BACKEND_BASE_URL = "https://vipassistant.ceng.metu.edu.tr:8081/api";
 	public static final String HASH_SALT = "$2a$10$3j3gfVtuynuvE6FIVvygdu"; /* A Random BCrypt Salt value generated with BCrypt.gensalt(10) */
 
 	/* Request Message Constants */
