@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.vipassistant.web.backend.constant.APIConstants.*;
+
 @Slf4j
 @Service
 public class UserService {
@@ -36,7 +38,7 @@ public class UserService {
 	 */
 	public Pair<HttpStatus, ResponseDTO> getAllUsers() {
 		List<UserDTO> playerDTOList = userMapper.toUserDTOList(userRepository.findAll());
-		return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTOList, null, APIConstants.RESPONSE_SUCCESS));
+		return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTOList, null, RESPONSE_SUCCESS));
 	}
 
 	/**
@@ -48,11 +50,11 @@ public class UserService {
 		Optional<User> queryResult = userRepository.findById(userId);
 		if (queryResult.isPresent()) {
 			UserDTO userDTO = userMapper.toUserDTO(queryResult.get());
-			return Pair.of(HttpStatus.OK, new ResponseDTO(userDTO, null, APIConstants.RESPONSE_SUCCESS));
+			return Pair.of(HttpStatus.OK, new ResponseDTO(userDTO, null, RESPONSE_SUCCESS));
 		} else {
 			log.warn("User not found with id:{}", userId);
 			return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-					String.format("User not found with id:%s", userId), APIConstants.RESPONSE_FAIL));
+					String.format("User not found with id:%s", userId), RESPONSE_FAIL));
 		}
 	}
 
@@ -68,11 +70,11 @@ public class UserService {
 		Optional<User> user = userRepository.findByUsername(principal.getUsername());
 		if (user.isPresent()) {
 			UserDTO playerDTO = userMapper.toUserDTO(user.get());
-			return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTO, null, APIConstants.RESPONSE_SUCCESS));
+			return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTO, null, RESPONSE_SUCCESS));
 		}
 		log.warn("User not found with username:{}", principal.getUsername());
 		return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-				String.format("User not found with username:%s", principal.getUsername()), APIConstants.RESPONSE_FAIL));
+				String.format("User not found with username:%s", principal.getUsername()), RESPONSE_FAIL));
 	}
 
 	/**
@@ -88,17 +90,17 @@ public class UserService {
 				User user = userMapper.toUser(userDTO);
 				userRepository.save(user);
 				return Pair.of(HttpStatus.OK, new ResponseDTO(null,
-						String.format("User is successfully created with username:%s", user.getUsername()), APIConstants.RESPONSE_SUCCESS));
+						String.format("User is successfully created with username:%s", user.getUsername()), RESPONSE_SUCCESS));
 			} else {
 				log.warn("Username exists, could not complete user registration for username:{}", userDTO.getUsername());
 				return Pair.of(HttpStatus.OK, new ResponseDTO(null,
 						String.format("Username already exists.\nPlease choose another and try again",
-								userDTO.getUsername()), APIConstants.RESPONSE_FAIL));
+								userDTO.getUsername()), RESPONSE_FAIL));
 			}
 		} else {
 			return Pair.of(HttpStatus.OK, new ResponseDTO(null,
 					String.format("Validation Error on registration.\nFollowing constraints must be met: %s", validationResult),
-					APIConstants.RESPONSE_FAIL));
+					RESPONSE_FAIL));
 		}
 	}
 
@@ -132,11 +134,11 @@ public class UserService {
 		if (queryResult.isPresent()) {
 			userRepository.delete(queryResult.get());
 			return Pair.of(HttpStatus.OK, new ResponseDTO(null,
-					String.format("User with id:%s successfully removed", userId), APIConstants.RESPONSE_SUCCESS));
+					String.format("User with id:%s successfully removed", userId), RESPONSE_SUCCESS));
 		}
 		log.warn("User not found with id:{}", userId);
 		return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-				String.format("User not found with id:%s", userId), APIConstants.RESPONSE_FAIL));
+				String.format("User not found with id:%s", userId), RESPONSE_FAIL));
 	}
 
 	/**
@@ -149,7 +151,7 @@ public class UserService {
 		if (queryResult.isEmpty()) {
 			log.warn("User not found with id:{}", userId);
 			return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-					String.format("User not found with id:%s", userId), APIConstants.RESPONSE_FAIL));
+					String.format("User not found with id:%s", userId), RESPONSE_FAIL));
 		}
 
 		User user = queryResult.get();
@@ -168,7 +170,7 @@ public class UserService {
 
 		userRepository.save(user);
 		return Pair.of(HttpStatus.OK, new ResponseDTO(null,
-				String.format("User with id:%s successfully updated", userId), APIConstants.RESPONSE_SUCCESS));
+				String.format("User with id:%s successfully updated", userId), RESPONSE_SUCCESS));
 	}
 
 
@@ -177,14 +179,14 @@ public class UserService {
 		if (queryResult.isEmpty()) {
 			log.warn("User not found with id:{}", userId);
 			return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-					String.format("User not found with id:%s", userId), APIConstants.RESPONSE_FAIL));
+					String.format("User not found with id:%s", userId), RESPONSE_FAIL));
 		}
 
 		Optional<User> queryResult2 = userRepository.findByMacAddress(macAddressOfPerson);
 		if (!queryResult2.isPresent()) {
 			log.warn("User to add not found with macAddress:{}", macAddressOfPerson);
 			return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-					String.format("User to add not found with macAddress:%s", macAddressOfPerson), APIConstants.RESPONSE_FAIL));
+					String.format("User to add not found with macAddress:%s", macAddressOfPerson), RESPONSE_FAIL));
 		}
 
 		User user = queryResult.get();
@@ -194,7 +196,7 @@ public class UserService {
 		userRepository.save(user);
 		return Pair.of(HttpStatus.OK, new ResponseDTO(null,
 				String.format("User with id:%s's Social Distance People Set has been successfully updated" +
-						" with new person with id:%s", userId, userToAdd.getId()), APIConstants.RESPONSE_SUCCESS));
+						" with new person with id:%s", userId, userToAdd.getId()), RESPONSE_SUCCESS));
 	}
 
 	public Pair<HttpStatus, ResponseDTO> checkUserSocialDistanceSetById(Long userId) {
@@ -202,7 +204,7 @@ public class UserService {
 		if (queryResult.isEmpty()) {
 			log.warn("User not found with id:{}", userId);
 			return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,
-					String.format("User not found with id:%s", userId), APIConstants.RESPONSE_FAIL));
+					String.format("User not found with id:%s", userId), RESPONSE_FAIL));
 		}
 
 		User user = queryResult.get();
@@ -212,11 +214,11 @@ public class UserService {
 				hasBeenNearbyUser.setTestedPositive(false);
 				userRepository.save(hasBeenNearbyUser);
 				return Pair.of(HttpStatus.OK, new ResponseDTO(true,
-						String.format("One of the users that was nearby User with id:%s has tested positive", userId), APIConstants.RESPONSE_SUCCESS));
+						String.format("One of the users that was nearby User with id:%s has tested positive", userId), RESPONSE_SUCCESS));
 			}
 		}
 		return Pair.of(HttpStatus.OK, new ResponseDTO(false,
-				String.format("None of the users that was nearby User with id:%s has tested positive", userId), APIConstants.RESPONSE_SUCCESS));
+				String.format("None of the users that was nearby User with id:%s has tested positive", userId), RESPONSE_SUCCESS));
 	}
 }
 

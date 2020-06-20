@@ -73,54 +73,6 @@
 		</dependency>
 	</dependencies>
 
-<!--	<build>-->
-<!--		<plugins>-->
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-compiler-plugin</artifactId>-->
-<!--				<version>3.5.1</version>-->
-<!--				<configuration>-->
-<!--					<source>11</source>-->
-<!--					<target>11</target>-->
-<!--					<annotationProcessorPaths>-->
-<!--						<path>-->
-<!--							<groupId>org.mapstruct</groupId>-->
-<!--							<artifactId>mapstruct-processor</artifactId>-->
-<!--							<version>${org.mapstruct.version}</version>-->
-<!--						</path>-->
-<!--						<path>-->
-<!--							<groupId>org.projectlombok</groupId>-->
-<!--							<artifactId>lombok</artifactId>-->
-<!--							<version>${lombok.version}</version>-->
-<!--						</path>-->
-<!--					</annotationProcessorPaths>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
-<!--&lt;!&ndash;			<plugin>&ndash;&gt;-->
-<!--&lt;!&ndash;				<artifactId>maven-assembly-plugin</artifactId>&ndash;&gt;-->
-<!--&lt;!&ndash;				<executions>&ndash;&gt;-->
-<!--&lt;!&ndash;					<execution>&ndash;&gt;-->
-<!--&lt;!&ndash;						<phase>package</phase>&ndash;&gt;-->
-<!--&lt;!&ndash;						<goals>&ndash;&gt;-->
-<!--&lt;!&ndash;							<goal>single</goal>&ndash;&gt;-->
-<!--&lt;!&ndash;						</goals>&ndash;&gt;-->
-<!--&lt;!&ndash;					</execution>&ndash;&gt;-->
-<!--&lt;!&ndash;				</executions>&ndash;&gt;-->
-<!--&lt;!&ndash;				<configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;					<archive>&ndash;&gt;-->
-<!--&lt;!&ndash;						<manifest>&ndash;&gt;-->
-<!--&lt;!&ndash;							<addClasspath>true</addClasspath>&ndash;&gt;-->
-<!--&lt;!&ndash;							<mainClass>com.vipassistant.web.backend.Main</mainClass>&ndash;&gt;-->
-<!--&lt;!&ndash;						</manifest>&ndash;&gt;-->
-<!--&lt;!&ndash;					</archive>&ndash;&gt;-->
-<!--&lt;!&ndash;					<descriptorRefs>&ndash;&gt;-->
-<!--&lt;!&ndash;						<descriptorRef>jar-with-dependencies</descriptorRef>&ndash;&gt;-->
-<!--&lt;!&ndash;					</descriptorRefs>&ndash;&gt;-->
-<!--&lt;!&ndash;				</configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;			</plugin>&ndash;&gt;-->
-<!--		</plugins>-->
-<!--	</build>-->
-
 	<build>
 		<plugins>
 			<plugin>
