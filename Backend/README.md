@@ -1,5 +1,5 @@
 # VipAssistant Backend
-VipAssistant's web backend which is deployed and running on: https://vipassistant.ceng.metu.edu.tr:8080/api
+VipAssistant's web backend which is deployed and running on: https://vipassistant.ceng.metu.edu.tr:8081/api
 
 This backend serves to VipAssistant frontend modules' (currently only to Android Mobile Application) various needs such as:
 
