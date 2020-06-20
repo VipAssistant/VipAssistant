@@ -1,6 +1,5 @@
 package com.vipassistant.web.backend.service;
 
-import com.vipassistant.web.backend.constant.APIConstants;
 import com.vipassistant.web.backend.dto.ResponseDTO;
 import com.vipassistant.web.backend.dto.UserDTO;
 import com.vipassistant.web.backend.entity.User;
@@ -37,8 +36,8 @@ public class UserService {
 	 * @return Pair<HttpStatus, ResponseDTO>
 	 */
 	public Pair<HttpStatus, ResponseDTO> getAllUsers() {
-		List<UserDTO> playerDTOList = userMapper.toUserDTOList(userRepository.findAll());
-		return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTOList, null, RESPONSE_SUCCESS));
+		List<UserDTO> userDTOList = userMapper.toUserDTOList(userRepository.findAll());
+		return Pair.of(HttpStatus.OK, new ResponseDTO(userDTOList, null, RESPONSE_SUCCESS));
 	}
 
 	/**
@@ -60,7 +59,7 @@ public class UserService {
 
 	/**
 	 * Service that handles the login process initiated by the authRequest.
-	 * Returns the DTO of logged in player
+	 * Returns the DTO of logged in user
 	 *
 	 * @return Pair<HttpStatus, ResponseDTO>
 	 */
@@ -69,8 +68,8 @@ public class UserService {
 				(org.springframework.security.core.userdetails.User) authRequest.getPrincipal();
 		Optional<User> user = userRepository.findByUsername(principal.getUsername());
 		if (user.isPresent()) {
-			UserDTO playerDTO = userMapper.toUserDTO(user.get());
-			return Pair.of(HttpStatus.OK, new ResponseDTO(playerDTO, null, RESPONSE_SUCCESS));
+			UserDTO userDTO = userMapper.toUserDTO(user.get());
+			return Pair.of(HttpStatus.OK, new ResponseDTO(userDTO, null, RESPONSE_SUCCESS));
 		}
 		log.warn("User not found with username:{}", principal.getUsername());
 		return Pair.of(HttpStatus.NOT_FOUND, new ResponseDTO(null,

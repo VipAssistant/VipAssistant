@@ -1,6 +1,5 @@
 package com.vipassistant.web.backend.controller;
 
-import com.vipassistant.web.backend.constant.APIConstants;
 import com.vipassistant.web.backend.dto.ResponseDTO;
 import com.vipassistant.web.backend.dto.UserDTO;
 import com.vipassistant.web.backend.service.UserService;
