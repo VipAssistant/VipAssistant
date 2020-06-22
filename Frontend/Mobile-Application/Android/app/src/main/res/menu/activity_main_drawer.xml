@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:title="@string/home">
+        <menu>
+            <item
+                    android:id="@+id/nav_home"
+                    android:icon="@drawable/ic_home_black"
+                    android:title="@string/menu_home" />
+        </menu>
+    </item>
+    <item android:title="@string/modules">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                        android:id="@+id/nav_map_nav"
+                        android:icon="@drawable/ic_near_me_black_24dp_opaque"
+                        android:title="@string/menu_map_nav" />
+                <item
+                        android:id="@+id/nav_heatmap"
+                        android:icon="@drawable/ic_whatshot_black_24dp"
+                        android:title="@string/menu_heatmap" />
+                <item
+                        android:id="@+id/nav_monitor"
+                        android:icon="@drawable/ic_graphic_eq_black_24dp"
+                        android:title="@string/menu_monitor" />
+            </group>
+        </menu>
+    </item>
+    <item android:title="@string/additional_settings">
+        <menu>
+            <item
+                    android:id="@+id/covid_switch"
+                    android:title="Covid-19 Social Distancing Mode"
+                    app:showAsAction="always"
+                    app:actionLayout="@layout/switch_item"/>
+        </menu>
+    </item>
+</menu>

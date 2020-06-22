@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:eegeo="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/fragment_heatmap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <com.eegeo.mapapi.MapView
+            android:id="@+id/mapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            eegeo:camera_target_latitude="39.82870452217694"
+            eegeo:camera_target_longitude="33.17710430839251"
+            eegeo:camera_zoom="3.3189425509318964" />
+
+    <Button
+            android:id="@+id/heatmapOpenButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/heatmap_open"
+            android:textColor="#fff"
+            android:layout_margin="10dp"/>
+
+    <Button
+            android:id="@+id/heatmapCloseButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/heatmap_closed"
+            android:textColor="#fff"
+            android:layout_margin="10dp"
+            android:visibility="invisible"/>
+
+    <Button
+            android:id="@+id/findMeButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/nav_find_me_1"
+            android:textColor="#fff"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="10dp"
+            android:layout_alignParentEnd="true"/>
+
+</RelativeLayout>
