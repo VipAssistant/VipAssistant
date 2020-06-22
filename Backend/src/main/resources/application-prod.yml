@@ -1,0 +1,25 @@
+server:
+    port: 8081
+    ssl:
+        key-store: classpath:keystore.p12
+        key-store-password: password
+        key-store-type: pkcs12
+        key-alias: vipacert
+        key-password: password
+spring:
+    application:
+        name: vipassistant-backend
+    jpa:
+        hibernate:
+            ddl-auto: create
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+                show_sql: true
+                format_sql: true
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://vipassistant.ceng.metu.edu.tr:3306/bitirme_remote?useSSL=false
+        username: yavuz
+        password: p@ssw0rd
+
