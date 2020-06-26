@@ -27,13 +27,16 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.vipassistant.mobile.demo.ui.constants.Constants;
 import com.vipassistant.mobile.demo.ui.home.HomeFragment;
 import com.vipassistant.mobile.demo.ui.mapnavigation.MapNavigationViewModel;
+import com.vipassistant.mobile.demo.ui.model.Beacon;
 import com.vipassistant.mobile.demo.ui.model.Directive;
 import com.vipassistant.mobile.demo.ui.service.RequestService;
 import com.vipassistant.mobile.demo.ui.utils.HomeArrayAdapter;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 	private boolean socialDistancingActive = false;
 	private final Handler socialDistancingHandler = new Handler();
 	private BluetoothAdapter mBluetoothAdapter;
+	private Handler beaconTableHandler = new Handler();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +91,18 @@ public class MainActivity extends AppCompatActivity {
 				socialDistancingHandler.postDelayed(this, 2500);
 			}
 		}, 2500);
+
+		/* set-up beaconTableHandler for periodic Beacon UUIDs refreshing */
+		this.beaconTableHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				Pair<List<Beacon>, String> result = RequestService.getBeaconTable();
+				if (result.first != null) {
+					Constants.beaconList = result.first;
+				}
+				beaconTableHandler.postDelayed(this, 10000);
+			}
+		}, 10000);
 
 		mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
 			@Override
@@ -229,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
 					Notification notify = new Notification.Builder
 							(getApplicationContext()).setContentTitle("Social Distance Violation")
 							.setContentText(notifMsg).
-							setContentTitle(notifMsg).setSmallIcon(R.drawable.covid_dialog).build();
+									setContentTitle(notifMsg).setSmallIcon(R.drawable.covid_dialog).build();
 
 					notify.flags |= Notification.FLAG_AUTO_CANCEL;
 					notif.notify(0, notify);
