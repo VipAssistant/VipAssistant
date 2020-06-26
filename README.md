@@ -9,4 +9,4 @@ Mirror Main Repository of VipAssistant Project that took the 3rd place in [Metu 
 
 ## ... and Poster
 
-![VipAssistant Poster](https://github.com/VipAssistant/VipAssistant/imgs/vipassistant-poster.png)
+![VipAssistant Poster](https://github.com/VipAssistant/VipAssistant/tree/master/visuals/vipassistant-poster.png)
