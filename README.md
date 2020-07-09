@@ -4,6 +4,7 @@ Mirror Main Repository of VipAssistant Project that took the 3rd place in [Metu 
 ### To get further information about VipAssistant please check [here](http://senior.ceng.metu.edu.tr/2020/vipassistant/)
 
 ## Our Video
+Please click to watch it on YouTube
 
 [![VipAssistant Video](https://img.youtube.com/vi/eQniK5_Tnbw/0.jpg)](http://www.youtube.com/watch?v=eQniK5_Tnbw)
 
